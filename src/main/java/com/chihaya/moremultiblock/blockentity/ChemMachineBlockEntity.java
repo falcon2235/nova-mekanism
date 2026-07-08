@@ -133,6 +133,8 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
      */
     private int coilGlowGrace;
     private static final int COIL_GLOW_GRACE_TICKS = 15;
+    /** Whether the machine is actively running — synced to clients to drive the star / black-hole render. */
+    private boolean active;
     private int revalidateIn;
     private Component statusMessage = Component.translatable(LANG + "not_formed");
 
@@ -361,6 +363,27 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
             coilGlowGrace--;
         }
         updateCoilGlow(coilGlowGrace > 0);
+        setActive(coilGlowGrace > 0);
+    }
+
+    /** Tracks the running state and syncs it to clients (for the star / black-hole effect machines). */
+    private void setActive(boolean now) {
+        if (active == now || level == null || level.isClientSide) {
+            return;
+        }
+        ChemMachineType type = machineType();
+        if (type != ChemMachineType.STAR_GENERATOR && type != ChemMachineType.STABILIZER) {
+            active = now;
+            return; // other machines have no world render; skip the sync packet
+        }
+        active = now;
+        BlockState state = getBlockState();
+        level.sendBlockUpdated(worldPosition, state, state, net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
+    }
+
+    /** Client-side: whether the machine is running (drives the star / black-hole render). */
+    public boolean isEffectActive() {
+        return active;
     }
 
     /** Lights or dims the EBF coil rings when the running state changes. */
@@ -1014,5 +1037,44 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
         fluidOut.readFromNBT(tag.getCompound("FluidOut"));
         energy = tag.getLong("Energy");
         progress = tag.getInt("Progress");
+    }
+
+    // --- client sync (running state, for the star / black-hole world render) ---
+
+    @Override
+    public CompoundTag getUpdateTag() {
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("Active", active);
+        return tag;
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag) {
+        active = tag.getBoolean("Active");
+    }
+
+    @Nullable
+    @Override
+    public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getUpdatePacket() {
+        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public void onDataPacket(net.minecraft.network.Connection net,
+                            net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket pkt) {
+        CompoundTag tag = pkt.getTag();
+        if (tag != null) {
+            handleUpdateTag(tag);
+        }
+    }
+
+    /** Enlarge the render box for the effect machines so the central star / black hole is not culled. */
+    @Override
+    public net.minecraft.world.phys.AABB getRenderBoundingBox() {
+        ChemMachineType type = machineType();
+        if (type == ChemMachineType.STAR_GENERATOR || type == ChemMachineType.STABILIZER) {
+            return new net.minecraft.world.phys.AABB(worldPosition).inflate(20.0D);
+        }
+        return new net.minecraft.world.phys.AABB(worldPosition);
     }
 }
