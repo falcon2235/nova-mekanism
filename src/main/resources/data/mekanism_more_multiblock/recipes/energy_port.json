@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["CUC", "UPU", "CUC"],
+  "key": {
+    "C": {"item": "mekanism_more_multiblock:multiblock_casing"},
+    "U": {"item": "mekanism:basic_universal_cable"},
+    "P": {"item": "mekanism:basic_energy_cube"}
+  },
+  "result": {"item": "mekanism_more_multiblock:energy_port", "count": 1}
+}

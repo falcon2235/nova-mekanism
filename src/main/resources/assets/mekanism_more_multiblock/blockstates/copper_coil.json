@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "lit=false": {"model": "mekanism_more_multiblock:block/copper_coil"},
+    "lit=true": {"model": "mekanism_more_multiblock:block/copper_coil_lit"}
+  }
+}

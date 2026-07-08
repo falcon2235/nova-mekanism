@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["CCC", "CBC", "CCC"], "key": {"C": {"item": "mekanism_more_multiblock:cupronickel_ingot"}, "B": {"item": "mekanism:basic_control_circuit"}}, "result": {"item": "mekanism_more_multiblock:cupronickel_coil", "count": 2}}

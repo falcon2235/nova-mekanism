@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["SIS", "ICI", "SIS"], "key": {"S": {"item": "mekanism:ingot_steel"}, "I": {"item": "minecraft:iron_ingot"}, "C": {"item": "mekanism_more_multiblock:multiblock_casing"}}, "result": {"item": "mekanism_more_multiblock:heat_proof_casing", "count": 2}}

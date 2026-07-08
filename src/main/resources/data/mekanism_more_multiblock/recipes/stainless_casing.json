@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["ESE", "SCS", "ESE"], "key": {"E": {"item": "mekanism:enriched_iron"}, "S": {"item": "mekanism:ingot_steel"}, "C": {"item": "mekanism_more_multiblock:multiblock_casing"}}, "result": {"item": "mekanism_more_multiblock:stainless_casing", "count": 2}}

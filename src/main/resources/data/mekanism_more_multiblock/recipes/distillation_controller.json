@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["CEC", "EME", "CEC"], "key": {"C": {"item": "mekanism_more_multiblock:multiblock_casing"}, "E": {"item": "mekanism:elite_control_circuit"}, "M": {"item": "mekanism:rotary_condensentrator"}}, "result": {"item": "mekanism_more_multiblock:distillation_controller", "count": 1}}

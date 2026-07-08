@@ -1,0 +1,75 @@
+plugins {
+    id 'eclipse'
+    id 'net.minecraftforge.gradle' version '6.0.54'
+}
+
+version = project.mod_version
+group = 'com.chihaya.moremultiblock'
+
+base {
+    archivesName = 'Nova-Mekanism-1.20.1'
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
+}
+
+minecraft {
+    mappings channel: 'official', version: project.minecraft_version
+
+    copyIdeResources = true
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'info'
+            // auto-join the test world so world-join code paths run in headless smoke tests
+            args '--quickPlaySingleplayer', 'testworld'
+            mods {
+                mekanism_more_multiblock {
+                    source sourceSets.main
+                }
+            }
+        }
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'info'
+            mods {
+                mekanism_more_multiblock {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { name = 'ModMaven'; url = 'https://modmaven.dev/' }
+    maven { name = 'BlameJared'; url = 'https://maven.blamejared.com' }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
+
+    // Mekanism — deobfuscated (SRG -> official) for the dev workspace.
+    implementation fg.deobf("mekanism:Mekanism:${project.minecraft_version}-${project.mekanism_version}")
+
+    // JEI: API at compile, full (deobf) mod at runtime for the dev client.
+    compileOnly "mezz.jei:jei-${project.minecraft_version}-common-api:${project.jei_version}"
+    compileOnly "mezz.jei:jei-${project.minecraft_version}-forge-api:${project.jei_version}"
+    runtimeOnly fg.deobf("mezz.jei:jei-${project.minecraft_version}-forge:${project.jei_version}")
+}
+
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+                'Specification-Title'   : 'Nova Mekanism',
+                'Specification-Vendor'  : 'falcon2235',
+                'Specification-Version' : '1',
+                'Implementation-Title'  : project.name,
+                'Implementation-Version': project.version
+        ])
+    }
+    finalizedBy 'reobfJar'
+}

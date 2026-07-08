@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["GSG", "SGS", "GSG"], "key": {"G": {"item": "minecraft:glass"}, "S": {"item": "mekanism_more_multiblock:special_steel_ingot"}}, "result": {"item": "mekanism_more_multiblock:assembly_glass", "count": 4}}

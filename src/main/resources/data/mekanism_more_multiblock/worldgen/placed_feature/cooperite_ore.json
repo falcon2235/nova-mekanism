@@ -1,0 +1,9 @@
+{
+  "feature": "mekanism_more_multiblock:cooperite_ore",
+  "placement": [
+    {"type": "minecraft:count", "count": 3},
+    {"type": "minecraft:in_square"},
+    {"type": "minecraft:height_range", "height": {"type": "minecraft:trapezoid", "min_inclusive": {"absolute": -64}, "max_inclusive": {"absolute": 0}}},
+    {"type": "minecraft:biome"}
+  ]
+}

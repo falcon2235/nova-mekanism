@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["APA", "PCP", "APA"], "key": {"A": {"item": "mekanism:pellet_antimatter"}, "P": {"item": "mekanism:pellet_plutonium"}, "C": {"item": "mekanism:ultimate_control_circuit"}}, "result": {"item": "mekanism_more_multiblock:antimatter_coil", "count": 2}}

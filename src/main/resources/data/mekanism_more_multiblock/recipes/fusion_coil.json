@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["SNS", "N#N", "SNS"], "key": {"S": {"item": "mekanism_more_multiblock:superconductor"}, "N": {"item": "mekanism_more_multiblock:naquadah_alloy_ingot"}, "#": {"tag": "forge:pellets/antimatter"}}, "result": {"item": "mekanism_more_multiblock:fusion_coil", "count": 2}}

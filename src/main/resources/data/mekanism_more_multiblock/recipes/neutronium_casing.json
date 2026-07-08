@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["SSS", "SNS", "SSS"], "key": {"S": {"item": "mekanism_more_multiblock:special_steel_ingot"}, "N": {"item": "mekanism_more_multiblock:neutronium"}}, "result": {"item": "mekanism_more_multiblock:neutronium_casing", "count": 8}}

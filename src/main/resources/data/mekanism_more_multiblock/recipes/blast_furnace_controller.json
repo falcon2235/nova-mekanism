@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["CEC", "EME", "CEC"], "key": {"C": {"item": "mekanism_more_multiblock:multiblock_casing"}, "E": {"item": "mekanism:advanced_control_circuit"}, "M": {"item": "mekanism:energized_smelter"}}, "result": {"item": "mekanism_more_multiblock:blast_furnace_controller", "count": 1}}

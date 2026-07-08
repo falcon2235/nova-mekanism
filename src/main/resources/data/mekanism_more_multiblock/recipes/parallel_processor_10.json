@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["ACA", "CPC", "ACA"],
+  "key": {
+    "A": {"item": "mekanism:alloy_infused"},
+    "C": {"item": "mekanism:basic_control_circuit"},
+    "P": {"item": "mekanism_more_multiblock:multiblock_casing"}
+  },
+  "result": {"item": "mekanism_more_multiblock:parallel_processor_10", "count": 1}
+}

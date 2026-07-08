@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "lit=false": {"model": "mekanism_more_multiblock:block/titanium_coil"},
+    "lit=true": {"model": "mekanism_more_multiblock:block/titanium_coil_lit"}
+  }
+}

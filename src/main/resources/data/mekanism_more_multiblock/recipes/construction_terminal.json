@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": [" G ", "CMC", " R "], "key": {"G": {"tag": "forge:glass"}, "C": {"item": "mekanism:basic_control_circuit"}, "M": {"item": "mekanism_more_multiblock:multiblock_casing"}, "R": {"item": "minecraft:redstone"}}, "result": {"item": "mekanism_more_multiblock:construction_terminal", "count": 1}}

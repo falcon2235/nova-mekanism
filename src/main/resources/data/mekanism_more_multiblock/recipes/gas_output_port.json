@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["CTC", "TPT", "CHC"], "key": {"C": {"item": "mekanism_more_multiblock:multiblock_casing"}, "T": {"item": "mekanism:basic_pressurized_tube"}, "P": {"item": "mekanism:basic_chemical_tank"}, "H": {"item": "minecraft:dropper"}}, "result": {"item": "mekanism_more_multiblock:gas_output_port", "count": 1}}

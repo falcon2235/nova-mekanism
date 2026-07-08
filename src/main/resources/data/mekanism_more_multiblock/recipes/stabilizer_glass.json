@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["GGG", "GSG", "GGG"], "key": {"G": {"tag": "forge:glass"}, "S": {"item": "mekanism_more_multiblock:special_steel_ingot"}}, "result": {"item": "mekanism_more_multiblock:stabilizer_glass", "count": 8}}

@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["SNS", "N#N", "SNS"], "key": {"S": {"item": "mekanism_more_multiblock:superconductor"}, "N": {"item": "mekanism_more_multiblock:special_steel_ingot"}, "#": {"item": "mekanism_more_multiblock:multiblock_casing"}}, "result": {"item": "mekanism_more_multiblock:fusion_casing", "count": 2}}

@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": {"model": "mekanism_more_multiblock:block/black_hole_stabilizer_controller"},
+    "facing=south": {"model": "mekanism_more_multiblock:block/black_hole_stabilizer_controller", "y": 180},
+    "facing=west": {"model": "mekanism_more_multiblock:block/black_hole_stabilizer_controller", "y": 270},
+    "facing=east": {"model": "mekanism_more_multiblock:block/black_hole_stabilizer_controller", "y": 90}
+  }
+}

@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["CEC", "EME", "CEC"], "key": {"C": {"item": "mekanism_more_multiblock:stainless_casing"}, "E": {"item": "mekanism:elite_control_circuit"}, "M": {"item": "mekanism:combiner"}}, "result": {"item": "mekanism_more_multiblock:mixer_controller", "count": 1}}

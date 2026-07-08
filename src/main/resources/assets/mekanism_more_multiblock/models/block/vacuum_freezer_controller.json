@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "mekanism_more_multiblock:block/vacuum_freezer_controller_front",
+    "side": "mekanism_more_multiblock:block/frost_proof_casing",
+    "top": "mekanism_more_multiblock:block/frost_proof_casing"
+  }
+}

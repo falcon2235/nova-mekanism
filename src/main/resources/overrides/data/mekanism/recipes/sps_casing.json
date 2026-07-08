@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","key":{"#":{"tag":"forge:pellets/plutonium"},"A":{"tag":"forge:pellets/polonium"},"P":{"item":"mekanism_more_multiblock:special_steel_ingot"}},"pattern":["PAP","A#A","PAP"],"result":{"item":"mekanism:sps_casing"}}

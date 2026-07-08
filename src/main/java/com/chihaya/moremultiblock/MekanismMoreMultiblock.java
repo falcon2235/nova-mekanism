@@ -1,0 +1,80 @@
+package com.chihaya.moremultiblock;
+
+import com.chihaya.moremultiblock.content.ChemRegistry;
+import com.chihaya.moremultiblock.multiblock.ParallelClaimRegistry;
+
+import java.nio.file.Path;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddPackFindersEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.resource.PathPackResources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Mod(MekanismMoreMultiblock.MODID)
+public class MekanismMoreMultiblock {
+
+    public static final String MODID = "mekanism_more_multiblock";
+    private static final Logger LOGGER = LoggerFactory.getLogger("MekanismMoreMultiblock");
+
+    public MekanismMoreMultiblock() {
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        MMMRegistry.register(modEventBus);
+        ChemRegistry.register(modEventBus);
+        modEventBus.addListener(MekanismMoreMultiblock::addPackFinders);
+        MinecraftForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> ParallelClaimRegistry.clear());
+        MinecraftForge.EVENT_BUS.addListener(MekanismMoreMultiblock::onServerStarted);
+    }
+
+    /**
+     * Registers the bundled "overrides" data pack at TOP priority. Same-path recipe
+     * overrides in a mod's normal datapack lose to mods that load later in the pack
+     * order (e.g. mekanismgenerators sorts after this mod), so replacements for other
+     * mods' recipes must live in this always-on, highest-priority pack.
+     */
+    private static void addPackFinders(AddPackFindersEvent event) {
+        if (event.getPackType() != PackType.SERVER_DATA) {
+            return;
+        }
+        Path path = ModList.get().getModFileById(MODID).getFile().findResource("overrides");
+        Pack pack = Pack.readMetaAndCreate(
+                MODID + ":overrides",
+                Component.literal("MMM Recipe Overrides"),
+                true,
+                id -> new PathPackResources(id, true, path),
+                PackType.SERVER_DATA,
+                Pack.Position.TOP,
+                PackSource.BUILT_IN);
+        if (pack != null) {
+            event.addRepositorySource(consumer -> consumer.accept(pack));
+        } else {
+            LOGGER.error("Failed to create the recipe override pack");
+        }
+    }
+
+    /** Sanity log so override problems are visible in the log instead of silently reverting recipes. */
+    private static void onServerStarted(ServerStartedEvent event) {
+        var recipes = event.getServer().getRecipeManager();
+        boolean steelGated = recipes.byKey(new ResourceLocation("mekanism", "processing/steel/enriched_iron_to_dust")).isEmpty();
+        LOGGER.info("Override pack check — mekanism enriched-iron-to-steel disabled: {}", steelGated);
+        if (ModList.get().isLoaded("mekanismgenerators")) {
+            recipes.byKey(new ResourceLocation("mekanismgenerators", "fission_reactor/casing")).ifPresent(recipe -> {
+                boolean hardened = recipe.getIngredients().stream()
+                        .anyMatch(ing -> ing.test(new ItemStack(MMMRegistry.SPECIAL_STEEL_INGOT.get())));
+                LOGGER.info("Override pack check — fission reactor casing uses special steel: {}", hardened);
+            });
+        }
+    }
+}

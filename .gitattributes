@@ -1,0 +1,11 @@
+# Normalise line endings so the project builds on every OS.
+* text=auto eol=lf
+
+# Windows scripts must keep CRLF; the gradle wrapper script must keep LF.
+*.bat        text eol=crlf
+gradlew      text eol=lf
+gradlew.bat  text eol=crlf
+
+# Treat binary assets as binary (no line-ending munging).
+*.png   binary
+*.jar   binary

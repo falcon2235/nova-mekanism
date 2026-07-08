@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "mekanism_more_multiblock:block/mixer_controller_front",
+    "side": "mekanism_more_multiblock:block/stainless_casing",
+    "top": "mekanism_more_multiblock:block/stainless_casing"
+  }
+}

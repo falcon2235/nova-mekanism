@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["HSH", "SCS", "HSH"], "key": {"H": {"item": "mekanism:hdpe_sheet"}, "S": {"item": "mekanism:ingot_steel"}, "C": {"item": "mekanism_more_multiblock:multiblock_casing"}}, "result": {"item": "mekanism_more_multiblock:ptfe_casing", "count": 2}}

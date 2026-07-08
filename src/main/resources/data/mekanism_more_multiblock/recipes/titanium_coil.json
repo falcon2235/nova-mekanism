@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["TTT", "TCT", "TTT"], "key": {"T": {"item": "mekanism_more_multiblock:titanium_ingot"}, "C": {"item": "mekanism:advanced_control_circuit"}}, "result": {"item": "mekanism_more_multiblock:titanium_coil", "count": 2}}

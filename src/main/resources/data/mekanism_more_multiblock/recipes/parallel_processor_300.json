@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["ACA", "CPC", "ACA"],
+  "key": {
+    "A": {"item": "mekanism:alloy_atomic"},
+    "C": {"item": "mekanism:ultimate_control_circuit"},
+    "P": {"item": "mekanism_more_multiblock:parallel_processor_200"}
+  },
+  "result": {"item": "mekanism_more_multiblock:parallel_processor_300", "count": 1}
+}

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["RCR", "CMC", "RCR"],
+  "key": {
+    "R": {"item": "mekanism:alloy_reinforced"},
+    "C": {"item": "mekanism:elite_control_circuit"},
+    "M": {"item": "mekanism:enrichment_chamber"}
+  },
+  "result": {"item": "mekanism_more_multiblock:enriching_controller", "count": 1}
+}

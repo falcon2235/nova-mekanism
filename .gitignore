@@ -1,0 +1,29 @@
+# Gradle
+.gradle/
+build/
+!gradle-wrapper.jar
+
+# ForgeGradle / MC dev run directory (world saves, logs, downloaded mods, configs)
+run/
+runs/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.eclipse/
+.settings/
+.classpath
+.project
+.metadata/
+bin/
+*.launch
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.log

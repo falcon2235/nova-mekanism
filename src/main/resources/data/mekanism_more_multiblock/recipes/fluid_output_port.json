@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["CTC", "TPT", "CHC"], "key": {"C": {"item": "mekanism_more_multiblock:multiblock_casing"}, "T": {"item": "mekanism:basic_mechanical_pipe"}, "P": {"item": "mekanism:basic_fluid_tank"}, "H": {"item": "minecraft:dropper"}}, "result": {"item": "mekanism_more_multiblock:fluid_output_port", "count": 1}}

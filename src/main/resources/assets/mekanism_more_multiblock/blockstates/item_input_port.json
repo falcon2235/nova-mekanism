@@ -1,0 +1,15 @@
+{
+  "variants": {
+    "style=default": {"model": "mekanism_more_multiblock:block/item_input_port"},
+    "style=heat_proof": {"model": "mekanism_more_multiblock:block/item_input_port_heat_proof"},
+    "style=ptfe": {"model": "mekanism_more_multiblock:block/item_input_port_ptfe"},
+    "style=stainless": {"model": "mekanism_more_multiblock:block/item_input_port_stainless"},
+    "style=brick": {"model": "mekanism_more_multiblock:block/item_input_port_brick"},
+    "style=alloy": {"model": "mekanism_more_multiblock:block/item_input_port_alloy"},
+    "style=frost": {"model": "mekanism_more_multiblock:block/item_input_port_frost"},
+    "style=assembly": {"model": "mekanism_more_multiblock:block/item_input_port_assembly"},
+    "style=electrolyzer": {"model": "mekanism_more_multiblock:block/item_input_port_electrolyzer"},
+    "style=centrifuge": {"model": "mekanism_more_multiblock:block/item_input_port_centrifuge"},
+    "style=fusion": {"model": "mekanism_more_multiblock:block/item_input_port_fusion"}
+  }
+}

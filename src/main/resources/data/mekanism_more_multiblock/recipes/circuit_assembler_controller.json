@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["CEC", "EME", "CEC"], "key": {"C": {"item": "mekanism_more_multiblock:assembly_casing"}, "E": {"item": "mekanism:ultimate_control_circuit"}, "M": {"item": "mekanism:formulaic_assemblicator"}}, "result": {"item": "mekanism_more_multiblock:circuit_assembler_controller", "count": 1}}

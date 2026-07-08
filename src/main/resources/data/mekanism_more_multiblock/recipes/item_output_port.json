@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["CTC", "THT", "CTC"],
+  "key": {
+    "C": {"item": "mekanism_more_multiblock:multiblock_casing"},
+    "T": {"item": "mekanism:basic_logistical_transporter"},
+    "H": {"item": "minecraft:dropper"}
+  },
+  "result": {"item": "mekanism_more_multiblock:item_output_port", "count": 1}
+}
