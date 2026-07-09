@@ -28,6 +28,7 @@ Nova Mekanism turns Mekanism's processing into a full progression of multiblock 
 - **Deep material chains** — titanium, nickel (Mond process), cupronickel, special steel, the platinum group (GTCEu platline), and the naquadah line (GTCEu), leading into super alloy, naquadah alloy, neutronium and trans-dimensional materials.
 - **Construction Terminal** — right-click any controller to auto-build its whole structure from your inventory.
 - **JEI integration** — every machine has recipe categories with gas/fluid amounts and an isometric 3-D structure preview; controllers act as recipe catalysts.
+- **Alternative antimatter route** — the **Large Hadron Collider** collides hydrogen protons straight into antimatter as an end-game-adjacent alternative to a hardened SPS, and a Large Chemical Reactor polonium recipe (gated behind an antimatter-pellet upgrade) offers a second polonium path.
 - **Tweaks to Mekanism** — the SPS (antimatter) is made harder and the fission reactor casing recipe is hardened, via a built-in high-priority data pack.
 
 ---
@@ -49,6 +50,7 @@ Parallel machines share a fixed **3×3×4** hollow casing box (GregTech-style bl
 | Alloy Blast Furnace | 5×5×5 barrel | Molten super/naquadah/trans-dim alloys |
 | Vacuum Freezer | 3×3×3 | Freezes molten alloys into solid ingots |
 | Circuit Assembly Line | 3×3×5 | Supreme circuits, superconductors, trans-dim circuits |
+| **Large Hadron Collider** | 33×3×33 ring | Collides hydrogen directly into antimatter (alt to the SPS); ~100M RF/t |
 | **Fusion Reactor** | 15×3×15 ring | D-T fusion → helium plasma → molten stellar matter |
 | **Artificial Star Generator** | 9×9×9 sphere | Stellar core + hydrogen → black hole seed |
 | **Black Hole Stabilizer** | 16×16×16 cube | Black hole seed → trans-dimensional metal + Creative Energy Cube |
@@ -64,10 +66,11 @@ The Electric and Alloy Blast Furnaces use tiered heating coils — **copper → 
 1. **Ore chains** — titanium, nickel/cupronickel and special steel via the EBF, reactor, distillation tower and mixer.
 2. **Platinum group** (cooperite/saltpeter ores) — nitric acid → sludge → centrifuge → electrolyzer → platinum, palladium, rhodium, ruthenium, iridium.
 3. **Naquadah line** (naquadah/antimony ores) — fluoroantimonic acid dissolution → centrifuge/mixer separations → enriched naquadah, naquadria, trinium; **naquadah alloy** in the alloy blast furnace.
-4. **Fusion** — deuterium + tritium → helium plasma → (+ antimatter) → **molten stellar matter** → **stellar core**. Also fuses naquadria into **neutronium**.
-5. **Artificial star** — stellar core + a huge charge of hydrogen at **100,000,000 RF/t for 10 minutes** → **black hole seed**.
-6. **Black hole stabilizer** — black hole seed at **1,000,000,000 RF/t for 30 minutes** → **10× trans-dimensional metal**.
-7. **The pinnacle** — trans-dimensional metal → alloy → circuit (each requiring hundreds of millions of RF/t) → a fully-charged, craftable **Mekanism Creative Energy Cube**.
+4. **Antimatter** — just before the end-game, build the **Large Hadron Collider** (33×3×33) to collide hydrogen straight into antimatter at ~100,000,000 RF/t, alongside the hardened SPS route.
+5. **Fusion** — deuterium + tritium → helium plasma → (+ antimatter) → **molten stellar matter** → **stellar core**. Also fuses naquadria into **neutronium**.
+6. **Artificial star** — stellar core + a huge charge of hydrogen at **100,000,000 RF/t for 10 minutes** → **black hole seed**.
+7. **Black hole stabilizer** — black hole seed at **1,000,000,000 RF/t for 30 minutes** → **10× trans-dimensional metal**.
+8. **The pinnacle** — trans-dimensional metal → alloy → circuit (each requiring hundreds of millions of RF/t) → a fully-charged, craftable **Mekanism Creative Energy Cube**.
 
 ---
 
@@ -82,7 +85,7 @@ Building a 16×16×16 cube by hand is not fun. Craft a **Construction Terminal**
 Requires **JDK 17**. The project uses ForgeGradle 6.
 
 ```bash
-./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.0.0.jar
+./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.0.2.jar
 ./gradlew runClient      # launch a dev client
 ```
 

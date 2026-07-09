@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["CRC", "RIR", "CRC"], "key": {"C": {"item": "minecraft:copper_ingot"}, "R": {"item": "minecraft:redstone"}, "I": {"item": "minecraft:iron_ingot"}}, "result": {"item": "mekanism_more_multiblock:collider_magnet", "count": 4}}

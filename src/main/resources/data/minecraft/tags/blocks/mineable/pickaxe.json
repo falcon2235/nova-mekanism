@@ -67,5 +67,8 @@
     "mekanism_more_multiblock:star_generator_controller",
     "mekanism_more_multiblock:neutronium_casing",
     "mekanism_more_multiblock:stabilizer_glass",
-    "mekanism_more_multiblock:black_hole_stabilizer_controller"
+    "mekanism_more_multiblock:black_hole_stabilizer_controller",
+    "mekanism_more_multiblock:accelerator_casing",
+    "mekanism_more_multiblock:collider_magnet",
+    "mekanism_more_multiblock:hadron_collider_controller"
 ]}
