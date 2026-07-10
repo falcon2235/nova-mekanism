@@ -137,6 +137,24 @@ public final class MMMRegistry {
             registerBlock("accelerator_casing", () -> new Block(props()));
     public static final RegistryObject<Block> COLLIDER_MAGNET =
             registerBlock("collider_magnet", () -> new Block(props().lightLevel(state -> 8)));
+    // void ore miner: reinforced rig casing + the glowing void-drill mast block
+    public static final RegistryObject<Block> VOID_MINER_CASING =
+            registerBlock("void_miner_casing", () -> new Block(props()));
+    public static final RegistryObject<Block> VOID_DRILL =
+            registerBlock("void_drill", () -> new Block(props().lightLevel(state -> 11)));
+    // oil drilling rig: steel rig casing + the drill-pipe string
+    public static final RegistryObject<Block> OIL_RIG_CASING =
+            registerBlock("oil_rig_casing", () -> new Block(props()));
+    public static final RegistryObject<Block> DRILL_PIPE =
+            registerBlock("drill_pipe", () -> new Block(props()));
+    // large combustion generator: engine casing shell + gearbox ring block
+    public static final RegistryObject<Block> ENGINE_CASING =
+            registerBlock("engine_casing", () -> new Block(props()));
+    public static final RegistryObject<Block> ENGINE_GEARBOX =
+            registerBlock("engine_gearbox", () -> new Block(props()));
+    // annihilation generator: glowing antimatter-containment sphere casing
+    public static final RegistryObject<Block> ANNIHILATION_CASING =
+            registerBlock("annihilation_casing", () -> new Block(props().lightLevel(state -> 9)));
     public static final RegistryObject<Block> COPPER_COIL =
             registerBlock("copper_coil", () -> new CoilBlock(props()));
     public static final RegistryObject<Block> CUPRONICKEL_COIL =
@@ -389,6 +407,10 @@ public final class MMMRegistry {
             case STAR_GENERATOR -> STAR_CASING.get();
             case STABILIZER -> NEUTRONIUM_CASING.get();
             case HADRON_COLLIDER -> ACCELERATOR_CASING.get();
+            case VOID_MINER -> VOID_MINER_CASING.get();
+            case OIL_RIG -> OIL_RIG_CASING.get();
+            case COMBUSTION_GENERATOR -> ENGINE_CASING.get();
+            case ANNIHILATION_GENERATOR -> ANNIHILATION_CASING.get();
         };
     }
 
@@ -397,6 +419,8 @@ public final class MMMRegistry {
         return switch (type) {
             case BLAST_FURNACE -> CUPRONICKEL_COIL.get();
             case ALLOY_BLAST_FURNACE -> TITANIUM_COIL.get();
+            // the generator's box validator enforces full gearbox rings in the middle slices
+            case COMBUSTION_GENERATOR -> ENGINE_GEARBOX.get();
             default -> null;
         };
     }

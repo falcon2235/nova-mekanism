@@ -72,18 +72,46 @@ public class MMMJeiPlugin implements IModPlugin {
         registration.addRecipes(StructureCategory.TYPE, buildStructures());
     }
 
+    /**
+     * Counts the structure's bill of materials from its construction blueprint
+     * (the same offsets the terminal builds and the validator checks), collapsed
+     * to one stack per unique block, largest count first.
+     */
+    private static List<ItemStack> countMaterials(net.minecraft.world.level.block.state.BlockState controllerState) {
+        List<com.falcon2235.moremultiblock.multiblock.StructureBlueprint.Cell> cells =
+                com.falcon2235.moremultiblock.multiblock.StructureBlueprint.forController(
+                        net.minecraft.core.BlockPos.ZERO, controllerState);
+        if (cells == null) {
+            return List.of();
+        }
+        java.util.Map<Block, Integer> counts = new java.util.LinkedHashMap<>();
+        for (var cell : cells) {
+            counts.merge(cell.block(), 1, Integer::sum);
+        }
+        return counts.entrySet().stream()
+                .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+                .map(e -> {
+                    ItemStack stack = new ItemStack(e.getKey());
+                    stack.setCount(e.getValue());
+                    return stack;
+                })
+                .toList();
+    }
+
     private static List<StructureEntry> buildStructures() {
         List<StructureEntry> list = new ArrayList<>();
         Block parallelCasing = MMMRegistry.CASING.get();
         for (MachineType type : MachineType.values()) {
             Block block = MMMRegistry.CONTROLLERS.get(type).get();
+            var state = block.defaultBlockState().setValue(ControllerBlock.FACING, Direction.NORTH);
             list.add(new StructureEntry(
                     new ResourceLocation(MekanismMoreMultiblock.MODID, "structure_" + type.id()),
                     new ItemStack(block),
-                    block.defaultBlockState().setValue(ControllerBlock.FACING, Direction.NORTH),
+                    state,
                     block.getName(),
                     MultiblockValidator.WIDTH, MultiblockValidator.HEIGHT, MultiblockValidator.DEPTH,
-                    parallelCasing.defaultBlockState(), new ItemStack(parallelCasing), null, null));
+                    parallelCasing.defaultBlockState(), new ItemStack(parallelCasing), null, null)
+                    .withMaterials(countMaterials(state)));
         }
         for (ChemMachineType type : ChemMachineType.values()) {
             Block block = MMMRegistry.CHEM_CONTROLLERS.get(type).get();
@@ -92,13 +120,19 @@ public class MMMJeiPlugin implements IModPlugin {
             boolean barrel = type == ChemMachineType.ALLOY_BLAST_FURNACE;
             boolean assembly = type == ChemMachineType.CIRCUIT_ASSEMBLER;
             boolean fusion = type == ChemMachineType.FUSION_REACTOR;
-            boolean star = type == ChemMachineType.STAR_GENERATOR;
+            boolean star = type == ChemMachineType.STAR_GENERATOR || type == ChemMachineType.ANNIHILATION_GENERATOR;
             boolean stabilizer = type == ChemMachineType.STABILIZER;
             boolean collider = type == ChemMachineType.HADRON_COLLIDER;
+            boolean voidMiner = type == ChemMachineType.VOID_MINER;
+            boolean oilRig = type == ChemMachineType.OIL_RIG;
             if (fusion) {
                 coil = MMMRegistry.FUSION_COIL.get();
             } else if (collider) {
                 coil = MMMRegistry.COLLIDER_MAGNET.get();
+            } else if (voidMiner) {
+                coil = MMMRegistry.VOID_DRILL.get();
+            } else if (oilRig) {
+                coil = MMMRegistry.DRILL_PIPE.get();
             }
             // "accent" block: heat vent (barrel), glass roof (assembly), fusion/face glass,
             // stabilizer glass panels
@@ -112,11 +146,14 @@ public class MMMJeiPlugin implements IModPlugin {
                     : star ? StructureEntry.Mode.SPHERE
                     : stabilizer ? StructureEntry.Mode.FRAME
                     : collider ? StructureEntry.Mode.LOOP
+                    : voidMiner ? StructureEntry.Mode.DRILL
+                    : oilRig ? StructureEntry.Mode.RIG
                     : type.coilTower ? StructureEntry.Mode.TOWER : StructureEntry.Mode.BOX;
+            var chemState = block.defaultBlockState().setValue(ChemMachineBlock.FACING, Direction.NORTH);
             list.add(new StructureEntry(
                     new ResourceLocation(MekanismMoreMultiblock.MODID, "structure_" + type.id),
                     new ItemStack(block),
-                    block.defaultBlockState().setValue(ChemMachineBlock.FACING, Direction.NORTH),
+                    chemState,
                     block.getName(),
                     type.width, type.height, type.depth,
                     casing.defaultBlockState(), new ItemStack(casing),
@@ -124,19 +161,22 @@ public class MMMJeiPlugin implements IModPlugin {
                     coil == null ? null : new ItemStack(coil),
                     mode,
                     vent == null ? null : vent.defaultBlockState(),
-                    vent == null ? null : new ItemStack(vent)));
+                    vent == null ? null : new ItemStack(vent))
+                    .withMaterials(countMaterials(chemState)));
         }
         // primitive blast furnace: same vertical shape as the EBF, all bricks
         Block pbf = MMMRegistry.PBF_CONTROLLER.get();
+        var pbfState = pbf.defaultBlockState().setValue(com.falcon2235.moremultiblock.block.PbfBlock.FACING, Direction.NORTH);
         list.add(new StructureEntry(
                 new ResourceLocation(MekanismMoreMultiblock.MODID, "structure_primitive_blast_furnace"),
                 new ItemStack(pbf),
-                pbf.defaultBlockState().setValue(com.falcon2235.moremultiblock.block.PbfBlock.FACING, Direction.NORTH),
+                pbfState,
                 pbf.getName(),
                 3, 4, 3,
                 net.minecraft.world.level.block.Blocks.BRICKS.defaultBlockState(),
                 new ItemStack(net.minecraft.world.level.block.Blocks.BRICKS),
-                null, null, true));
+                null, null, true)
+                .withMaterials(countMaterials(pbfState)));
         return list;
     }
 

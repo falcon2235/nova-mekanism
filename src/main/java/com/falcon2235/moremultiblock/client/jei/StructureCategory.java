@@ -74,23 +74,32 @@ public class StructureCategory implements IRecipeCategory<StructureEntry> {
     public void setRecipe(IRecipeLayoutBuilder builder, StructureEntry entry, IFocusGroup focuses) {
         // The controller item lets JEI focus-filter to this entry, and marks which machine it is.
         builder.addSlot(RecipeIngredientRole.CATALYST, 6, 6).addItemStack(entry.controllerStack);
-        builder.addSlot(RecipeIngredientRole.INPUT, 6, 28).addItemStack(entry.casingStack);
-        if (entry.coilStack != null) {
-            boolean heatingCoil = MMMRegistry.COIL_TIERS.stream()
-                    .anyMatch(c -> entry.coilStack.getItem() == c.get().asItem());
-            if (heatingCoil) {
-                // Any heating-coil tier works (all must match); cycle through them in the slot.
-                java.util.List<ItemStack> coils = MMMRegistry.COIL_TIERS.stream()
-                        .map(coil -> new ItemStack(coil.get()))
-                        .toList();
-                builder.addSlot(RecipeIngredientRole.INPUT, 26, 28).addItemStacks(coils);
-            } else {
-                // Dedicated coil (fusion reactor's superconducting coil).
-                builder.addSlot(RecipeIngredientRole.INPUT, 26, 28).addItemStack(entry.coilStack);
-            }
+        if (entry.materials.isEmpty()) {
+            // No blueprint (shouldn't happen) — fall back to the bare casing stack.
+            builder.addSlot(RecipeIngredientRole.INPUT, 6, 28).addItemStack(entry.casingStack);
+            return;
         }
-        if (entry.ventStack != null) {
-            builder.addSlot(RecipeIngredientRole.INPUT, 46, 28).addItemStack(entry.ventStack);
+        // Bill of materials: one slot per unique block; the stack count is how many
+        // blocks the structure needs (counted from the construction blueprint).
+        int x = 6;
+        for (ItemStack material : entry.materials) {
+            var slot = builder.addSlot(RecipeIngredientRole.INPUT, x, 28);
+            boolean heatingCoil = MMMRegistry.COIL_TIERS.stream()
+                    .anyMatch(c -> material.getItem() == c.get().asItem());
+            if (heatingCoil) {
+                // Any heating-coil tier works (all must match); cycle through them with the count.
+                java.util.List<ItemStack> coils = MMMRegistry.COIL_TIERS.stream()
+                        .map(coil -> {
+                            ItemStack stack = new ItemStack(coil.get());
+                            stack.setCount(material.getCount());
+                            return stack;
+                        })
+                        .toList();
+                slot.addItemStacks(coils);
+            } else {
+                slot.addItemStack(material);
+            }
+            x += 20;
         }
     }
 
@@ -110,7 +119,9 @@ public class StructureCategory implements IRecipeCategory<StructureEntry> {
                 : entry.mode == StructureEntry.Mode.RING ? 2.6F
                 : entry.mode == StructureEntry.Mode.SPHERE ? 3.6F
                 : entry.mode == StructureEntry.Mode.FRAME ? 2.0F
-                : entry.mode == StructureEntry.Mode.LOOP ? 2.3F : 8.5F;
+                : entry.mode == StructureEntry.Mode.LOOP ? 2.3F
+                : entry.mode == StructureEntry.Mode.DRILL ? 5.0F
+                : entry.mode == StructureEntry.Mode.RIG ? 6.0F : 8.5F;
         StructurePreview.render(g, WIDTH / 2, 96, entry.width, entry.height, entry.depth,
                 entry.controllerState, entry.casingState, entry.coilState, entry.mode, entry.ventState, scale);
     }

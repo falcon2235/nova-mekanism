@@ -171,6 +171,11 @@ public class ChemRecipeCategory implements IRecipeCategory<ChemRecipe> {
             g.drawString(font, amount, 141 - font.width(amount), 51, 0xFF606060, false);
         }
 
+        // optional recipe note (e.g. the void miner's weighted roll chance)
+        if (recipe.note != null) {
+            g.drawString(font, recipe.note, 6, HEIGHT - 10, 0xFF606060, false);
+        }
+
         // required heating coil (coil-tower machines only); higher tiers halve the time per tier
         if (type.coilTower) {
             Component coil = Component.translatable("gui." + MekanismMoreMultiblock.MODID + ".coil_req",

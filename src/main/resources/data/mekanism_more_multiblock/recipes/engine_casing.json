@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["SIS", "ICI", "SIS"], "key": {"S": {"item": "mekanism_more_multiblock:special_steel_ingot"}, "I": {"item": "mekanism_more_multiblock:titanium_ingot"}, "C": {"item": "mekanism_more_multiblock:multiblock_casing"}}, "result": {"item": "mekanism_more_multiblock:engine_casing", "count": 4}}

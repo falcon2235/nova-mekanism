@@ -35,6 +35,8 @@ public class ChemRecipe {
     public final long energyPerTick;
     /** Special upgrade module the machine must have installed to run this recipe; EMPTY = none. */
     public ItemStack requiredUpgrade = ItemStack.EMPTY;
+    /** Optional note drawn under the recipe in JEI (e.g. the void miner's roll chance); null = none. */
+    public net.minecraft.network.chat.Component note;
     /**
      * Minimum heating-coil tier required (blast furnace only; 0 elsewhere).
      * Each coil tier above this halves the processing time.
@@ -114,6 +116,12 @@ public class ChemRecipe {
     /** Fluent: require an installed upgrade module (e.g. antimatter-forged) to run this recipe. */
     public ChemRecipe requireUpgrade(ItemStack upgrade) {
         this.requiredUpgrade = upgrade;
+        return this;
+    }
+
+    /** Fluent: attach a JEI display note (drawn under the recipe panel). */
+    public ChemRecipe withNote(net.minecraft.network.chat.Component note) {
+        this.note = note;
         return this;
     }
 

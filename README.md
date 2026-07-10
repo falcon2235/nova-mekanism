@@ -29,6 +29,9 @@ Nova Mekanism turns Mekanism's processing into a full progression of multiblock 
 - **Construction Terminal** — right-click any controller to auto-build its whole structure from your inventory.
 - **JEI integration** — every machine has recipe categories with gas/fluid amounts and an isometric 3-D structure preview; controllers act as recipe catalysts.
 - **Alternative antimatter route** — the **Large Hadron Collider** collides hydrogen protons straight into antimatter as an end-game-adjacent alternative to a hardened SPS, and a Large Chemical Reactor polonium recipe (gated behind an antimatter-pellet upgrade) offers a second polonium path.
+- **GT-style petroleum power** — an **Oil Drilling Rig** pumps crude oil, the distillation tower and chemical reactor refine it (distill → desulfurize) into diesel, and a **Large Combustion Generator** burns it at 500,000 RF/t; the end-game **Annihilation Generator** converts hydrogen + antimatter under liquid-helium cooling into 800,000,000 RF/t.
+- **Void Ore Miner** — mines 10 of a random rarity-weighted ore every tick (22 ore types, naquadah as the jackpot) for 1,000,000 RF/t.
+- **JEI bill of materials** — every structure preview lists exactly how many of each block the multiblock needs.
 - **Tweaks to Mekanism** — the SPS (antimatter) is made harder and the fission reactor casing recipe is hardened, via a built-in high-priority data pack.
 
 ---
@@ -50,8 +53,12 @@ Parallel machines share a fixed **3×3×4** hollow casing box (GregTech-style bl
 | Alloy Blast Furnace | 5×5×5 barrel | Molten super/naquadah/trans-dim alloys |
 | Vacuum Freezer | 3×3×3 | Freezes molten alloys into solid ingots |
 | Circuit Assembly Line | 3×3×5 | Supreme circuits, superconductors, trans-dim circuits |
+| Oil Drilling Rig | 5×7×5 rig | Pumps crude oil from bedrock (10 mB/t) |
+| **Large Combustion Generator** | 3×3×4 engine | Burns diesel (20 mB/t) into **500,000 RF/t** |
+| **Void Ore Miner** | 7×9×7 rig | Mines 10 random rarity-weighted ores per tick from nothing (1M RF/t) |
 | **Large Hadron Collider** | 33×3×33 ring | Collides hydrogen directly into antimatter (alt to the SPS); ~100M RF/t |
 | **Fusion Reactor** | 15×3×15 ring | D-T fusion → helium plasma → molten stellar matter |
+| **Annihilation Generator** | 7×7×7 sphere | Hydrogen + antimatter + liquid helium → **800,000,000 RF/t** |
 | **Artificial Star Generator** | 9×9×9 sphere | Stellar core + hydrogen → black hole seed |
 | **Black Hole Stabilizer** | 16×16×16 cube | Black hole seed → trans-dimensional metal + Creative Energy Cube |
 
@@ -85,7 +92,7 @@ Building a 16×16×16 cube by hand is not fun. Craft a **Construction Terminal**
 Requires **JDK 17**. The project uses ForgeGradle 6.
 
 ```bash
-./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.0.2.jar
+./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.0.3.jar
 ./gradlew runClient      # launch a dev client
 ```
 

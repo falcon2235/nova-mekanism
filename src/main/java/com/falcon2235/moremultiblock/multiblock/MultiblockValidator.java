@@ -397,6 +397,142 @@ public final class MultiblockValidator {
         return null;
     }
 
+    public static final int VOID_MINER_SIZE = 7;    // base plate footprint (width & depth)
+    public static final int VOID_MINER_HEIGHT = 9;  // base + drill mast + crown platform
+
+    /**
+     * Classifies a void ore miner cell (GTNH-style drill rig): a solid 7x7 casing base
+     * plate (controller at the front centre), four corner legs up to mid height, a glowing
+     * void-drill mast rising through the centre and a 3x3 casing crown platform on top.
+     * {@code d} 0..6 back from the controller, {@code r} -3..3 sideways, {@code u} 0..8 up.
+     * Returns 0 = open (not checked), 1 = casing (ports allowed), 2 = void drill (exact).
+     */
+    public static int voidMinerKind(int d, int r, int u) {
+        int max = VOID_MINER_SIZE - 1;
+        int mid = max / 2;
+        if (u == 0) {
+            return 1; // solid 7x7 base plate
+        }
+        if (u <= 4 && (d == 0 || d == max) && Math.abs(r) == mid) {
+            return 1; // four corner legs
+        }
+        if (u <= VOID_MINER_HEIGHT - 2 && d == mid && r == 0) {
+            return 2; // central void-drill mast
+        }
+        if (u == VOID_MINER_HEIGHT - 1 && Math.abs(d - mid) <= 1 && Math.abs(r) <= 1) {
+            return 1; // 3x3 crown platform capping the mast
+        }
+        return 0;
+    }
+
+    /**
+     * Validates the void ore miner drill rig (see {@link #voidMinerKind}). Only the rig's
+     * own cells are checked — the open space around the mast is ignored, so the rig can
+     * stand anywhere. Casing cells accept a port; the drill mast is exact.
+     */
+    public static Component validateVoidMiner(Level level, BlockPos controllerPos, Direction facing,
+                                              Block casing, Block drill, List<BlockPos> portsOut) {
+        Direction back = facing.getOpposite();
+        Direction right = facing.getClockWise();
+        int mid = (VOID_MINER_SIZE - 1) / 2;
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+
+        for (int d = 0; d < VOID_MINER_SIZE; d++) {
+            for (int u = 0; u < VOID_MINER_HEIGHT; u++) {
+                for (int r = -mid; r <= mid; r++) {
+                    int kind = voidMinerKind(d, r, u);
+                    if (kind == 0) {
+                        continue;
+                    }
+                    if (d == 0 && u == 0 && r == 0) {
+                        continue; // controller at the front centre of the base plate
+                    }
+                    cursor.set(controllerPos).move(back, d).move(Direction.UP, u).move(right, r);
+                    BlockState state = level.getBlockState(cursor);
+                    if (kind == 2) {
+                        if (!state.is(drill)) {
+                            return Component.translatable(LANG + "invalid_coil", posString(cursor));
+                        }
+                    } else if (state.getBlock() instanceof PortBlock) {
+                        if (portsOut != null) {
+                            portsOut.add(cursor.immutable());
+                        }
+                    } else if (!state.is(casing)) {
+                        return Component.translatable(LANG + "invalid_wall", posString(cursor));
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static final int OIL_RIG_SIZE = 5;     // base plate footprint (width & depth)
+    public static final int OIL_RIG_HEIGHT = 7;   // base + drill-pipe string + crown platform
+
+    /**
+     * Classifies an oil drilling rig cell (GT Fluid Drilling Rig style): a solid 5x5
+     * casing base plate (controller at the front centre), four corner legs up to mid
+     * height, a drill-pipe string down the centre and a 3x3 casing crown on top.
+     * Returns 0 = open (not checked), 1 = casing (ports allowed), 2 = drill pipe (exact).
+     */
+    public static int oilRigKind(int d, int r, int u) {
+        int max = OIL_RIG_SIZE - 1;
+        int mid = max / 2;
+        if (u == 0) {
+            return 1; // solid 5x5 base plate
+        }
+        if (u <= 3 && (d == 0 || d == max) && Math.abs(r) == mid) {
+            return 1; // four corner legs
+        }
+        if (u <= OIL_RIG_HEIGHT - 2 && d == mid && r == 0) {
+            return 2; // central drill-pipe string
+        }
+        if (u == OIL_RIG_HEIGHT - 1 && Math.abs(d - mid) <= 1 && Math.abs(r) <= 1) {
+            return 1; // 3x3 crown platform
+        }
+        return 0;
+    }
+
+    /**
+     * Validates the oil drilling rig (see {@link #oilRigKind}). Only the rig's own cells
+     * are checked; casing cells accept a port, the drill pipe is exact.
+     */
+    public static Component validateOilRig(Level level, BlockPos controllerPos, Direction facing,
+                                           Block casing, Block pipe, List<BlockPos> portsOut) {
+        Direction back = facing.getOpposite();
+        Direction right = facing.getClockWise();
+        int mid = (OIL_RIG_SIZE - 1) / 2;
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+
+        for (int d = 0; d < OIL_RIG_SIZE; d++) {
+            for (int u = 0; u < OIL_RIG_HEIGHT; u++) {
+                for (int r = -mid; r <= mid; r++) {
+                    int kind = oilRigKind(d, r, u);
+                    if (kind == 0) {
+                        continue;
+                    }
+                    if (d == 0 && u == 0 && r == 0) {
+                        continue; // controller at the front centre of the base plate
+                    }
+                    cursor.set(controllerPos).move(back, d).move(Direction.UP, u).move(right, r);
+                    BlockState state = level.getBlockState(cursor);
+                    if (kind == 2) {
+                        if (!state.is(pipe)) {
+                            return Component.translatable(LANG + "invalid_coil", posString(cursor));
+                        }
+                    } else if (state.getBlock() instanceof PortBlock) {
+                        if (portsOut != null) {
+                            portsOut.add(cursor.immutable());
+                        }
+                    } else if (!state.is(casing)) {
+                        return Component.translatable(LANG + "invalid_wall", posString(cursor));
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     /** Width offset of grid column {@code rr}: the controller column ({@code rr = 7}) maps to r = 0. */
     private static int stabilizerR(int rr) {
         return rr - (STABILIZER_SIZE / 2 - 1);

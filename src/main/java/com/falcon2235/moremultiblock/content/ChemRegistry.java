@@ -96,6 +96,19 @@ public final class ChemRegistry {
     public static final FluidRegistryObject<?, ?, ?, ?, ?> MOLTEN_NAQUADAH_ALLOY =
             FLUIDS.register("molten_naquadah_alloy", props -> props.tint(0xFF4C7A50));
 
+    // --- petroleum line (GT-style oil processing) ---
+    /** Crude oil pumped up by the oil drilling rig; distilled into sulfuric fuel. */
+    public static final FluidRegistryObject<?, ?, ?, ?, ?> CRUDE_OIL =
+            FLUIDS.register("crude_oil", props -> props.tint(0xFF17130E));
+
+    /** Sulfur-laden fuel fraction from crude-oil distillation; desulfurized into diesel. */
+    public static final FluidRegistryObject<?, ?, ?, ?, ?> SULFURIC_FUEL =
+            FLUIDS.register("sulfuric_fuel", props -> props.tint(0xFF8A7A26));
+
+    /** Diesel: desulfurized fuel, burned by the large combustion generator. */
+    public static final FluidRegistryObject<?, ?, ?, ?, ?> DIESEL =
+            FLUIDS.register("diesel", props -> props.tint(0xFFD8B04A));
+
     // --- fusion reactor ---
     /** Helium plasma: first fusion product (hydrogen + lithium), fuel for stellar fusion. */
     public static final GasRegistryObject<Gas> HELIUM_PLASMA =
@@ -104,6 +117,10 @@ public final class ChemRegistry {
     /** Molten stellar matter: the fusion reactor's pinnacle output, frozen into a stellar core. */
     public static final FluidRegistryObject<?, ?, ?, ?, ?> MOLTEN_STELLAR_MATTER =
             FLUIDS.register("molten_stellar_matter", props -> props.tint(0xFFB0E8FF));
+
+    /** Liquid helium: helium plasma condensed in the vacuum freezer; annihilation coolant. */
+    public static final FluidRegistryObject<?, ?, ?, ?, ?> LIQUID_HELIUM =
+            FLUIDS.register("liquid_helium", props -> props.tint(0xFFC8ECF8));
 
     /** Molten trans-dimensional alloy: alloy blast furnace output, frozen into the alloy ingot. */
     public static final FluidRegistryObject<?, ?, ?, ?, ?> MOLTEN_TRANSDIMENSIONAL_ALLOY =

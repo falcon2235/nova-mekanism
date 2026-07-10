@@ -143,6 +143,8 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
     private boolean active;
     private int revalidateIn;
     private Component statusMessage = Component.translatable(LANG + "not_formed");
+    /** Structure ports found by the last successful validation (transient, rebuilt on revalidate). */
+    private java.util.List<BlockPos> cachedPorts = java.util.List.of();
 
     private int clientEnergy10k;
     // Tank amounts synced in units of 10 mB so they fit ContainerData's short range.
@@ -263,7 +265,10 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
             case CIRCUIT_ASSEMBLER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ASSEMBLY;
             case ELECTROLYZER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ELECTROLYZER;
             case CENTRIFUGE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.CENTRIFUGE;
-            case FUSION_REACTOR, STAR_GENERATOR, STABILIZER, HADRON_COLLIDER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.FUSION;
+            case FUSION_REACTOR, STAR_GENERATOR, STABILIZER, HADRON_COLLIDER, ANNIHILATION_GENERATOR -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.FUSION;
+            case VOID_MINER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ALLOY;
+            case OIL_RIG -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.STAINLESS;
+            case COMBUSTION_GENERATOR -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.HEAT_PROOF;
         };
     }
 
@@ -289,7 +294,7 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
             error = MultiblockValidator.validateFusion(level, worldPosition, facing,
                     MMMRegistry.chemCasing(type), MMMRegistry.FUSION_COIL.get(),
                     MMMRegistry.FUSION_GLASS.get(), ports);
-        } else if (type == ChemMachineType.STAR_GENERATOR) {
+        } else if (type == ChemMachineType.STAR_GENERATOR || type == ChemMachineType.ANNIHILATION_GENERATOR) {
             error = MultiblockValidator.validateStar(level, worldPosition, facing,
                     MMMRegistry.chemCasing(type), MMMRegistry.FUSION_GLASS.get(), type.width, ports);
         } else if (type == ChemMachineType.STABILIZER) {
@@ -299,6 +304,12 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
             error = MultiblockValidator.validateCollider(level, worldPosition, facing,
                     MMMRegistry.chemCasing(type), MMMRegistry.COLLIDER_MAGNET.get(),
                     MMMRegistry.FUSION_GLASS.get(), ports);
+        } else if (type == ChemMachineType.VOID_MINER) {
+            error = MultiblockValidator.validateVoidMiner(level, worldPosition, facing,
+                    MMMRegistry.chemCasing(type), MMMRegistry.VOID_DRILL.get(), ports);
+        } else if (type == ChemMachineType.OIL_RIG) {
+            error = MultiblockValidator.validateOilRig(level, worldPosition, facing,
+                    MMMRegistry.chemCasing(type), MMMRegistry.DRILL_PIPE.get(), ports);
         } else if (type.coilTower) {
             error = MultiblockValidator.validateEbf(level, worldPosition, facing,
                     MMMRegistry.chemCasing(type), type.height, ports, coilTierOut);
@@ -309,6 +320,7 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
         }
         formed = error == null;
         coilTier = formed ? coilTierOut[0] : 0;
+        cachedPorts = formed ? java.util.List.copyOf(ports) : java.util.List.of();
         if (formed) {
             for (BlockPos portPos : ports) {
                 if (level.getBlockEntity(portPos) instanceof PortBlockEntity port) {
@@ -335,6 +347,18 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
             recomputeUpgrades();
             upgradesDirty = false;
         }
+        if (machineType() == ChemMachineType.VOID_MINER) {
+            voidMinerTick();
+            return;
+        }
+        if (machineType() == ChemMachineType.COMBUSTION_GENERATOR) {
+            combustionTick();
+            return;
+        }
+        if (machineType() == ChemMachineType.ANNIHILATION_GENERATOR) {
+            annihilationTick();
+            return;
+        }
         ChemRecipe recipe = findRecipe();
         if (recipe == null) {
             progress = 0;
@@ -358,6 +382,151 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
         }
         applyCoilGlow(processed, false);
         updateDisplay();
+    }
+
+    /**
+     * The void ore miner's mining loop: every tick it burns a flat energy cost and rolls
+     * ONE rarity-weighted ore type, producing 10 of it (see {@link com.falcon2235.moremultiblock.machine.VoidOreTable}).
+     * Stalls (without burning energy) when the output buffer cannot take the rolled stack.
+     * Energy upgrades reduce the per-tick cost like any other machine.
+     */
+    private void voidMinerTick() {
+        ticksRequired = 1;
+        long cost = Math.max(1L, (long) Math.ceil(
+                com.falcon2235.moremultiblock.machine.VoidOreTable.ENERGY_PER_TICK * upgradeEnergyFactor));
+        boolean processed = false;
+        if (energy >= cost && level != null) {
+            ItemStack mined = com.falcon2235.moremultiblock.machine.VoidOreTable.roll(level.random);
+            if (!mined.isEmpty() && fitsItemStack(mined)) {
+                energy -= cost;
+                insertItemOutput(mined);
+                processed = true;
+                setChanged();
+            }
+        }
+        progress = processed ? 1 : 0;
+        applyCoilGlow(processed, false);
+        updateDisplay();
+    }
+
+    /** Combustion generator output: 1,250,000 J/t = 500,000 RF/t while burning. */
+    public static final long COMBUSTION_J_PER_TICK = 1_250_000L;
+    /** Diesel burned per tick (mB). */
+    public static final int COMBUSTION_DIESEL_MB_PER_TICK = 20;
+
+    /**
+     * The large combustion generator's loop: burns diesel from the fluid input tank
+     * into the energy buffer (GT Large Combustion Engine style), then pushes the
+     * buffered energy out through the structure's energy ports every tick.
+     */
+    private void combustionTick() {
+        ticksRequired = 1;
+        boolean processed = false;
+        FluidStack diesel = ChemRecipes.diesel(COMBUSTION_DIESEL_MB_PER_TICK);
+        if (!diesel.isEmpty()
+                && fluidIn.getFluidAmount() >= COMBUSTION_DIESEL_MB_PER_TICK
+                && fluidIn.getFluid().isFluidEqual(diesel)
+                && energy + COMBUSTION_J_PER_TICK <= CAPACITY) {
+            fluidIn.drain(COMBUSTION_DIESEL_MB_PER_TICK, IFluidHandler.FluidAction.EXECUTE);
+            energy += COMBUSTION_J_PER_TICK;
+            processed = true;
+            setChanged();
+        }
+        pushGeneratedEnergy();
+        progress = processed ? 1 : 0;
+        applyCoilGlow(processed, false);
+        updateDisplay();
+    }
+
+    /**
+     * Actively distributes buffered energy to FE receivers adjacent to the controller
+     * and to each structure port (so cables plugged into any energy port are fed even
+     * if they never pull). Our energy is Joules; neighbours receive FE (= J * 2/5).
+     */
+    private void pushGeneratedEnergy() {
+        if (energy <= 0 || level == null) {
+            return;
+        }
+        java.util.List<BlockPos> origins = new java.util.ArrayList<>(cachedPorts.size() + 1);
+        origins.add(worldPosition);
+        origins.addAll(cachedPorts);
+        for (BlockPos origin : origins) {
+            for (Direction dir : Direction.values()) {
+                int offerFe = (int) Math.min(Integer.MAX_VALUE, energy * 2 / 5);
+                if (offerFe <= 0) {
+                    return;
+                }
+                BlockEntity neighbor = level.getBlockEntity(origin.relative(dir));
+                if (neighbor == null || neighbor instanceof PortBlockEntity || neighbor instanceof ChemMachineBlockEntity) {
+                    continue; // skip our own structure
+                }
+                IEnergyStorage handler = neighbor.getCapability(ForgeCapabilities.ENERGY, dir.getOpposite())
+                        .resolve().orElse(null);
+                if (handler == null || !handler.canReceive()) {
+                    continue;
+                }
+                int accepted = handler.receiveEnergy(offerFe, false);
+                if (accepted > 0) {
+                    energy -= accepted * 5L / 2;
+                    setChanged();
+                }
+            }
+        }
+    }
+
+    /** Annihilation generator output: 2,000,000,000 J/t = 800,000,000 RF/t while running. */
+    public static final long ANNIHILATION_J_PER_TICK = 2_000_000_000L;
+    /** Hydrogen annihilated per tick (mB). */
+    public static final int ANNIHILATION_HYDROGEN_MB_PER_TICK = 50;
+    /** Antimatter annihilated per tick (mB). */
+    public static final int ANNIHILATION_ANTIMATTER_MB_PER_TICK = 1;
+    /** Liquid-helium coolant consumed per tick (mB). */
+    public static final int ANNIHILATION_HELIUM_MB_PER_TICK = 10;
+
+    /**
+     * The annihilation generator's loop: collides hydrogen against antimatter under a
+     * liquid-helium coolant bath, converting the annihilated mass straight into the
+     * energy buffer, then pushes the buffered energy out through the energy ports.
+     */
+    private void annihilationTick() {
+        ticksRequired = 1;
+        boolean processed = false;
+        GasStack hydrogen = new GasStack(mekanism.common.registries.MekanismGases.HYDROGEN.get(),
+                ANNIHILATION_HYDROGEN_MB_PER_TICK);
+        GasStack antimatter = new GasStack(mekanism.common.registries.MekanismGases.ANTIMATTER.get(),
+                ANNIHILATION_ANTIMATTER_MB_PER_TICK);
+        FluidStack helium = ChemRecipes.liquidHelium(ANNIHILATION_HELIUM_MB_PER_TICK);
+        if (hasGasInput(hydrogen) && hasGasInput(antimatter)
+                && !helium.isEmpty()
+                && fluidIn.getFluidAmount() >= ANNIHILATION_HELIUM_MB_PER_TICK
+                && fluidIn.getFluid().isFluidEqual(helium)
+                && energy + ANNIHILATION_J_PER_TICK <= CAPACITY) {
+            consumeGasInput(hydrogen);
+            consumeGasInput(antimatter);
+            fluidIn.drain(ANNIHILATION_HELIUM_MB_PER_TICK, IFluidHandler.FluidAction.EXECUTE);
+            energy += ANNIHILATION_J_PER_TICK;
+            processed = true;
+            setChanged();
+        }
+        pushGeneratedEnergy();
+        progress = processed ? 1 : 0;
+        applyCoilGlow(processed, false);
+        updateDisplay();
+    }
+
+    /** Whether this machine produces energy (extract allowed, insert refused). */
+    private boolean isGenerator() {
+        ChemMachineType type = machineType();
+        return type == ChemMachineType.COMBUSTION_GENERATOR || type == ChemMachineType.ANNIHILATION_GENERATOR;
+    }
+
+    /** Whether the single stack fits into the output buffer (simulated slot by slot). */
+    private boolean fitsItemStack(ItemStack out) {
+        int remaining = out.getCount();
+        for (int i = 0; i < OUTPUT_SLOTS && remaining > 0; i++) {
+            remaining = outputs.insertItem(i, out.copyWithCount(remaining), true).getCount();
+        }
+        return remaining == 0;
     }
 
     /**
@@ -818,6 +987,9 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
     private final IEnergyStorage feHandler = new IEnergyStorage() {
         @Override
         public int receiveEnergy(int maxReceive, boolean simulate) {
+            if (isGenerator()) {
+                return 0; // generators only ever emit
+            }
             long needed = CAPACITY - energy;
             if (needed <= 0 || maxReceive <= 0) {
                 return 0;
@@ -835,7 +1007,19 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
 
         @Override
         public int extractEnergy(int maxExtract, boolean simulate) {
-            return 0;
+            if (!isGenerator() || maxExtract <= 0) {
+                return 0;
+            }
+            int available = (int) Math.min(Integer.MAX_VALUE, energy * 2 / 5);
+            int extracted = Math.min(maxExtract, available);
+            if (extracted <= 0) {
+                return 0;
+            }
+            if (!simulate) {
+                energy -= extracted * 5L / 2;
+                setChanged();
+            }
+            return extracted;
         }
 
         @Override
@@ -850,12 +1034,12 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
 
         @Override
         public boolean canExtract() {
-            return false;
+            return isGenerator();
         }
 
         @Override
         public boolean canReceive() {
-            return true;
+            return !isGenerator();
         }
     };
 
@@ -888,6 +1072,9 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
 
         @Override
         public FloatingLong insertEnergy(int container, FloatingLong amount, @NotNull Action action) {
+            if (isGenerator()) {
+                return amount; // generators only ever emit
+            }
             long room = CAPACITY - energy;
             long toInsert = Math.min(amount.longValue(), room);
             if (toInsert <= 0) {
@@ -902,7 +1089,18 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
 
         @Override
         public FloatingLong extractEnergy(int container, FloatingLong amount, @NotNull Action action) {
-            return FloatingLong.ZERO;
+            if (!isGenerator()) {
+                return FloatingLong.ZERO;
+            }
+            long extracted = Math.min(amount.longValue(), energy);
+            if (extracted <= 0) {
+                return FloatingLong.ZERO;
+            }
+            if (action.execute()) {
+                energy -= extracted;
+                setChanged();
+            }
+            return FloatingLong.create(extracted);
         }
     };
 

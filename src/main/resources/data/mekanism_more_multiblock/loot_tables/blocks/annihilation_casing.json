@@ -1,0 +1,1 @@
+{"type": "minecraft:block", "pools": [{"rolls": 1.0, "bonus_rolls": 0.0, "entries": [{"type": "minecraft:item", "name": "mekanism_more_multiblock:annihilation_casing"}], "conditions": [{"condition": "minecraft:survives_explosion"}]}]}

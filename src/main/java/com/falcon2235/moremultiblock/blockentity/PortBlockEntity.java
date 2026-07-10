@@ -264,7 +264,9 @@ public class PortBlockEntity extends BlockEntity implements MenuProvider {
 
         @Override
         public int extractEnergy(int maxExtract, boolean simulate) {
-            return 0;
+            // Forwarded so generator machines can be drained; consumers return 0 upstream.
+            PortHost controller = host();
+            return controller == null ? 0 : controller.getFeHandler().extractEnergy(maxExtract, simulate);
         }
 
         @Override
@@ -281,12 +283,14 @@ public class PortBlockEntity extends BlockEntity implements MenuProvider {
 
         @Override
         public boolean canExtract() {
-            return false;
+            PortHost controller = host();
+            return controller != null && controller.getFeHandler().canExtract();
         }
 
         @Override
         public boolean canReceive() {
-            return true;
+            PortHost controller = host();
+            return controller == null || controller.getFeHandler().canReceive();
         }
     };
 
@@ -330,7 +334,10 @@ public class PortBlockEntity extends BlockEntity implements MenuProvider {
 
         @Override
         public FloatingLong extractEnergy(int container, FloatingLong amount, @NotNull Action action) {
-            return FloatingLong.ZERO;
+            // Forwarded so Mekanism cables can pull from generator machines.
+            PortHost controller = host();
+            return controller == null ? FloatingLong.ZERO
+                    : controller.getStrictEnergyHandler().extractEnergy(container, amount, action);
         }
     };
 

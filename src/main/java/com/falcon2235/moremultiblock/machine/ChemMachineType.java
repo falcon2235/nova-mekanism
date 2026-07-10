@@ -79,7 +79,37 @@ public enum ChemMachineType {
      * channel, around a huge empty centre. Collides hydrogen (protons) directly into
      * antimatter. Craftable just before the end-game; ~100M RF/t.
      */
-    HADRON_COLLIDER("hadron_collider", 33, 3, 33, false);
+    HADRON_COLLIDER("hadron_collider", 33, 3, 33, false),
+    /**
+     * Void ore miner: a GTNH-style drill rig — a solid 7x7 casing base plate with four
+     * corner legs, a glowing void-drill mast rising through the centre and a 3x3 crown
+     * platform on top. Mines ore from nothing: every tick it consumes 1,000,000 RF
+     * (2.5M J) and produces 10 of one randomly chosen ore, weighted by rarity.
+     */
+    VOID_MINER("void_ore_miner", 7, 9, 7, false),
+    /**
+     * Oil drilling rig, modelled on GregTech's Fluid Drilling Rig: a 5x5 casing base
+     * plate with four corner legs, a drill-pipe string down the centre and a 3x3 crown.
+     * Pumps crude oil up from bedrock (10 mB/t at 4,000 RF/t) — the head of the GT-style
+     * petroleum chain (crude oil → distillation → desulfurization → diesel).
+     */
+    OIL_RIG("oil_drilling_rig", 5, 7, 5, false),
+    /**
+     * Large combustion generator, modelled on GregTech's Large Combustion Engine:
+     * a 3x3x4 engine block — engine casing shell with two full gearbox rings in the
+     * middle slices. Burns diesel (20 mB/t) into 500,000 RF/t, far beyond an
+     * ethylene-fed gas-burning generator (~70k RF/t). Energy flows OUT through its
+     * energy ports.
+     */
+    COMBUSTION_GENERATOR("combustion_generator", 3, 3, 4, false),
+    /**
+     * Annihilation generator: a 7x7x7 rounded containment sphere of annihilation casing
+     * with a fusion-glass window on each face (same family as the artificial star
+     * generator). Annihilates hydrogen (50 mB/t) against antimatter (1 mB/t) under a
+     * liquid-helium coolant bath (10 mB/t), producing 800,000,000 RF/t. Built after
+     * obtaining a stellar core; extremely expensive.
+     */
+    ANNIHILATION_GENERATOR("annihilation_generator", 7, 7, 7, false);
 
     public final String id;
     public final int width;

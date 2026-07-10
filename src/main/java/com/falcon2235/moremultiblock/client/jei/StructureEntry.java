@@ -26,7 +26,11 @@ public class StructureEntry {
         /** Black hole stabilizer (chunk-sized wireframe cube: edges + face windows). */
         FRAME,
         /** Large hadron collider (giant flat octagonal accelerator loop). */
-        LOOP
+        LOOP,
+        /** Void ore miner (drill rig: base plate, corner legs, glowing mast, crown platform). */
+        DRILL,
+        /** Oil drilling rig (GT fluid drill: 5x5 base, corner legs, drill-pipe string, crown). */
+        RIG
     }
 
     public final ResourceLocation id;
@@ -48,6 +52,11 @@ public class StructureEntry {
     public final BlockState ventState;
     @Nullable
     public final ItemStack ventStack;
+    /**
+     * The full bill of materials — one stack per unique block with its required count
+     * (counted from the construction blueprint; the controller itself is excluded).
+     */
+    public java.util.List<ItemStack> materials = java.util.List.of();
 
     public StructureEntry(ResourceLocation id, ItemStack controllerStack, BlockState controllerState,
                           Component name, int width, int height, int depth,
@@ -84,5 +93,11 @@ public class StructureEntry {
         this.mode = mode;
         this.ventState = ventState;
         this.ventStack = ventStack;
+    }
+
+    /** Fluent: attach the counted bill of materials. */
+    public StructureEntry withMaterials(java.util.List<ItemStack> materials) {
+        this.materials = materials;
+        return this;
     }
 }

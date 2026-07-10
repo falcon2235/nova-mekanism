@@ -79,7 +79,7 @@ public final class StructurePreview {
         // Anchor (controller) height: bottom layer for the vertical towers/barrel, the
         // TOP layer for the assembly line (like GT's CAL), face centre for plain boxes.
         int anchorY = switch (mode) {
-            case TOWER, BARREL, FRAME -> 0;
+            case TOWER, BARREL, FRAME, DRILL, RIG -> 0;
             case ASSEMBLY -> h - 1;
             default -> halfH; // LOOP (mid layer), BOX, RING, SPHERE
         };
@@ -147,6 +147,28 @@ public final class StructurePreview {
                             cell = switch (kind) {
                                 case 2 -> coil != null ? coil : casing;
                                 case 3 -> vent != null ? vent : casing;
+                                case 1 -> casing;
+                                default -> null;
+                            };
+                        }
+                        case DRILL -> {
+                            // Void ore miner: drill rig — base plate, corner legs, glowing
+                            // drill mast (coil param), 3x3 crown platform.
+                            int kind = com.falcon2235.moremultiblock.multiblock.MultiblockValidator
+                                    .voidMinerKind(z, x - w / 2, y);
+                            cell = switch (kind) {
+                                case 2 -> coil != null ? coil : casing;
+                                case 1 -> casing;
+                                default -> null;
+                            };
+                        }
+                        case RIG -> {
+                            // Oil drilling rig: base plate, corner legs, drill-pipe string
+                            // (coil param), 3x3 crown platform.
+                            int kind = com.falcon2235.moremultiblock.multiblock.MultiblockValidator
+                                    .oilRigKind(z, x - w / 2, y);
+                            cell = switch (kind) {
+                                case 2 -> coil != null ? coil : casing;
                                 case 1 -> casing;
                                 default -> null;
                             };

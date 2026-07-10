@@ -54,9 +54,13 @@ public final class StructureBlueprint {
             case ALLOY_BLAST_FURNACE -> alloyBarrel(pos, facing);
             case CIRCUIT_ASSEMBLER -> assemblyLine(pos, facing);
             case FUSION_REACTOR -> fusionRing(pos, facing);
-            case STAR_GENERATOR -> starSphere(pos, facing, type.width);
+            case STAR_GENERATOR, ANNIHILATION_GENERATOR -> starSphere(pos, facing, type);
             case STABILIZER -> stabilizerCage(pos, facing);
             case HADRON_COLLIDER -> colliderLoop(pos, facing);
+            case VOID_MINER -> voidMinerRig(pos, facing);
+            case OIL_RIG -> oilRig(pos, facing);
+            case COMBUSTION_GENERATOR -> coilBox(pos, facing, MMMRegistry.chemCasing(type),
+                    MMMRegistry.chemCoil(type), type.width, type.height, type.depth);
             default -> box(pos, facing, MMMRegistry.chemCasing(type), type.width, type.height, type.depth);
         };
     }
@@ -236,12 +240,13 @@ public final class StructureBlueprint {
         return cells;
     }
 
-    // --- artificial star generator (giant rounded cube with face windows) ---
-    private static List<Cell> starSphere(BlockPos pos, Direction facing, int size) {
+    // --- rounded containment sphere with face windows (star generator, annihilation generator) ---
+    private static List<Cell> starSphere(BlockPos pos, Direction facing, ChemMachineType type) {
         Direction back = facing.getOpposite();
         Direction right = facing.getClockWise();
-        Block casing = MMMRegistry.chemCasing(ChemMachineType.STAR_GENERATOR);
+        Block casing = MMMRegistry.chemCasing(type);
         Block glass = MMMRegistry.FUSION_GLASS.get();
+        int size = type.width;
         int half = size / 2;
         List<Cell> cells = new ArrayList<>();
         BlockPos.MutableBlockPos c = new BlockPos.MutableBlockPos();
@@ -317,6 +322,80 @@ public final class StructureBlueprint {
                     Block block = kind == 2 ? magnet : kind == 3 ? glass : casing;
                     c.set(pos).move(back, d).move(Direction.UP, layer - 1).move(right, r);
                     cells.add(new Cell(c.immutable(), block));
+                }
+            }
+        }
+        return cells;
+    }
+
+    // --- void ore miner (GTNH-style drill rig: base plate, corner legs, drill mast, crown) ---
+    private static List<Cell> voidMinerRig(BlockPos pos, Direction facing) {
+        Direction back = facing.getOpposite();
+        Direction right = facing.getClockWise();
+        Block casing = MMMRegistry.chemCasing(ChemMachineType.VOID_MINER);
+        Block drill = MMMRegistry.VOID_DRILL.get();
+        int mid = (MultiblockValidator.VOID_MINER_SIZE - 1) / 2;
+        List<Cell> cells = new ArrayList<>();
+        BlockPos.MutableBlockPos c = new BlockPos.MutableBlockPos();
+        for (int d = 0; d < MultiblockValidator.VOID_MINER_SIZE; d++) {
+            for (int u = 0; u < MultiblockValidator.VOID_MINER_HEIGHT; u++) {
+                for (int r = -mid; r <= mid; r++) {
+                    int kind = MultiblockValidator.voidMinerKind(d, r, u);
+                    if (kind == 0 || (d == 0 && u == 0 && r == 0)) {
+                        continue; // open cell or the controller itself
+                    }
+                    c.set(pos).move(back, d).move(Direction.UP, u).move(right, r);
+                    cells.add(new Cell(c.immutable(), kind == 2 ? drill : casing));
+                }
+            }
+        }
+        return cells;
+    }
+
+    // --- oil drilling rig (GT fluid drill: base plate, corner legs, drill pipe, crown) ---
+    private static List<Cell> oilRig(BlockPos pos, Direction facing) {
+        Direction back = facing.getOpposite();
+        Direction right = facing.getClockWise();
+        Block casing = MMMRegistry.chemCasing(ChemMachineType.OIL_RIG);
+        Block pipe = MMMRegistry.DRILL_PIPE.get();
+        int mid = (MultiblockValidator.OIL_RIG_SIZE - 1) / 2;
+        List<Cell> cells = new ArrayList<>();
+        BlockPos.MutableBlockPos c = new BlockPos.MutableBlockPos();
+        for (int d = 0; d < MultiblockValidator.OIL_RIG_SIZE; d++) {
+            for (int u = 0; u < MultiblockValidator.OIL_RIG_HEIGHT; u++) {
+                for (int r = -mid; r <= mid; r++) {
+                    int kind = MultiblockValidator.oilRigKind(d, r, u);
+                    if (kind == 0 || (d == 0 && u == 0 && r == 0)) {
+                        continue;
+                    }
+                    c.set(pos).move(back, d).move(Direction.UP, u).move(right, r);
+                    cells.add(new Cell(c.immutable(), kind == 2 ? pipe : casing));
+                }
+            }
+        }
+        return cells;
+    }
+
+    // --- hollow casing box with full coil/gearbox rings in the middle slices ---
+    private static List<Cell> coilBox(BlockPos pos, Direction facing, Block casing, Block coil,
+                                      int width, int height, int depth) {
+        Direction back = facing.getOpposite();
+        Direction right = facing.getClockWise();
+        int halfW = (width - 1) / 2;
+        int halfH = (height - 1) / 2;
+        List<Cell> cells = new ArrayList<>();
+        BlockPos.MutableBlockPos c = new BlockPos.MutableBlockPos();
+        for (int d = 0; d < depth; d++) {
+            for (int u = -halfH; u <= halfH; u++) {
+                for (int r = -halfW; r <= halfW; r++) {
+                    boolean anchor = d == 0 && u == 0 && r == 0;
+                    boolean interior = Math.abs(r) < halfW && Math.abs(u) < halfH && d > 0 && d < depth - 1;
+                    if (anchor || interior) {
+                        continue;
+                    }
+                    boolean coilRing = d > 0 && d < depth - 1;
+                    c.set(pos).move(back, d).move(Direction.UP, u).move(right, r);
+                    cells.add(new Cell(c.immutable(), coilRing ? coil : casing));
                 }
             }
         }

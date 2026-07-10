@@ -313,6 +313,12 @@ public final class ChemRecipes {
                         ItemStack.EMPTY, new GasStack(MekanismGases.POLONIUM, 100L), FluidStack.EMPTY,
                         200, 400L)
                         .requireUpgrade(new ItemStack(MMMRegistry.POLONIUM_SYNTHESIS_UPGRADE.get())));
+                // GT desulfurization: hydrogen strips the sulfur out of the fuel fraction,
+                // yielding clean diesel + a sulfur dust byproduct.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, new GasStack(MekanismGases.HYDROGEN, 200L), sulfuricFuel(1_000),
+                        mekItem("dust_sulfur", 1), GasStack.EMPTY, diesel(850),
+                        100, 2_000L));
             }
             case DISTILLATION -> {
                 // stage 3: titanium tetrachloride -> purified titanium tetrachloride
@@ -325,6 +331,11 @@ public final class ChemRecipes {
                         ItemStack.EMPTY, GasStack.EMPTY, acidicOsmiumSolution(2_000),
                         item(MMMRegistry.OSMIUM_TETROXIDE.get(), 5), new GasStack(MekanismGases.HYDROGEN_CHLORIDE, 1_000L), water(1_000),
                         400, 300L));
+                // GT oil processing: distill crude oil into the sulfur-laden fuel fraction
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, GasStack.EMPTY, crudeOil(1_000),
+                        ItemStack.EMPTY, GasStack.EMPTY, sulfuricFuel(700),
+                        100, 2_000L));
             }
             case MIXER -> {
                 // copper dust + nickel dust -> 2 cupronickel dust
@@ -414,6 +425,12 @@ public final class ChemRecipes {
                         ItemStack.EMPTY, GasStack.EMPTY, moltenTransAlloy(144),
                         item(MMMRegistry.TRANSDIMENSIONAL_ALLOY.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
                         800, 500_000_000L, 0));
+                // helium plasma (fusion product) condensed into liquid helium — the
+                // annihilation generator's coolant.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, new GasStack(ChemRegistry.HELIUM_PLASMA, 200L), FluidStack.EMPTY,
+                        ItemStack.EMPTY, GasStack.EMPTY, liquidHelium(100),
+                        100, 2_000L, 0));
             }
             case FUSION_REACTOR -> {
                 // D-T fusion: deuterium + tritium -> helium plasma (needs Mekanism Generators).
@@ -470,6 +487,52 @@ public final class ChemRecipes {
                             creativeCube, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
                             GasStack.EMPTY, FluidStack.EMPTY,
                             24_000, 1_250_000_000L, 0));
+                }
+            }
+            case OIL_RIG -> {
+                // Pumps crude oil up from bedrock: 200 mB per second (10 mB/t) at
+                // 10,000 J/t (4,000 RF/t). A normal recipe — no inputs, runs forever.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
+                        ItemStack.EMPTY, GasStack.EMPTY, crudeOil(200),
+                        20, 10_000L));
+            }
+            case COMBUSTION_GENERATOR -> {
+                // JEI display only — the generator's real logic burns diesel every tick in
+                // ChemMachineBlockEntity.combustionTick() and PRODUCES the shown energy.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, GasStack.EMPTY, diesel(400),
+                        ItemStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
+                        20, 1_250_000L)
+                        .withNote(net.minecraft.network.chat.Component.translatable(
+                                "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".generates")));
+            }
+            case ANNIHILATION_GENERATOR -> {
+                // JEI display only — the generator's real logic annihilates every tick in
+                // ChemMachineBlockEntity.annihilationTick() and PRODUCES the shown energy.
+                // Per second: 1,000 mB hydrogen + 20 mB antimatter + 200 mB liquid helium.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        new GasStack(MekanismGases.HYDROGEN, 1_000L),
+                        new GasStack(MekanismGases.ANTIMATTER, 20L), liquidHelium(200),
+                        ItemStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
+                        20, 2_000_000_000L, 0)
+                        .withNote(net.minecraft.network.chat.Component.translatable(
+                                "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".generates_annihilation")));
+            }
+            case VOID_MINER -> {
+                // JEI display only — the miner's real logic rolls the weighted table every
+                // tick in ChemMachineBlockEntity.voidMinerTick(). One entry per ore, with
+                // its roll chance drawn as a note.
+                int total = VoidOreTable.totalWeight();
+                for (VoidOreTable.Entry entry : VoidOreTable.entries()) {
+                    String pct = String.format(java.util.Locale.ROOT, "%.1f%%", 100.0 * entry.weight() / total);
+                    list.add(new ChemRecipe(
+                            ItemStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
+                            entry.stack().copyWithCount(VoidOreTable.ORES_PER_TICK), GasStack.EMPTY, FluidStack.EMPTY,
+                            1, VoidOreTable.ENERGY_PER_TICK, 0)
+                            .withNote(net.minecraft.network.chat.Component.translatable(
+                                    "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".void_chance", pct)));
                 }
             }
             case STAR_GENERATOR -> {
@@ -607,6 +670,24 @@ public final class ChemRecipes {
 
     private static FluidStack liquidMagnesium(int amount) {
         return new FluidStack(ChemRegistry.LIQUID_MAGNESIUM.getStillFluid(), amount);
+    }
+
+    private static FluidStack crudeOil(int amount) {
+        return new FluidStack(ChemRegistry.CRUDE_OIL.getStillFluid(), amount);
+    }
+
+    private static FluidStack sulfuricFuel(int amount) {
+        return new FluidStack(ChemRegistry.SULFURIC_FUEL.getStillFluid(), amount);
+    }
+
+    /** Public: the combustion generator's block entity checks its fuel tank against this. */
+    public static FluidStack diesel(int amount) {
+        return new FluidStack(ChemRegistry.DIESEL.getStillFluid(), amount);
+    }
+
+    /** Public: the annihilation generator's block entity checks its coolant tank against this. */
+    public static FluidStack liquidHelium(int amount) {
+        return new FluidStack(ChemRegistry.LIQUID_HELIUM.getStillFluid(), amount);
     }
 
     private static FluidStack moltenSuperAlloy(int amount) {

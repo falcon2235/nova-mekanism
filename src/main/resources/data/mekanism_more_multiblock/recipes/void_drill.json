@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["DND", "NCN", "DND"], "key": {"D": {"item": "minecraft:diamond_block"}, "N": {"item": "mekanism_more_multiblock:naquadah_alloy_ingot"}, "C": {"item": "mekanism_more_multiblock:supreme_control_circuit"}}, "result": {"item": "mekanism_more_multiblock:void_drill", "count": 2}}

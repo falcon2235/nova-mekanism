@@ -1,0 +1,1 @@
+{"parent": "minecraft:block/cube_column", "textures": {"side": "mekanism_more_multiblock:block/drill_pipe", "end": "mekanism_more_multiblock:block/drill_pipe_top"}}
