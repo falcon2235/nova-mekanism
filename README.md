@@ -30,8 +30,11 @@ Nova Mekanism turns Mekanism's processing into a full progression of multiblock 
 - **JEI integration** — every machine has recipe categories with gas/fluid amounts and an isometric 3-D structure preview; controllers act as recipe catalysts.
 - **Alternative antimatter route** — the **Large Hadron Collider** collides hydrogen protons straight into antimatter as an end-game-adjacent alternative to a hardened SPS, and a Large Chemical Reactor polonium recipe (gated behind an antimatter-pellet upgrade) offers a second polonium path.
 - **GT-style petroleum power** — an **Oil Drilling Rig** pumps crude oil, the distillation tower and chemical reactor refine it (distill → desulfurize) into diesel, and a **Large Combustion Generator** burns it at 500,000 RF/t; the end-game **Annihilation Generator** converts hydrogen + antimatter under liquid-helium cooling into 800,000,000 RF/t.
-- **Void Ore Miner** — mines 10 of a random rarity-weighted ore every tick (22 ore types, naquadah as the jackpot) for 1,000,000 RF/t.
+- **Void Ore Miner** — mines 10 of a random rarity-weighted RAW ore every second (22 ore types, naquadah as the jackpot) for 1,000,000 RF/t; Mekanism speed upgrades roll faster.
 - **JEI bill of materials** — every structure preview lists exactly how many of each block the multiblock needs.
+- **Quantum conduits** — a transmitter tier above Mekanism's ultimate: quantum universal cable / mechanical pipe / pressurized tube / logistical pipe. Anything pushed in is routed instantly; right-click a face with an empty hand to toggle extraction from tanks/chests. Crafted from 8 ultimate transmitters + a superconductor.
+- **Fully configurable** — `config/mekanism_more_multiblock-common.toml` exposes every machine rate (miner, rigs, generators, LHC, conduits) plus global recipe energy/time multipliers for expert-pack tuning.
+- **Hardened Mekanism recipes** — the Gas-Burning Generator is gated behind titanium and the Digital Miner behind special steel (plus the existing SPS/fission hardening).
 - **Tweaks to Mekanism** — the SPS (antimatter) is made harder and the fission reactor casing recipe is hardened, via a built-in high-priority data pack.
 
 ---
@@ -55,7 +58,7 @@ Parallel machines share a fixed **3×3×4** hollow casing box (GregTech-style bl
 | Circuit Assembly Line | 3×3×5 | Supreme circuits, superconductors, trans-dim circuits |
 | Oil Drilling Rig | 5×7×5 rig | Pumps crude oil from bedrock (10 mB/t) |
 | **Large Combustion Generator** | 3×3×4 engine | Burns diesel (20 mB/t) into **500,000 RF/t** |
-| **Void Ore Miner** | 7×9×7 rig | Mines 10 random rarity-weighted ores per tick from nothing (1M RF/t) |
+| **Void Ore Miner** | 7×9×7 rig | Mines 10 random rarity-weighted RAW ores per second from nothing (1M RF/t; speed upgrades roll faster) |
 | **Large Hadron Collider** | 33×3×33 ring | Collides hydrogen directly into antimatter (alt to the SPS); ~100M RF/t |
 | **Fusion Reactor** | 15×3×15 ring | D-T fusion → helium plasma → molten stellar matter |
 | **Annihilation Generator** | 7×7×7 sphere | Hydrogen + antimatter + liquid helium → **800,000,000 RF/t** |
@@ -92,7 +95,7 @@ Building a 16×16×16 cube by hand is not fun. Craft a **Construction Terminal**
 Requires **JDK 17**. The project uses ForgeGradle 6.
 
 ```bash
-./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.0.3.jar
+./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.0.4.jar
 ./gradlew runClient      # launch a dev client
 ```
 

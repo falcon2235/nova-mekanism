@@ -3,6 +3,34 @@
 All notable changes to Nova Mekanism are documented here. This project targets
 Minecraft 1.20.1 (Forge) and follows loose semantic versioning.
 
+## [1.0.4] - 2026-07-12
+
+### Added
+- **Quantum conduits** — a transmitter tier above Mekanism's ultimate: quantum
+  universal cable, mechanical pipe, pressurized tube and logistical pipe.
+  Anything pushed into a conduit network is routed instantly to its consumers;
+  right-click a face with an empty hand to toggle extraction mode (pulls from
+  tanks/chests/machine outputs at up to ~2.1B RF/t, 1,024,000 mB/t or a stack
+  of items per face per tick). Crafted from 8 ultimate transmitters + a
+  superconductor.
+- **Full config** (`config/mekanism_more_multiblock-common.toml`) — every
+  machine rate is tunable: void miner (energy/interval/yield), oil rig,
+  combustion generator, annihilation generator, hadron collider and quantum
+  conduit rates, plus global recipe energy/time multipliers for expert packs.
+  Config reloads rebuild the recipe set live.
+
+### Changed (semi-expert balance pass)
+- **Void Ore Miner** now mines RAW ores (raw iron/tin/titanium, gems for
+  non-metals) instead of ore blocks, and rolls once per second instead of every
+  tick. Mekanism speed upgrades now shorten the roll interval.
+- **Large Hadron Collider** antimatter output halved: 500 mB per operation
+  (5 mB/t), keeping the annihilation loop strong without trivializing the SPS.
+- Supreme control circuit energy cost raised to 4,000 RF/t and the
+  superconductor to 10,000 RF/t.
+- **Hardened Mekanism recipes**: the Gas-Burning Generator now requires
+  titanium + elite circuits, and the Digital Miner requires special steel +
+  elite circuits (functional parts unchanged).
+
 ## [1.0.3] - 2026-07-10
 
 ### Added
@@ -66,6 +94,7 @@ Minecraft 1.20.1 (Forge) and follows loose semantic versioning.
   materials, a craftable Creative Energy Cube, and a construction terminal that
   auto-builds any structure.
 
+[1.0.4]: https://github.com/falcon2235/nova-mekanism/releases/tag/v1.0.4
 [1.0.3]: https://github.com/falcon2235/nova-mekanism/releases/tag/v1.0.3
 [1.0.2]: https://github.com/falcon2235/nova-mekanism/releases/tag/v1.0.2
 [1.0.1]: https://github.com/falcon2235/nova-mekanism/releases/tag/v1.0.1

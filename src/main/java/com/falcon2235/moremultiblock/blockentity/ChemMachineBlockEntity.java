@@ -385,50 +385,61 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
     }
 
     /**
-     * The void ore miner's mining loop: every tick it burns a flat energy cost and rolls
-     * ONE rarity-weighted ore type, producing 10 of it (see {@link com.falcon2235.moremultiblock.machine.VoidOreTable}).
-     * Stalls (without burning energy) when the output buffer cannot take the rolled stack.
-     * Energy upgrades reduce the per-tick cost like any other machine.
+     * The void ore miner's mining loop: works towards one roll per second (base), then
+     * rolls ONE rarity-weighted raw-ore type and produces 10 of it (see
+     * {@link com.falcon2235.moremultiblock.machine.VoidOreTable}). Mekanism speed
+     * upgrades shorten the roll interval (with the usual energy-cost increase); the
+     * miner idles (no energy drain) while the output buffer has no free slot.
      */
     private void voidMinerTick() {
-        ticksRequired = 1;
+        int interval = Math.max(1, (int) Math.round(
+                com.falcon2235.moremultiblock.machine.VoidOreTable.rollIntervalTicks() * upgradeTimeFactor));
+        ticksRequired = interval;
         long cost = Math.max(1L, (long) Math.ceil(
-                com.falcon2235.moremultiblock.machine.VoidOreTable.ENERGY_PER_TICK * upgradeEnergyFactor));
-        boolean processed = false;
-        if (energy >= cost && level != null) {
-            ItemStack mined = com.falcon2235.moremultiblock.machine.VoidOreTable.roll(level.random);
-            if (!mined.isEmpty() && fitsItemStack(mined)) {
-                energy -= cost;
-                insertItemOutput(mined);
-                processed = true;
-                setChanged();
+                com.falcon2235.moremultiblock.machine.VoidOreTable.energyPerTick() * upgradeEnergyFactor));
+        boolean outputRoom = false;
+        for (int i = 0; i < OUTPUT_SLOTS; i++) {
+            if (outputs.getStackInSlot(i).isEmpty()) {
+                outputRoom = true; // an empty slot always fits a full roll
+                break;
             }
         }
-        progress = processed ? 1 : 0;
+        boolean processed = false;
+        if (energy >= cost && outputRoom && level != null) {
+            energy -= cost;
+            progress++;
+            processed = true;
+            if (progress >= interval) {
+                ItemStack mined = com.falcon2235.moremultiblock.machine.VoidOreTable.roll(level.random);
+                if (!mined.isEmpty() && fitsItemStack(mined)) {
+                    insertItemOutput(mined);
+                }
+                progress = 0;
+            }
+            setChanged();
+        }
         applyCoilGlow(processed, false);
         updateDisplay();
     }
-
-    /** Combustion generator output: 1,250,000 J/t = 500,000 RF/t while burning. */
-    public static final long COMBUSTION_J_PER_TICK = 1_250_000L;
-    /** Diesel burned per tick (mB). */
-    public static final int COMBUSTION_DIESEL_MB_PER_TICK = 20;
 
     /**
      * The large combustion generator's loop: burns diesel from the fluid input tank
      * into the energy buffer (GT Large Combustion Engine style), then pushes the
      * buffered energy out through the structure's energy ports every tick.
+     * Output and fuel rate come from the config (combustion_generator section).
      */
     private void combustionTick() {
         ticksRequired = 1;
         boolean processed = false;
-        FluidStack diesel = ChemRecipes.diesel(COMBUSTION_DIESEL_MB_PER_TICK);
+        int burn = com.falcon2235.moremultiblock.MMMConfig.combustionDieselMbPerTick();
+        long generated = com.falcon2235.moremultiblock.MMMConfig.combustionJPerTick();
+        FluidStack diesel = ChemRecipes.diesel(burn);
         if (!diesel.isEmpty()
-                && fluidIn.getFluidAmount() >= COMBUSTION_DIESEL_MB_PER_TICK
+                && fluidIn.getFluidAmount() >= burn
                 && fluidIn.getFluid().isFluidEqual(diesel)
-                && energy + COMBUSTION_J_PER_TICK <= CAPACITY) {
-            fluidIn.drain(COMBUSTION_DIESEL_MB_PER_TICK, IFluidHandler.FluidAction.EXECUTE);
-            energy += COMBUSTION_J_PER_TICK;
+                && energy + generated <= CAPACITY) {
+            fluidIn.drain(burn, IFluidHandler.FluidAction.EXECUTE);
+            energy += generated;
             processed = true;
             setChanged();
         }
@@ -474,37 +485,35 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
         }
     }
 
-    /** Annihilation generator output: 2,000,000,000 J/t = 800,000,000 RF/t while running. */
-    public static final long ANNIHILATION_J_PER_TICK = 2_000_000_000L;
-    /** Hydrogen annihilated per tick (mB). */
-    public static final int ANNIHILATION_HYDROGEN_MB_PER_TICK = 50;
-    /** Antimatter annihilated per tick (mB). */
-    public static final int ANNIHILATION_ANTIMATTER_MB_PER_TICK = 1;
-    /** Liquid-helium coolant consumed per tick (mB). */
-    public static final int ANNIHILATION_HELIUM_MB_PER_TICK = 10;
-
     /**
      * The annihilation generator's loop: collides hydrogen against antimatter under a
      * liquid-helium coolant bath, converting the annihilated mass straight into the
      * energy buffer, then pushes the buffered energy out through the energy ports.
+     * All rates come from the config (annihilation_generator section); an input
+     * configured to 0 mB/t is simply not required.
      */
     private void annihilationTick() {
         ticksRequired = 1;
         boolean processed = false;
-        GasStack hydrogen = new GasStack(mekanism.common.registries.MekanismGases.HYDROGEN.get(),
-                ANNIHILATION_HYDROGEN_MB_PER_TICK);
-        GasStack antimatter = new GasStack(mekanism.common.registries.MekanismGases.ANTIMATTER.get(),
-                ANNIHILATION_ANTIMATTER_MB_PER_TICK);
-        FluidStack helium = ChemRecipes.liquidHelium(ANNIHILATION_HELIUM_MB_PER_TICK);
-        if (hasGasInput(hydrogen) && hasGasInput(antimatter)
-                && !helium.isEmpty()
-                && fluidIn.getFluidAmount() >= ANNIHILATION_HELIUM_MB_PER_TICK
-                && fluidIn.getFluid().isFluidEqual(helium)
-                && energy + ANNIHILATION_J_PER_TICK <= CAPACITY) {
+        int hydrogenMb = com.falcon2235.moremultiblock.MMMConfig.annihilationHydrogenMbPerTick();
+        int antimatterMb = com.falcon2235.moremultiblock.MMMConfig.annihilationAntimatterMbPerTick();
+        int heliumMb = com.falcon2235.moremultiblock.MMMConfig.annihilationHeliumMbPerTick();
+        long generated = com.falcon2235.moremultiblock.MMMConfig.annihilationJPerTick();
+        GasStack hydrogen = hydrogenMb <= 0 ? GasStack.EMPTY
+                : new GasStack(mekanism.common.registries.MekanismGases.HYDROGEN.get(), hydrogenMb);
+        GasStack antimatter = antimatterMb <= 0 ? GasStack.EMPTY
+                : new GasStack(mekanism.common.registries.MekanismGases.ANTIMATTER.get(), antimatterMb);
+        FluidStack helium = heliumMb <= 0 ? FluidStack.EMPTY : ChemRecipes.liquidHelium(heliumMb);
+        boolean heliumOk = helium.isEmpty()
+                || (fluidIn.getFluidAmount() >= heliumMb && fluidIn.getFluid().isFluidEqual(helium));
+        if (hasGasInput(hydrogen) && hasGasInput(antimatter) && heliumOk
+                && energy + generated <= CAPACITY) {
             consumeGasInput(hydrogen);
             consumeGasInput(antimatter);
-            fluidIn.drain(ANNIHILATION_HELIUM_MB_PER_TICK, IFluidHandler.FluidAction.EXECUTE);
-            energy += ANNIHILATION_J_PER_TICK;
+            if (!helium.isEmpty()) {
+                fluidIn.drain(heliumMb, IFluidHandler.FluidAction.EXECUTE);
+            }
+            energy += generated;
             processed = true;
             setChanged();
         }

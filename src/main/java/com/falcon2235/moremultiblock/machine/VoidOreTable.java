@@ -13,19 +13,30 @@ import net.minecraft.world.item.Items;
 import net.minecraftforge.registries.ForgeRegistries;
 
 /**
- * The void ore miner's loot table: every mining tick picks ONE ore type at random,
+ * The void ore miner's loot table: every mining roll picks ONE raw-ore type at random,
  * weighted by rarity (commons like coal/iron dominate; naquadah is the jackpot), and
- * produces {@link #ORES_PER_TICK} of it. Built lazily after item registration and
- * cached; Mekanism ores are resolved by id at build time.
+ * produces {@link #oresPerRoll()} of it. Yields RAW materials (raw iron, raw tin, raw
+ * titanium, gems for the non-metals) rather than ore blocks. Built lazily after item
+ * registration and cached; Mekanism raw items are resolved by id at build time.
  */
 public final class VoidOreTable {
 
-    /** How many ore blocks one mining tick produces. */
-    public static final int ORES_PER_TICK = 10;
-    /** Energy per mining tick: 1,000,000 RF/t = 2,500,000 J/t. */
-    public static final long ENERGY_PER_TICK = 2_500_000L;
+    /** How many raw ores one mining roll produces (config-driven). */
+    public static int oresPerRoll() {
+        return com.falcon2235.moremultiblock.MMMConfig.voidMinerOresPerRoll();
+    }
 
-    /** One rollable ore: the ore block item and its rarity weight. */
+    /** Base ticks between rolls (config-driven; Mekanism speed upgrades shorten it). */
+    public static int rollIntervalTicks() {
+        return com.falcon2235.moremultiblock.MMMConfig.voidMinerRollIntervalTicks();
+    }
+
+    /** Energy per working tick in Joules (config-driven; configured as RF/t). */
+    public static long energyPerTick() {
+        return com.falcon2235.moremultiblock.MMMConfig.voidMinerJPerTick();
+    }
+
+    /** One rollable raw ore: the raw item and its rarity weight. */
     public record Entry(ItemStack stack, int weight) {
     }
 
@@ -39,31 +50,31 @@ public final class VoidOreTable {
     public static synchronized List<Entry> entries() {
         if (entries == null) {
             List<Entry> list = new ArrayList<>();
-            // --- vanilla ---
-            add(list, Items.COAL_ORE, 140);
-            add(list, Items.IRON_ORE, 130);
-            add(list, Items.COPPER_ORE, 130);
-            add(list, Items.REDSTONE_ORE, 90);
-            add(list, Items.GOLD_ORE, 60);
-            add(list, Items.LAPIS_ORE, 55);
-            add(list, Items.DIAMOND_ORE, 20);
-            add(list, Items.EMERALD_ORE, 10);
-            // --- mekanism ---
-            addById(list, "mekanism", "tin_ore", 90);
-            addById(list, "mekanism", "lead_ore", 85);
-            addById(list, "mekanism", "osmium_ore", 80);
-            addById(list, "mekanism", "uranium_ore", 35);
-            addById(list, "mekanism", "fluorite_ore", 35);
+            // --- vanilla (raw metals; the non-metals drop their gem/dust directly) ---
+            add(list, Items.COAL, 140);
+            add(list, Items.RAW_IRON, 130);
+            add(list, Items.RAW_COPPER, 130);
+            add(list, Items.REDSTONE, 90);
+            add(list, Items.RAW_GOLD, 60);
+            add(list, Items.LAPIS_LAZULI, 55);
+            add(list, Items.DIAMOND, 20);
+            add(list, Items.EMERALD, 10);
+            // --- mekanism raw ores ---
+            addById(list, "mekanism", "raw_tin", 90);
+            addById(list, "mekanism", "raw_lead", 85);
+            addById(list, "mekanism", "raw_osmium", 80);
+            addById(list, "mekanism", "raw_uranium", 35);
+            addById(list, "mekanism", "fluorite_gem", 35);
             // --- ours ---
-            add(list, MMMRegistry.NICKEL_ORE.get().asItem(), 70);
-            add(list, MMMRegistry.MAGNESIUM_ORE.get().asItem(), 65);
-            add(list, MMMRegistry.BAUXITE_ORE.get().asItem(), 60);
-            add(list, MMMRegistry.TITANIUM_ORE.get().asItem(), 50);
-            add(list, MMMRegistry.CHROMIUM_ORE.get().asItem(), 45);
-            add(list, MMMRegistry.SALTPETER_ORE.get().asItem(), 45);
-            add(list, MMMRegistry.ANTIMONY_ORE.get().asItem(), 40);
-            add(list, MMMRegistry.COOPERITE_ORE.get().asItem(), 12);
-            add(list, MMMRegistry.NAQUADAH_ORE.get().asItem(), 8);
+            add(list, MMMRegistry.RAW_NICKEL.get(), 70);
+            add(list, MMMRegistry.RAW_MAGNESIUM.get(), 65);
+            add(list, MMMRegistry.RAW_BAUXITE.get(), 60);
+            add(list, MMMRegistry.RAW_TITANIUM.get(), 50);
+            add(list, MMMRegistry.RAW_CHROMIUM.get(), 45);
+            add(list, MMMRegistry.SALTPETER.get(), 45);
+            add(list, MMMRegistry.RAW_ANTIMONY.get(), 40);
+            add(list, MMMRegistry.RAW_COOPERITE.get(), 12);
+            add(list, MMMRegistry.RAW_NAQUADAH.get(), 8);
             entries = List.copyOf(list);
             totalWeight = entries.stream().mapToInt(Entry::weight).sum();
         }
@@ -76,7 +87,7 @@ public final class VoidOreTable {
         return totalWeight;
     }
 
-    /** Rolls one weighted ore type and returns a fresh stack of {@link #ORES_PER_TICK}. */
+    /** Rolls one weighted raw-ore type and returns a fresh stack of {@link #oresPerRoll()}. */
     public static ItemStack roll(RandomSource random) {
         List<Entry> table = entries();
         if (table.isEmpty()) {
@@ -86,10 +97,10 @@ public final class VoidOreTable {
         for (Entry entry : table) {
             pick -= entry.weight();
             if (pick < 0) {
-                return entry.stack().copyWithCount(ORES_PER_TICK);
+                return entry.stack().copyWithCount(oresPerRoll());
             }
         }
-        return table.get(table.size() - 1).stack().copyWithCount(ORES_PER_TICK);
+        return table.get(table.size() - 1).stack().copyWithCount(oresPerRoll());
     }
 
     private static void add(List<Entry> list, Item item, int weight) {

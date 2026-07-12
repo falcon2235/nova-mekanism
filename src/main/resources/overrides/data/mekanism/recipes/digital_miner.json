@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": {"tag": "mekanism:alloys/atomic"},
+    "E": {"item": "mekanism:elite_control_circuit"},
+    "P": {"item": "mekanism_more_multiblock:special_steel_ingot"},
+    "R": {"item": "mekanism:robit"},
+    "T": {"item": "mekanism:teleportation_core"},
+    "X": {"item": "mekanism:steel_casing"}
+  },
+  "pattern": [
+    "AEA",
+    "PRP",
+    "TXT"
+  ],
+  "result": {
+    "item": "mekanism:digital_miner"
+  }
+}

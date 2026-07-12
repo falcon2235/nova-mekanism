@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {"type": "forge:mod_loaded", "modid": "mekanismgenerators"}
+  ],
+  "key": {
+    "T": {"item": "mekanism_more_multiblock:titanium_ingot"},
+    "E": {"item": "mekanism:elite_control_circuit"},
+    "C": {"item": "mekanism:electrolytic_core"},
+    "X": {"item": "mekanism:steel_casing"}
+  },
+  "pattern": [
+    "TET",
+    "XCX",
+    "TET"
+  ],
+  "result": {
+    "item": "mekanismgenerators:gas_burning_generator"
+  }
+}

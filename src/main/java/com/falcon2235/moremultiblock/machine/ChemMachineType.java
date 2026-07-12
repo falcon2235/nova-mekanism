@@ -83,8 +83,8 @@ public enum ChemMachineType {
     /**
      * Void ore miner: a GTNH-style drill rig — a solid 7x7 casing base plate with four
      * corner legs, a glowing void-drill mast rising through the centre and a 3x3 crown
-     * platform on top. Mines ore from nothing: every tick it consumes 1,000,000 RF
-     * (2.5M J) and produces 10 of one randomly chosen ore, weighted by rarity.
+     * platform on top. Mines RAW ore from nothing: at 1,000,000 RF/t it rolls once per
+     * second (faster with speed upgrades), producing 10 of one rarity-weighted raw ore.
      */
     VOID_MINER("void_ore_miner", 7, 9, 7, false),
     /**

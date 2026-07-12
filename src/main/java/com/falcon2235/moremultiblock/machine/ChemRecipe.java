@@ -31,8 +31,9 @@ public class ChemRecipe {
     public final ItemStack itemOutput4;
     public final GasStack gasOutput;
     public final FluidStack fluidOutput;
-    public final int ticks;
-    public final long energyPerTick;
+    /** Mutable so the global config multipliers can adjust them after construction. */
+    public int ticks;
+    public long energyPerTick;
     /** Special upgrade module the machine must have installed to run this recipe; EMPTY = none. */
     public ItemStack requiredUpgrade = ItemStack.EMPTY;
     /** Optional note drawn under the recipe in JEI (e.g. the void miner's roll chance); null = none. */

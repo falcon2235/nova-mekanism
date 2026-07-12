@@ -155,6 +155,25 @@ public final class MMMRegistry {
     // annihilation generator: glowing antimatter-containment sphere casing
     public static final RegistryObject<Block> ANNIHILATION_CASING =
             registerBlock("annihilation_casing", () -> new Block(props().lightLevel(state -> 9)));
+
+    // quantum conduits: the transmitter tier above Mekanism's ultimate cables/pipes
+    public static final RegistryObject<com.falcon2235.moremultiblock.block.ConduitBlock> QUANTUM_CABLE =
+            registerBlock("quantum_cable", () -> new com.falcon2235.moremultiblock.block.ConduitBlock(
+                    conduitProps(), com.falcon2235.moremultiblock.block.ConduitBlock.Type.ENERGY));
+    public static final RegistryObject<com.falcon2235.moremultiblock.block.ConduitBlock> QUANTUM_FLUID_PIPE =
+            registerBlock("quantum_fluid_pipe", () -> new com.falcon2235.moremultiblock.block.ConduitBlock(
+                    conduitProps(), com.falcon2235.moremultiblock.block.ConduitBlock.Type.FLUID));
+    public static final RegistryObject<com.falcon2235.moremultiblock.block.ConduitBlock> QUANTUM_GAS_TUBE =
+            registerBlock("quantum_gas_tube", () -> new com.falcon2235.moremultiblock.block.ConduitBlock(
+                    conduitProps(), com.falcon2235.moremultiblock.block.ConduitBlock.Type.GAS));
+    public static final RegistryObject<com.falcon2235.moremultiblock.block.ConduitBlock> QUANTUM_ITEM_PIPE =
+            registerBlock("quantum_item_pipe", () -> new com.falcon2235.moremultiblock.block.ConduitBlock(
+                    conduitProps(), com.falcon2235.moremultiblock.block.ConduitBlock.Type.ITEM));
+
+    public static final RegistryObject<BlockEntityType<com.falcon2235.moremultiblock.blockentity.ConduitBlockEntity>> CONDUIT_BE =
+            BLOCK_ENTITIES.register("conduit", () -> BlockEntityType.Builder.of(
+                    com.falcon2235.moremultiblock.blockentity.ConduitBlockEntity::new,
+                    QUANTUM_CABLE.get(), QUANTUM_FLUID_PIPE.get(), QUANTUM_GAS_TUBE.get(), QUANTUM_ITEM_PIPE.get()).build(null));
     public static final RegistryObject<Block> COPPER_COIL =
             registerBlock("copper_coil", () -> new CoilBlock(props()));
     public static final RegistryObject<Block> CUPRONICKEL_COIL =
@@ -368,6 +387,14 @@ public final class MMMRegistry {
                 .strength(3.5F, 16.0F)
                 .requiresCorrectToolForDrops()
                 .sound(SoundType.METAL);
+    }
+
+    private static BlockBehaviour.Properties conduitProps() {
+        return BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL)
+                .strength(1.5F, 8.0F)
+                .sound(SoundType.METAL)
+                .noOcclusion();
     }
 
     private static <B extends Block> RegistryObject<B> registerBlock(String name, Supplier<B> supplier) {

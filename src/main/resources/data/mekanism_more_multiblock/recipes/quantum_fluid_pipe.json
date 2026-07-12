@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["UUU", "USU", "UUU"], "key": {"U": {"item": "mekanism:ultimate_mechanical_pipe"}, "S": {"item": "mekanism_more_multiblock:superconductor"}}, "result": {"item": "mekanism_more_multiblock:quantum_fluid_pipe", "count": 8}}

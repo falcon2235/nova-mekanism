@@ -32,7 +32,30 @@ public final class ChemRecipes {
         return CACHE.computeIfAbsent(type, ChemRecipes::build);
     }
 
+    /** Drops all cached recipes so the next access rebuilds them with fresh config values. */
+    public static synchronized void invalidateCache() {
+        CACHE.clear();
+    }
+
     private static List<ChemRecipe> build(ChemMachineType type) {
+        List<ChemRecipe> list = buildRaw(type);
+        // Global balance multipliers. The generator/miner machines are excluded: their
+        // JEI entries describe custom per-tick logic tuned in their own config sections.
+        boolean customLogicDisplay = type == ChemMachineType.COMBUSTION_GENERATOR
+                || type == ChemMachineType.ANNIHILATION_GENERATOR
+                || type == ChemMachineType.VOID_MINER;
+        double energyMult = com.falcon2235.moremultiblock.MMMConfig.recipeEnergyMultiplier();
+        double timeMult = com.falcon2235.moremultiblock.MMMConfig.recipeTimeMultiplier();
+        if (!customLogicDisplay && (energyMult != 1.0D || timeMult != 1.0D)) {
+            for (ChemRecipe recipe : list) {
+                recipe.energyPerTick = Math.max(1L, (long) Math.ceil(recipe.energyPerTick * energyMult));
+                recipe.ticks = Math.max(1, (int) Math.round(recipe.ticks * timeMult));
+            }
+        }
+        return list;
+    }
+
+    private static List<ChemRecipe> buildRaw(ChemMachineType type) {
         List<ChemRecipe> list = new ArrayList<>();
         switch (type) {
             case BLAST_FURNACE -> {
@@ -470,12 +493,19 @@ public final class ChemRecipes {
             }
             case HADRON_COLLIDER -> {
                 // Alternative antimatter route: collide hydrogen (protons) directly into
-                // antimatter — no polonium/SPS needed. ~100,000,000 RF/t (250,000,000 J/t).
+                // antimatter — no polonium/SPS needed. All rates are config-driven
+                // (default 500 mB per 5s = 5 mB/t at 100M RF/t): keeps the
+                // annihilation-generator loop strong without trivializing the SPS route.
                 list.add(new ChemRecipe(
                         ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
-                        new GasStack(MekanismGases.HYDROGEN, 8_000L), GasStack.EMPTY, FluidStack.EMPTY,
-                        ItemStack.EMPTY, new GasStack(MekanismGases.ANTIMATTER, 1_000L), FluidStack.EMPTY,
-                        100, 250_000_000L, 0));
+                        new GasStack(MekanismGases.HYDROGEN,
+                                com.falcon2235.moremultiblock.MMMConfig.colliderHydrogenMbPerOp()),
+                        GasStack.EMPTY, FluidStack.EMPTY,
+                        ItemStack.EMPTY,
+                        new GasStack(MekanismGases.ANTIMATTER,
+                                com.falcon2235.moremultiblock.MMMConfig.colliderAntimatterMbPerOp()),
+                        FluidStack.EMPTY,
+                        100, com.falcon2235.moremultiblock.MMMConfig.colliderJPerTick(), 0));
                 // ultimate craft: assemble a Mekanism creative energy cube from large amounts of
                 // trans-dimensional circuits/alloy/metal. 500,000,000 RF/t = 1,250,000,000 J/t.
                 ItemStack creativeCube = chargedCreativeCube();
@@ -490,35 +520,44 @@ public final class ChemRecipes {
                 }
             }
             case OIL_RIG -> {
-                // Pumps crude oil up from bedrock: 200 mB per second (10 mB/t) at
-                // 10,000 J/t (4,000 RF/t). A normal recipe — no inputs, runs forever.
+                // Pumps crude oil up from bedrock (config: mB per second, RF/t).
+                // A normal recipe — no inputs, runs forever.
                 list.add(new ChemRecipe(
                         ItemStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
-                        ItemStack.EMPTY, GasStack.EMPTY, crudeOil(200),
-                        20, 10_000L));
+                        ItemStack.EMPTY, GasStack.EMPTY,
+                        crudeOil(com.falcon2235.moremultiblock.MMMConfig.oilRigCrudeMbPerSecond()),
+                        20, com.falcon2235.moremultiblock.MMMConfig.oilRigJPerTick()));
             }
             case COMBUSTION_GENERATOR -> {
                 // JEI display only — the generator's real logic burns diesel every tick in
                 // ChemMachineBlockEntity.combustionTick() and PRODUCES the shown energy.
                 list.add(new ChemRecipe(
-                        ItemStack.EMPTY, GasStack.EMPTY, diesel(400),
+                        ItemStack.EMPTY, GasStack.EMPTY,
+                        diesel(com.falcon2235.moremultiblock.MMMConfig.combustionDieselMbPerTick() * 20),
                         ItemStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
-                        20, 1_250_000L)
+                        20, com.falcon2235.moremultiblock.MMMConfig.combustionJPerTick())
                         .withNote(net.minecraft.network.chat.Component.translatable(
-                                "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".generates")));
+                                "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".generates",
+                                String.format(java.util.Locale.ROOT, "%,d",
+                                        com.falcon2235.moremultiblock.MMMConfig.combustionRfPerTick()))));
             }
             case ANNIHILATION_GENERATOR -> {
                 // JEI display only — the generator's real logic annihilates every tick in
                 // ChemMachineBlockEntity.annihilationTick() and PRODUCES the shown energy.
-                // Per second: 1,000 mB hydrogen + 20 mB antimatter + 200 mB liquid helium.
+                // Slot amounts show one second's worth of each input.
                 list.add(new ChemRecipe(
                         ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
-                        new GasStack(MekanismGases.HYDROGEN, 1_000L),
-                        new GasStack(MekanismGases.ANTIMATTER, 20L), liquidHelium(200),
+                        new GasStack(MekanismGases.HYDROGEN,
+                                com.falcon2235.moremultiblock.MMMConfig.annihilationHydrogenMbPerTick() * 20L),
+                        new GasStack(MekanismGases.ANTIMATTER,
+                                com.falcon2235.moremultiblock.MMMConfig.annihilationAntimatterMbPerTick() * 20L),
+                        liquidHelium(com.falcon2235.moremultiblock.MMMConfig.annihilationHeliumMbPerTick() * 20),
                         ItemStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
-                        20, 2_000_000_000L, 0)
+                        20, com.falcon2235.moremultiblock.MMMConfig.annihilationJPerTick(), 0)
                         .withNote(net.minecraft.network.chat.Component.translatable(
-                                "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".generates_annihilation")));
+                                "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".generates_annihilation",
+                                String.format(java.util.Locale.ROOT, "%,d",
+                                        com.falcon2235.moremultiblock.MMMConfig.annihilationRfPerTick()))));
             }
             case VOID_MINER -> {
                 // JEI display only — the miner's real logic rolls the weighted table every
@@ -529,10 +568,11 @@ public final class ChemRecipes {
                     String pct = String.format(java.util.Locale.ROOT, "%.1f%%", 100.0 * entry.weight() / total);
                     list.add(new ChemRecipe(
                             ItemStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
-                            entry.stack().copyWithCount(VoidOreTable.ORES_PER_TICK), GasStack.EMPTY, FluidStack.EMPTY,
-                            1, VoidOreTable.ENERGY_PER_TICK, 0)
+                            entry.stack().copyWithCount(VoidOreTable.oresPerRoll()), GasStack.EMPTY, FluidStack.EMPTY,
+                            VoidOreTable.rollIntervalTicks(), VoidOreTable.energyPerTick(), 0)
                             .withNote(net.minecraft.network.chat.Component.translatable(
-                                    "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".void_chance", pct)));
+                                    "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".void_chance",
+                                    pct, VoidOreTable.oresPerRoll())));
                 }
             }
             case STAR_GENERATOR -> {
@@ -552,7 +592,7 @@ public final class ChemRecipes {
                         item(net.minecraft.world.item.Items.REDSTONE, 4),
                         GasStack.EMPTY, GasStack.EMPTY, moltenSuperAlloy(144),
                         item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
-                        400, 1_500L, 0));
+                        400, 10_000L, 0));
                 // superconductor (GregTech-style): exotic-metal windings assembled with molten
                 // super-alloy solder, used to build the fusion coils and fusion casing.
                 list.add(new ChemRecipe(
@@ -561,7 +601,7 @@ public final class ChemRecipes {
                         item(MMMRegistry.NAQUADAH_ENRICHED_INGOT.get(), 1),
                         GasStack.EMPTY, GasStack.EMPTY, moltenSuperAlloy(144),
                         item(MMMRegistry.SUPERCONDUCTOR.get(), 2), GasStack.EMPTY, FluidStack.EMPTY,
-                        400, 2_000L, 0));
+                        400, 25_000L, 0));
                 // trans-dimensional circuit: alloy + supreme circuit + metal, soldered with
                 // molten stellar matter. 400,000,000 RF/t = 1,000,000,000 J/t.
                 list.add(new ChemRecipe(

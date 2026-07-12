@@ -33,6 +33,14 @@ public class MekanismMoreMultiblock {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         MMMRegistry.register(modEventBus);
         ChemRegistry.register(modEventBus);
+        net.minecraftforge.fml.ModLoadingContext.get().registerConfig(
+                net.minecraftforge.fml.config.ModConfig.Type.COMMON, MMMConfig.SPEC);
+        // Recipes bake config values in, so drop the cache whenever the config (re)loads.
+        modEventBus.addListener((net.minecraftforge.fml.event.config.ModConfigEvent event) -> {
+            if (event.getConfig().getSpec() == MMMConfig.SPEC) {
+                com.falcon2235.moremultiblock.machine.ChemRecipes.invalidateCache();
+            }
+        });
         modEventBus.addListener(MekanismMoreMultiblock::addPackFinders);
         MinecraftForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> ParallelClaimRegistry.clear());
         MinecraftForge.EVENT_BUS.addListener(MekanismMoreMultiblock::onServerStarted);
