@@ -74,6 +74,20 @@ public class MekanismMoreMultiblock {
 
     /** Sanity log so override problems are visible in the log instead of silently reverting recipes. */
     private static void onServerStarted(ServerStartedEvent event) {
+        // Integration debug: which optional mods and key items resolved. If a mod shows
+        // loaded=true but an item false, the item id is wrong for that mod version.
+        for (String[] probe : new String[][]{
+                {"ae2", "charged_certus_quartz_crystal"},
+                {"botania", "terrasteel_ingot"},
+                {"megacells", "cell_component_4m"},
+                {"draconicevolution", "awakened_core"},
+                {"draconicevolution", "chaos_shard"},
+                {"draconicevolution", "wyvern_core"}}) {
+            boolean loaded = ModList.get().isLoaded(probe[0]);
+            boolean item = loaded && net.minecraftforge.registries.ForgeRegistries.ITEMS
+                    .containsKey(new ResourceLocation(probe[0], probe[1]));
+            LOGGER.info("Integration check — {}: loaded={}, {} resolved={}", probe[0], loaded, probe[1], item);
+        }
         var recipes = event.getServer().getRecipeManager();
         boolean steelGated = recipes.byKey(new ResourceLocation("mekanism", "processing/steel/enriched_iron_to_dust")).isEmpty();
         LOGGER.info("Override pack check — mekanism enriched-iron-to-steel disabled: {}", steelGated);

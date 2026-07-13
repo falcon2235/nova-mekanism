@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "conditions": [{"type": "forge:mod_loaded", "modid": "botania"}], "pattern": ["SIS", "IPI", "SIS"], "key": {"S": {"item": "botania:livingrock"}, "I": {"item": "botania:manasteel_ingot"}, "P": {"item": "botania:spark"}}, "result": {"item": "mekanism_more_multiblock:mana_hatch", "count": 2}}

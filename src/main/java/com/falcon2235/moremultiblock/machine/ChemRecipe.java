@@ -38,6 +38,8 @@ public class ChemRecipe {
     public ItemStack requiredUpgrade = ItemStack.EMPTY;
     /** Optional note drawn under the recipe in JEI (e.g. the void miner's roll chance); null = none. */
     public net.minecraft.network.chat.Component note;
+    /** Botania mana this recipe drains from the structure's mana hatches; 0 = none. */
+    public int manaCost;
     /**
      * Minimum heating-coil tier required (blast furnace only; 0 elsewhere).
      * Each coil tier above this halves the processing time.
@@ -123,6 +125,12 @@ public class ChemRecipe {
     /** Fluent: attach a JEI display note (drawn under the recipe panel). */
     public ChemRecipe withNote(net.minecraft.network.chat.Component note) {
         this.note = note;
+        return this;
+    }
+
+    /** Fluent: require Botania mana (drained from the structure's mana hatches). */
+    public ChemRecipe withMana(int mana) {
+        this.manaCost = mana;
         return this;
     }
 

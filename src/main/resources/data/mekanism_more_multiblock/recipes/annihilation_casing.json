@@ -1,1 +1,20 @@
-{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["SFS", "FNF", "SFS"], "key": {"S": {"item": "mekanism_more_multiblock:superconductor"}, "F": {"item": "mekanism_more_multiblock:fusion_casing"}, "N": {"item": "mekanism_more_multiblock:neutronium"}}, "result": {"item": "mekanism_more_multiblock:annihilation_casing", "count": 4}}
+{
+  "type": "draconicevolution:fusion_crafting",
+  "conditions": [{"type": "forge:mod_loaded", "modid": "draconicevolution"}],
+  "catalyst": {"item": "mekanism_more_multiblock:neutronium"},
+  "result": {"item": "mekanism_more_multiblock:annihilation_casing", "count": 4},
+  "total_energy": 64000000,
+  "tier": "DRACONIC",
+  "ingredients": [
+    {"item": "mekanism_more_multiblock:superconductor"},
+    {"item": "mekanism_more_multiblock:superconductor"},
+    {"item": "mekanism_more_multiblock:superconductor"},
+    {"item": "mekanism_more_multiblock:superconductor"},
+    {"item": "mekanism_more_multiblock:fusion_casing"},
+    {"item": "mekanism_more_multiblock:fusion_casing"},
+    {"item": "mekanism_more_multiblock:fusion_casing"},
+    {"item": "mekanism_more_multiblock:fusion_casing"},
+    {"item": "draconicevolution:awakened_draconium_ingot"},
+    {"item": "draconicevolution:awakened_draconium_ingot"}
+  ]
+}

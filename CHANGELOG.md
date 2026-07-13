@@ -3,6 +3,37 @@
 All notable changes to Nova Mekanism are documented here. This project targets
 Minecraft 1.20.1 (Forge) and follows loose semantic versioning.
 
+## [1.1.0] - 2026-07-13
+
+### Added — cross-mod integration (AE2, Botania, MEGA Cells, Draconic Evolution are now required)
+- **Large Inscriber** (3×3×4) — runs AE2's inscriber steps 16 at a time; install
+  a real AE2 press in its module slot to unlock the printing recipes (processor
+  assembly needs none).
+- **Large Charger** (3×3×3) — AE2 charging 16 at a time: certus quartz, and the
+  new **uncharged superconductor** (the assembler now outputs superconductors
+  uncharged; charge them in AE2's charger or here).
+- **Grand Mana Pool / Grand Elven Gate / Grand Terra Plate** — Botania machine
+  functions as 16× multiblocks: mana infusion (manasteel / mana pearl / mana
+  diamond), elven trades (elementium, dragonstone, pixie dust, dreamwood) and
+  terrasteel production (8,000,000 mana per 16-ingot batch).
+- **Mana hatch** — a wall block for the Botania machines; put a Botania spark
+  on top and it joins the spark network (pull from sparked mana pools), or
+  shoot it with mana spreaders. Buffers 10,000,000 mana.
+- **Draconic Evolution fusion crafting** — the Annihilation Containment Casing
+  (DRACONIC tier, awakened draconium) and the Large Hadron Collider controller
+  (WYVERN tier, wyvern cores) are now forged in DE's fusion crafting; the black
+  hole seed needs an awakened core, the stabilizer a chaos shard, and
+  neutronium fusion draconium.
+- **Material integration** — supreme circuits use manasteel, superconductors
+  use elementium, trans-dimensional circuits use MEGA 4M cell components, and
+  the creative cube demands Gaia spirits + a 256M cell component.
+
+### Balance
+- Large Inscriber / Large Charger 4,000 RF/t (was ~800–1,600).
+- Grand Mana Pool / Grand Elven Gate 5,000 RF/t.
+- D-T fusion (helium plasma) now draws 50,000 RF/t (was 8,000) — fusion-tier
+  power for fusion-tier output.
+
 ## [1.0.4] - 2026-07-12
 
 ### Added
@@ -94,6 +125,7 @@ Minecraft 1.20.1 (Forge) and follows loose semantic versioning.
   materials, a craftable Creative Energy Cube, and a construction terminal that
   auto-builds any structure.
 
+[1.1.0]: https://github.com/falcon2235/nova-mekanism/releases/tag/v1.1.0
 [1.0.4]: https://github.com/falcon2235/nova-mekanism/releases/tag/v1.0.4
 [1.0.3]: https://github.com/falcon2235/nova-mekanism/releases/tag/v1.0.3
 [1.0.2]: https://github.com/falcon2235/nova-mekanism/releases/tag/v1.0.2

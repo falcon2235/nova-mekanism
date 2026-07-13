@@ -59,6 +59,10 @@ dependencies {
     compileOnly "mezz.jei:jei-${project.minecraft_version}-common-api:${project.jei_version}"
     compileOnly "mezz.jei:jei-${project.minecraft_version}-forge-api:${project.jei_version}"
     runtimeOnly fg.deobf("mezz.jei:jei-${project.minecraft_version}-forge:${project.jei_version}")
+
+    // Botania: compile-only API surface for the mana hatch (spark/mana receiver caps).
+    // The classes that touch it are only classloaded when Botania is present at runtime.
+    compileOnly fg.deobf(project.dependencies.create("vazkii.botania:Botania:1.20.1-446-FORGE") { transitive = false })
 }
 
 tasks.named('jar', Jar).configure {

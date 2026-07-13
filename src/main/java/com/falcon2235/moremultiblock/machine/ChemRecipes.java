@@ -466,7 +466,7 @@ public final class ChemRecipes {
                             ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
                             new GasStack(deuterium, 1_000L), new GasStack(tritium, 1_000L), FluidStack.EMPTY,
                             ItemStack.EMPTY, new GasStack(ChemRegistry.HELIUM_PLASMA, 1_000L), FluidStack.EMPTY,
-                            200, 20_000L, 0));
+                            200, 125_000L, 0));
                 }
                 // stellar fusion: helium plasma + antimatter -> molten stellar matter.
                 // Endgame: draws 1,000,000,000 J/t = 400,000,000 RF/t.
@@ -475,9 +475,12 @@ public final class ChemRecipes {
                         new GasStack(ChemRegistry.HELIUM_PLASMA, 1_000L), new GasStack(MekanismGases.ANTIMATTER, 10L), FluidStack.EMPTY,
                         ItemStack.EMPTY, GasStack.EMPTY, moltenStellarMatter(100),
                         400, 1_000_000_000L, 0));
-                // neutronium (GT: naquadria fusion): fuse naquadria with helium plasma + antimatter
+                // neutronium (GT: naquadria fusion): fuse naquadria with helium plasma +
+                // antimatter. With Draconic Evolution the fusion needs a draconium seed.
+                ItemStack draconium = loaded("draconicevolution")
+                        ? modItem("draconicevolution", "draconium_ingot", 4) : ItemStack.EMPTY;
                 list.add(new ChemRecipe(
-                        item(MMMRegistry.NAQUADRIA_INGOT.get(), 1), ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        item(MMMRegistry.NAQUADRIA_INGOT.get(), 1), draconium, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
                         new GasStack(ChemRegistry.HELIUM_PLASMA, 1_000L), new GasStack(MekanismGases.ANTIMATTER, 50L), FluidStack.EMPTY,
                         item(MMMRegistry.NEUTRONIUM.get(), 4), ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
                         GasStack.EMPTY, FluidStack.EMPTY,
@@ -486,8 +489,12 @@ public final class ChemRecipes {
             case STABILIZER -> {
                 // stabilize a black hole seed into 10 trans-dimensional metal.
                 // 30 minutes (36000 ticks) at 2,500,000,000 J/t = 1,000,000,000 RF/t.
+                // With Draconic Evolution the containment lattice consumes a chaos shard.
+                ItemStack chaosShard = loaded("draconicevolution")
+                        ? modItem("draconicevolution", "chaos_shard", 1) : ItemStack.EMPTY;
                 list.add(new ChemRecipe(
-                        item(MMMRegistry.BLACK_HOLE_SEED.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
+                        item(MMMRegistry.BLACK_HOLE_SEED.get(), 1), chaosShard,
+                        GasStack.EMPTY, FluidStack.EMPTY,
                         item(MMMRegistry.TRANSDIMENSIONAL_METAL.get(), 10), GasStack.EMPTY, FluidStack.EMPTY,
                         36_000, 2_500_000_000L, 0));
             }
@@ -510,13 +517,135 @@ public final class ChemRecipes {
                 // trans-dimensional circuits/alloy/metal. 500,000,000 RF/t = 1,250,000,000 J/t.
                 ItemStack creativeCube = chargedCreativeCube();
                 if (!creativeCube.isEmpty()) {
+                    // With Botania / MEGA Cells installed, the final craft also demands
+                    // Gaia spirits and a 256M cell component.
+                    ItemStack gaia = loaded("botania") ? modItem("botania", "life_essence", 4) : ItemStack.EMPTY;
+                    ItemStack megaTop = loaded("megacells") ? modItem("megacells", "cell_component_256m", 1) : ItemStack.EMPTY;
                     list.add(new ChemRecipe(
                             item(MMMRegistry.TRANSDIMENSIONAL_CIRCUIT.get(), 8), item(MMMRegistry.TRANSDIMENSIONAL_ALLOY.get(), 16),
-                            item(MMMRegistry.TRANSDIMENSIONAL_METAL.get(), 16), ItemStack.EMPTY, ItemStack.EMPTY,
+                            item(MMMRegistry.TRANSDIMENSIONAL_METAL.get(), 16), gaia, megaTop,
                             GasStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
                             creativeCube, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
                             GasStack.EMPTY, FluidStack.EMPTY,
                             24_000, 1_250_000_000L, 0));
+                }
+            }
+            case LARGE_INSCRIBER -> {
+                // AE2 inscriber, 16x parallel. Printing steps need the matching AE2 press
+                // installed in the module slot; assembly steps need no press.
+                if (loaded("ae2")) {
+                    record Print(String press, ItemStack in, String out) {
+                    }
+                    for (Print p : new Print[]{
+                            new Print("silicon_press", modItem("ae2", "silicon", 16), "printed_silicon"),
+                            new Print("logic_processor_press", item(net.minecraft.world.item.Items.GOLD_INGOT, 16), "printed_logic_processor"),
+                            new Print("calculation_processor_press", modItem("ae2", "certus_quartz_crystal", 16), "printed_calculation_processor"),
+                            new Print("engineering_processor_press", item(net.minecraft.world.item.Items.DIAMOND, 16), "printed_engineering_processor")}) {
+                        ItemStack press = modItem("ae2", p.press(), 1);
+                        ItemStack out = modItem("ae2", p.out(), 16);
+                        if (!press.isEmpty() && !p.in().isEmpty() && !out.isEmpty()) {
+                            list.add(withPressNote(new ChemRecipe(
+                                    p.in(), GasStack.EMPTY, FluidStack.EMPTY,
+                                    out, GasStack.EMPTY, FluidStack.EMPTY,
+                                    80, 10_000L).requireUpgrade(press), press));
+                        }
+                    }
+                    // processor assembly (print + redstone + printed silicon), no press
+                    for (String kind : new String[]{"logic", "calculation", "engineering"}) {
+                        ItemStack print = modItem("ae2", "printed_" + kind + "_processor", 16);
+                        ItemStack silicon = modItem("ae2", "printed_silicon", 16);
+                        ItemStack out = modItem("ae2", kind + "_processor", 16);
+                        if (!print.isEmpty() && !silicon.isEmpty() && !out.isEmpty()) {
+                            list.add(new ChemRecipe(
+                                    print, item(net.minecraft.world.item.Items.REDSTONE, 16), silicon,
+                                    GasStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
+                                    out, GasStack.EMPTY, FluidStack.EMPTY,
+                                    80, 10_000L, 0));
+                        }
+                    }
+                }
+            }
+            case LARGE_CHARGER -> {
+                // AE2 charger, 16x parallel.
+                if (loaded("ae2")) {
+                    ItemStack certus = modItem("ae2", "certus_quartz_crystal", 16);
+                    ItemStack charged = modItem("ae2", "charged_certus_quartz_crystal", 16);
+                    if (!certus.isEmpty() && !charged.isEmpty()) {
+                        list.add(new ChemRecipe(
+                                certus, GasStack.EMPTY, FluidStack.EMPTY,
+                                charged, GasStack.EMPTY, FluidStack.EMPTY,
+                                40, 10_000L));
+                    }
+                }
+                // charge this mod's superconductors (the assembler outputs them uncharged)
+                list.add(new ChemRecipe(
+                        item(MMMRegistry.UNCHARGED_SUPERCONDUCTOR.get(), 16), GasStack.EMPTY, FluidStack.EMPTY,
+                        item(MMMRegistry.SUPERCONDUCTOR.get(), 16), GasStack.EMPTY, FluidStack.EMPTY,
+                        60, 25_000L));
+            }
+            case GRAND_MANA_POOL -> {
+                // Botania mana infusion, 16x parallel. Mana comes from the structure's
+                // mana hatches (spark them to pull from mana pools); energy runs the rig.
+                if (loaded("botania")) {
+                    record Infuse(ItemStack in, String out, int mana) {
+                    }
+                    for (Infuse i : new Infuse[]{
+                            new Infuse(item(net.minecraft.world.item.Items.IRON_INGOT, 16), "manasteel_ingot", 48_000),
+                            new Infuse(item(net.minecraft.world.item.Items.ENDER_PEARL, 16), "mana_pearl", 96_000),
+                            new Infuse(item(net.minecraft.world.item.Items.DIAMOND, 16), "mana_diamond", 160_000)}) {
+                        ItemStack out = modItem("botania", i.out(), 16);
+                        if (!out.isEmpty()) {
+                            list.add(new ChemRecipe(
+                                    i.in(), GasStack.EMPTY, FluidStack.EMPTY,
+                                    out, GasStack.EMPTY, FluidStack.EMPTY,
+                                    100, 12_500L)
+                                    .withMana(i.mana())
+                                    .withNote(manaNote(i.mana())));
+                        }
+                    }
+                }
+            }
+            case GRAND_ELVEN_GATE -> {
+                // Botania elven trade, 16x parallel (vanilla ratios: 2 manasteel -> 1
+                // elementium, 2 mana diamonds -> 1 dragonstone, pearls/wood 1:1).
+                if (loaded("botania")) {
+                    record Trade(String in, int inCount, String out) {
+                    }
+                    for (Trade t : new Trade[]{
+                            new Trade("manasteel_ingot", 32, "elementium_ingot"),
+                            new Trade("mana_diamond", 32, "dragonstone"),
+                            new Trade("mana_pearl", 16, "pixie_dust"),
+                            new Trade("livingwood_log", 16, "dreamwood_log")}) {
+                        ItemStack in = modItem("botania", t.in(), t.inCount());
+                        ItemStack out = modItem("botania", t.out(), 16);
+                        if (!in.isEmpty() && !out.isEmpty()) {
+                            list.add(new ChemRecipe(
+                                    in, GasStack.EMPTY, FluidStack.EMPTY,
+                                    out, GasStack.EMPTY, FluidStack.EMPTY,
+                                    200, 12_500L)
+                                    .withMana(20_000)
+                                    .withNote(manaNote(20_000)));
+                        }
+                    }
+                }
+            }
+            case GRAND_TERRA_PLATE -> {
+                // Botania terrasteel infusion, 16x parallel: 500,000 mana per ingot
+                // (8,000,000 per batch) plus a terra-plate-scale energy cost.
+                if (loaded("botania")) {
+                    ItemStack manasteel = modItem("botania", "manasteel_ingot", 16);
+                    ItemStack pearl = modItem("botania", "mana_pearl", 16);
+                    ItemStack diamond = modItem("botania", "mana_diamond", 16);
+                    ItemStack terrasteel = modItem("botania", "terrasteel_ingot", 16);
+                    if (!manasteel.isEmpty() && !pearl.isEmpty() && !diamond.isEmpty() && !terrasteel.isEmpty()) {
+                        list.add(new ChemRecipe(
+                                manasteel, pearl, diamond,
+                                GasStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
+                                terrasteel, GasStack.EMPTY, FluidStack.EMPTY,
+                                400, 250_000L, 0)
+                                .withMana(8_000_000)
+                                .withNote(manaNote(8_000_000)));
+                    }
                 }
             }
             case OIL_RIG -> {
@@ -578,36 +707,50 @@ public final class ChemRecipes {
             case STAR_GENERATOR -> {
                 // Compress a stellar core + a full charge of hydrogen into a black hole seed.
                 // 10 minutes (12000 ticks) at 250,000,000 J/t = 100,000,000 RF/t.
+                // With Draconic Evolution the collapse also needs an awakened core.
+                ItemStack awakenedCore = loaded("draconicevolution")
+                        ? modItem("draconicevolution", "awakened_core", 1) : ItemStack.EMPTY;
                 list.add(new ChemRecipe(
-                        item(MMMRegistry.STELLAR_CORE.get(), 1), new GasStack(MekanismGases.HYDROGEN, 64_000L), FluidStack.EMPTY,
+                        item(MMMRegistry.STELLAR_CORE.get(), 1), awakenedCore,
+                        new GasStack(MekanismGases.HYDROGEN, 64_000L), FluidStack.EMPTY,
                         item(MMMRegistry.BLACK_HOLE_SEED.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
                         12_000, 250_000_000L, 0));
             }
             case CIRCUIT_ASSEMBLER -> {
-                // supreme control circuit: 5 components + molten super alloy solder
-                // (above Mekanism's ultimate control circuit)
+                // supreme control circuit: 5 components + molten super alloy solder.
+                // With Botania installed the gold is replaced by mana-infused manasteel.
+                ItemStack manasteel = loaded("botania") ? modItem("botania", "manasteel_ingot", 2) : ItemStack.EMPTY;
                 list.add(new ChemRecipe(
                         mekItem("ultimate_control_circuit", 2), item(MMMRegistry.SUPER_ALLOY_INGOT.get(), 1),
-                        mekItem("alloy_atomic", 2), item(net.minecraft.world.item.Items.GOLD_INGOT, 2),
+                        mekItem("alloy_atomic", 2),
+                        manasteel.isEmpty() ? item(net.minecraft.world.item.Items.GOLD_INGOT, 2) : manasteel,
                         item(net.minecraft.world.item.Items.REDSTONE, 4),
                         GasStack.EMPTY, GasStack.EMPTY, moltenSuperAlloy(144),
                         item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
                         400, 10_000L, 0));
                 // superconductor (GregTech-style): exotic-metal windings assembled with molten
-                // super-alloy solder, used to build the fusion coils and fusion casing.
+                // super-alloy solder. With Botania the rhodium becomes elven elementium; with
+                // AE2 the assembler outputs UNCHARGED coils that must be charged (AE2 charger
+                // or the large charger) before use.
+                ItemStack elementium = loaded("botania") ? modItem("botania", "elementium_ingot", 1) : ItemStack.EMPTY;
+                ItemStack scOutput = loaded("ae2") && !item(MMMRegistry.UNCHARGED_SUPERCONDUCTOR.get(), 1).isEmpty()
+                        ? item(MMMRegistry.UNCHARGED_SUPERCONDUCTOR.get(), 2)
+                        : item(MMMRegistry.SUPERCONDUCTOR.get(), 2);
                 list.add(new ChemRecipe(
                         item(MMMRegistry.NAQUADAH_ALLOY_INGOT.get(), 1), item(MMMRegistry.PLATINUM_INGOT.get(), 1),
-                        item(MMMRegistry.IRIDIUM_INGOT.get(), 1), item(MMMRegistry.RHODIUM_INGOT.get(), 1),
+                        item(MMMRegistry.IRIDIUM_INGOT.get(), 1),
+                        elementium.isEmpty() ? item(MMMRegistry.RHODIUM_INGOT.get(), 1) : elementium,
                         item(MMMRegistry.NAQUADAH_ENRICHED_INGOT.get(), 1),
                         GasStack.EMPTY, GasStack.EMPTY, moltenSuperAlloy(144),
-                        item(MMMRegistry.SUPERCONDUCTOR.get(), 2), GasStack.EMPTY, FluidStack.EMPTY,
+                        scOutput, GasStack.EMPTY, FluidStack.EMPTY,
                         400, 25_000L, 0));
                 // trans-dimensional circuit: alloy + supreme circuit + metal, soldered with
-                // molten stellar matter. 400,000,000 RF/t = 1,000,000,000 J/t.
+                // molten stellar matter. With MEGA Cells the gold becomes a 4M cell component.
+                ItemStack megaComponent = loaded("megacells") ? modItem("megacells", "cell_component_4m", 1) : ItemStack.EMPTY;
                 list.add(new ChemRecipe(
                         item(MMMRegistry.TRANSDIMENSIONAL_ALLOY.get(), 2), mekItem("ultimate_control_circuit", 2),
                         item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 2), item(MMMRegistry.TRANSDIMENSIONAL_METAL.get(), 1),
-                        item(net.minecraft.world.item.Items.GOLD_INGOT, 2),
+                        megaComponent.isEmpty() ? item(net.minecraft.world.item.Items.GOLD_INGOT, 2) : megaComponent,
                         GasStack.EMPTY, GasStack.EMPTY, moltenStellarMatter(144),
                         item(MMMRegistry.TRANSDIMENSIONAL_CIRCUIT.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
                         600, 1_000_000_000L, 0));
@@ -699,9 +842,33 @@ public final class ChemRecipes {
     }
 
     private static ItemStack mekItem(String path, int count) {
+        return modItem("mekanism", path, count);
+    }
+
+    /** Runtime item lookup for optional/soft-referenced mods (AE2, Botania, MEGA Cells). */
+    private static ItemStack modItem(String namespace, String path, int count) {
         var item = net.minecraftforge.registries.ForgeRegistries.ITEMS
-                .getValue(new net.minecraft.resources.ResourceLocation("mekanism", path));
-        return item == null ? ItemStack.EMPTY : new ItemStack(item, count);
+                .getValue(new net.minecraft.resources.ResourceLocation(namespace, path));
+        return item == null || item == net.minecraft.world.item.Items.AIR
+                ? ItemStack.EMPTY : new ItemStack(item, count);
+    }
+
+    private static boolean loaded(String modid) {
+        return net.minecraftforge.fml.ModList.get().isLoaded(modid);
+    }
+
+    /** JEI note naming the press module a large-inscriber recipe needs. */
+    private static ChemRecipe withPressNote(ChemRecipe recipe, ItemStack press) {
+        return recipe.withNote(net.minecraft.network.chat.Component.translatable(
+                "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".press_req",
+                press.getHoverName()));
+    }
+
+    /** JEI note showing a recipe's Botania mana cost. */
+    private static net.minecraft.network.chat.Component manaNote(int mana) {
+        return net.minecraft.network.chat.Component.translatable(
+                "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".mana_req",
+                String.format(java.util.Locale.ROOT, "%,d", mana));
     }
 
     private static FluidStack water(int amount) {

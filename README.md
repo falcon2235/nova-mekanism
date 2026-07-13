@@ -16,6 +16,10 @@ Nova Mekanism turns Mekanism's processing into a full progression of multiblock 
 | Mod loader | **Forge 47.4.x** (not NeoForge) |
 | **Mekanism** | 10.4.x — **required** |
 | **Mekanism Generators** | 10.4.x — **required** (deuterium/tritium fusion) |
+| **Applied Energistics 2** | 15.x — **required** (inscriber/charger machines, processors) |
+| **Botania** | 440+ — **required** (mana machines, manasteel/elementium/terrasteel) |
+| **MEGA Cells** | any — **required** (cell components in end-game circuits) |
+| **Draconic Evolution** | any — **required** (fusion crafting, awakened/chaotic materials) |
 | JEI | 15.20.x — optional (recipe & structure viewer) |
 
 ---
@@ -35,6 +39,7 @@ Nova Mekanism turns Mekanism's processing into a full progression of multiblock 
 - **Quantum conduits** — a transmitter tier above Mekanism's ultimate: quantum universal cable / mechanical pipe / pressurized tube / logistical pipe. Anything pushed in is routed instantly; right-click a face with an empty hand to toggle extraction from tanks/chests. Crafted from 8 ultimate transmitters + a superconductor.
 - **Fully configurable** — `config/mekanism_more_multiblock-common.toml` exposes every machine rate (miner, rigs, generators, LHC, conduits) plus global recipe energy/time multipliers for expert-pack tuning.
 - **Hardened Mekanism recipes** — the Gas-Burning Generator is gated behind titanium and the Digital Miner behind special steel (plus the existing SPS/fission hardening).
+- **Cross-mod integration** — AE2 inscribing/charging as 16× multiblocks (real presses as modules); Botania mana machines fed by **mana hatches** (spark them to pull from pools); superconductors must be charged (AE2 charger or the Large Charger); circuits demand manasteel/elementium/MEGA cell components; the Annihilation Casing and LHC controller are forged in **Draconic Evolution fusion crafting**; the black-hole chain consumes awakened cores and chaos shards.
 - **Tweaks to Mekanism** — the SPS (antimatter) is made harder and the fission reactor casing recipe is hardened, via a built-in high-priority data pack.
 
 ---
@@ -56,6 +61,11 @@ Parallel machines share a fixed **3×3×4** hollow casing box (GregTech-style bl
 | Alloy Blast Furnace | 5×5×5 barrel | Molten super/naquadah/trans-dim alloys |
 | Vacuum Freezer | 3×3×3 | Freezes molten alloys into solid ingots |
 | Circuit Assembly Line | 3×3×5 | Supreme circuits, superconductors, trans-dim circuits |
+| Large Inscriber | 3×3×4 | AE2 inscribing ×16 (install a real AE2 press as its module) |
+| Large Charger | 3×3×3 | AE2 charging ×16 (certus, uncharged superconductors) |
+| Grand Mana Pool | 5×3×5 | Botania mana infusion ×16 (mana from mana hatches) |
+| Grand Elven Gate | 5×5×3 | Botania elven trade ×16 (elementium, dragonstone, pixie dust) |
+| Grand Terra Plate | 3×3×3 | Terrasteel ×16 (8,000,000 mana per batch) |
 | Oil Drilling Rig | 5×7×5 rig | Pumps crude oil from bedrock (10 mB/t) |
 | **Large Combustion Generator** | 3×3×4 engine | Burns diesel (20 mB/t) into **500,000 RF/t** |
 | **Void Ore Miner** | 7×9×7 rig | Mines 10 random rarity-weighted RAW ores per second from nothing (1M RF/t; speed upgrades roll faster) |
@@ -95,7 +105,7 @@ Building a 16×16×16 cube by hand is not fun. Craft a **Construction Terminal**
 Requires **JDK 17**. The project uses ForgeGradle 6.
 
 ```bash
-./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.0.4.jar
+./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.1.0.jar
 ./gradlew runClient      # launch a dev client
 ```
 

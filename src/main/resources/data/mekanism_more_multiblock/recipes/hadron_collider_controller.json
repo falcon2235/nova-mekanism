@@ -1,1 +1,20 @@
-{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["CEC", "EPE", "CEC"], "key": {"C": {"item": "mekanism_more_multiblock:accelerator_casing"}, "E": {"item": "mekanism_more_multiblock:supreme_control_circuit"}, "P": {"item": "mekanism_more_multiblock:iridium_ingot"}}, "result": {"item": "mekanism_more_multiblock:hadron_collider_controller", "count": 1}}
+{
+  "type": "draconicevolution:fusion_crafting",
+  "conditions": [{"type": "forge:mod_loaded", "modid": "draconicevolution"}],
+  "catalyst": {"item": "mekanism_more_multiblock:iridium_ingot"},
+  "result": {"item": "mekanism_more_multiblock:hadron_collider_controller", "count": 1},
+  "total_energy": 16000000,
+  "tier": "WYVERN",
+  "ingredients": [
+    {"item": "mekanism_more_multiblock:accelerator_casing"},
+    {"item": "mekanism_more_multiblock:accelerator_casing"},
+    {"item": "mekanism_more_multiblock:accelerator_casing"},
+    {"item": "mekanism_more_multiblock:accelerator_casing"},
+    {"item": "mekanism_more_multiblock:supreme_control_circuit"},
+    {"item": "mekanism_more_multiblock:supreme_control_circuit"},
+    {"item": "mekanism_more_multiblock:supreme_control_circuit"},
+    {"item": "mekanism_more_multiblock:supreme_control_circuit"},
+    {"item": "draconicevolution:wyvern_core"},
+    {"item": "draconicevolution:wyvern_core"}
+  ]
+}

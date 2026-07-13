@@ -109,7 +109,36 @@ public enum ChemMachineType {
      * liquid-helium coolant bath (10 mB/t), producing 800,000,000 RF/t. Built after
      * obtaining a stellar core; extremely expensive.
      */
-    ANNIHILATION_GENERATOR("annihilation_generator", 7, 7, 7, false);
+    ANNIHILATION_GENERATOR("annihilation_generator", 7, 7, 7, false),
+    /**
+     * Large inscriber (AE2 integration): a sky-stone box that runs AE2's inscriber
+     * steps 16 at a time. Install a real AE2 press in the module slot to unlock its
+     * printing recipes; processor assembly (print + redstone + silicon) needs none.
+     */
+    LARGE_INSCRIBER("large_inscriber", 3, 3, 4, false),
+    /**
+     * Large charger (AE2 integration): a fluix-laced box that charges 16 items at
+     * once — certus quartz into charged certus, and this mod's uncharged
+     * superconductors into working superconductors.
+     */
+    LARGE_CHARGER("large_charger", 3, 3, 3, false),
+    /**
+     * Grand mana pool (Botania integration): a livingrock basin that runs Botania's
+     * mana-infusion recipes 16 at a time, converting energy into mana internally
+     * (iron → manasteel, ender pearl → mana pearl, diamond → mana diamond).
+     */
+    GRAND_MANA_POOL("grand_mana_pool", 5, 3, 5, false),
+    /**
+     * Grand elven gate (Botania integration): a livingwood portal frame that runs
+     * elven trades 16 at a time (manasteel → elementium, mana diamond → dragonstone,
+     * mana pearl → pixie dust, livingwood → dreamwood).
+     */
+    GRAND_ELVEN_GATE("grand_elven_gate", 5, 5, 3, false),
+    /**
+     * Grand terra plate (Botania integration): compresses manasteel + mana pearl +
+     * mana diamond into terrasteel, 16 at a time, at a heavy energy cost.
+     */
+    GRAND_TERRA_PLATE("grand_terra_plate", 3, 3, 3, false);
 
     public final String id;
     public final int width;

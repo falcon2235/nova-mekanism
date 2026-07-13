@@ -5,7 +5,7 @@ issueTrackerURL="https://github.com/falcon2235/nova-mekanism/issues"
 
 [[mods]]
 modId="mekanism_more_multiblock"
-version="1.0.4"
+version="1.1.0"
 displayName="Nova Mekanism"
 displayURL="https://github.com/falcon2235/nova-mekanism"
 authors="falcon2235"
@@ -46,3 +46,31 @@ mandatory=false
 versionRange="*"
 ordering="AFTER"
 side="CLIENT"
+
+[[dependencies.mekanism_more_multiblock]]
+modId="ae2"
+mandatory=true
+versionRange="[15.0.0,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.mekanism_more_multiblock]]
+modId="botania"
+mandatory=true
+versionRange="[1.20.1-440,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.mekanism_more_multiblock]]
+modId="megacells"
+mandatory=true
+versionRange="*"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.mekanism_more_multiblock]]
+modId="draconicevolution"
+mandatory=true
+versionRange="*"
+ordering="AFTER"
+side="BOTH"

@@ -155,6 +155,26 @@ public final class MMMRegistry {
     // annihilation generator: glowing antimatter-containment sphere casing
     public static final RegistryObject<Block> ANNIHILATION_CASING =
             registerBlock("annihilation_casing", () -> new Block(props().lightLevel(state -> 9)));
+    // AE2 integration: large inscriber (sky stone) + large charger (fluix) casings
+    public static final RegistryObject<Block> INSCRIBER_CASING =
+            registerBlock("inscriber_casing", () -> new Block(props()));
+    public static final RegistryObject<Block> CHARGER_CASING =
+            registerBlock("charger_casing", () -> new Block(props()));
+    // Botania integration: mana pool / elven gate / terra plate machine casings
+    public static final RegistryObject<Block> LIVINGROCK_CASING =
+            registerBlock("livingrock_casing", () -> new Block(props()));
+    /** Mana hatch: buffers mana for the Botania machines; accepts a spark on top. */
+    public static final RegistryObject<com.falcon2235.moremultiblock.block.ManaHatchBlock> MANA_HATCH =
+            registerBlock("mana_hatch", () -> new com.falcon2235.moremultiblock.block.ManaHatchBlock(props()));
+
+    public static final RegistryObject<BlockEntityType<?>> MANA_HATCH_BE =
+            BLOCK_ENTITIES.register("mana_hatch", () -> BlockEntityType.Builder.of(
+                    com.falcon2235.moremultiblock.blockentity.ManaHatchSupport::create,
+                    MANA_HATCH.get()).build(null));
+    public static final RegistryObject<Block> ELVEN_GATE_CASING =
+            registerBlock("elven_gate_casing", () -> new Block(props().lightLevel(state -> 7)));
+    public static final RegistryObject<Block> TERRA_PLATE_CASING =
+            registerBlock("terra_plate_casing", () -> new Block(props()));
 
     // quantum conduits: the transmitter tier above Mekanism's ultimate cables/pipes
     public static final RegistryObject<com.falcon2235.moremultiblock.block.ConduitBlock> QUANTUM_CABLE =
@@ -312,6 +332,8 @@ public final class MMMRegistry {
     public static final RegistryObject<Item> STELLAR_CORE = registerItem("stellar_core");
     /** Superconducting coil (GregTech-style): crafts the fusion coil block and the fusion casing. */
     public static final RegistryObject<Item> SUPERCONDUCTOR = registerItem("superconductor");
+    /** Assembler output that must be charged (AE2 charger / large charger) into a superconductor. */
+    public static final RegistryObject<Item> UNCHARGED_SUPERCONDUCTOR = registerItem("uncharged_superconductor");
     /** Black hole seed: the artificial star generator's pinnacle product. */
     public static final RegistryObject<Item> BLACK_HOLE_SEED = registerItem("black_hole_seed");
     /** Reactor module (antimatter-forged) that unlocks the alternative polonium synthesis recipe. */
@@ -438,6 +460,11 @@ public final class MMMRegistry {
             case OIL_RIG -> OIL_RIG_CASING.get();
             case COMBUSTION_GENERATOR -> ENGINE_CASING.get();
             case ANNIHILATION_GENERATOR -> ANNIHILATION_CASING.get();
+            case LARGE_INSCRIBER -> INSCRIBER_CASING.get();
+            case LARGE_CHARGER -> CHARGER_CASING.get();
+            case GRAND_MANA_POOL -> LIVINGROCK_CASING.get();
+            case GRAND_ELVEN_GATE -> ELVEN_GATE_CASING.get();
+            case GRAND_TERRA_PLATE -> TERRA_PLATE_CASING.get();
         };
     }
 

@@ -802,7 +802,10 @@ public final class MultiblockValidator {
                             if (!state.is(coil)) {
                                 return Component.translatable(LANG + "invalid_coil", posString(cursor));
                             }
-                        } else if (state.getBlock() instanceof PortBlock) {
+                        } else if (state.getBlock() instanceof PortBlock
+                                || state.is(MMMRegistry.MANA_HATCH.get())) {
+                            // mana hatches count as ports so the Botania machines can
+                            // find them (harmless in any other box machine's wall)
                             if (portsOut != null) {
                                 portsOut.add(cursor.immutable());
                             }

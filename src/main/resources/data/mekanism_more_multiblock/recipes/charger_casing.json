@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "conditions": [{"type": "forge:mod_loaded", "modid": "ae2"}], "pattern": ["SIS", "ICI", "SIS"], "key": {"S": {"item": "mekanism:ingot_steel"}, "I": {"item": "ae2:fluix_crystal"}, "C": {"item": "mekanism_more_multiblock:multiblock_casing"}}, "result": {"item": "mekanism_more_multiblock:charger_casing", "count": 4}}

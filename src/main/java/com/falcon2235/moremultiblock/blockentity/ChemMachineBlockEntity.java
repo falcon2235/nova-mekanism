@@ -102,7 +102,7 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
             return switch (slot) {
                 case 0 -> ControllerBlockEntity.isSpeedUpgrade(stack);
                 case 1 -> ControllerBlockEntity.isEnergyUpgrade(stack);
-                default -> stack.is(MMMRegistry.POLONIUM_SYNTHESIS_UPGRADE.get());
+                default -> stack.is(MMMRegistry.POLONIUM_SYNTHESIS_UPGRADE.get()) || isInscriberPress(stack);
             };
         }
 
@@ -269,6 +269,11 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
             case VOID_MINER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ALLOY;
             case OIL_RIG -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.STAINLESS;
             case COMBUSTION_GENERATOR -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.HEAT_PROOF;
+            case LARGE_INSCRIBER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ASSEMBLY;
+            case LARGE_CHARGER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ELECTROLYZER;
+            case GRAND_MANA_POOL -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.STAINLESS;
+            case GRAND_ELVEN_GATE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ASSEMBLY;
+            case GRAND_TERRA_PLATE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ALLOY;
         };
     }
 
@@ -646,11 +651,32 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
     }
 
     private boolean canRun(ChemRecipe r) {
-        return hasRequiredUpgrade(r)
+        return hasRequiredUpgrade(r) && hasMana(r)
                 && hasItemInput(r.itemInput) && hasItemInput(r.itemInput2) && hasItemInput(r.itemInput3)
                 && hasItemInput(r.itemInput4) && hasItemInput(r.itemInput5)
                 && hasGasInput(r.gasInput) && hasGasInput(r.gasInput2) && hasFluidInput(r.fluidInput)
                 && fitsItemOutputs(r) && fitsGasOutput(r.gasOutput) && fitsFluidOutput(r.fluidOutput);
+    }
+
+    /** Whether the structure's mana hatches hold the recipe's mana cost (Botania machines). */
+    private boolean hasMana(ChemRecipe r) {
+        if (r.manaCost <= 0) {
+            return true;
+        }
+        if (level == null || !net.minecraftforge.fml.ModList.get().isLoaded("botania")) {
+            return false;
+        }
+        return ManaHatchSupport.available(level, cachedPorts) >= r.manaCost;
+    }
+
+    /** Whether the stack is one of AE2's inscriber presses (the large inscriber's modules). */
+    public static boolean isInscriberPress(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+        net.minecraft.resources.ResourceLocation id =
+                net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());
+        return id != null && "ae2".equals(id.getNamespace()) && id.getPath().endsWith("_press");
     }
 
     /** Whether the recipe's required upgrade module (if any) is installed in the special slot. */
@@ -759,6 +785,9 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
     }
 
     private void complete(ChemRecipe r) {
+        if (r.manaCost > 0 && level != null && net.minecraftforge.fml.ModList.get().isLoaded("botania")) {
+            ManaHatchSupport.drain(level, cachedPorts, r.manaCost);
+        }
         if (!r.itemInput.isEmpty()) {
             consumeItem(r.itemInput);
         }

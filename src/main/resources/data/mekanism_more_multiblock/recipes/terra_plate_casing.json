@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "conditions": [{"type": "forge:mod_loaded", "modid": "botania"}], "pattern": ["SIS", "ICI", "SIS"], "key": {"S": {"item": "botania:livingrock"}, "I": {"item": "botania:mana_diamond"}, "C": {"item": "mekanism_more_multiblock:multiblock_casing"}}, "result": {"item": "mekanism_more_multiblock:terra_plate_casing", "count": 4}}
