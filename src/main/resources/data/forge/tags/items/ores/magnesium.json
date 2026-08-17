@@ -1,1 +1,7 @@
-{"replace": false, "values": ["mekanism_more_multiblock:magnesium_ore", "mekanism_more_multiblock:deepslate_magnesium_ore"]}
+{
+  "values": [
+    "mekanism_more_multiblock:magnesium_ore",
+    "mekanism_more_multiblock:deepslate_magnesium_ore"
+  ],
+  "replace": false
+}

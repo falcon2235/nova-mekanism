@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["CEC", "EPE", "CEC"], "key": {"C": {"item": "mekanism_more_multiblock:research_casing"}, "E": {"item": "mekanism:ultimate_control_circuit"}, "P": {"item": "mekanism_more_multiblock:data_orb"}}, "result": {"item": "mekanism_more_multiblock:research_station_controller", "count": 1}}

@@ -1,1 +1,6 @@
-{"replace": false, "values": ["mekanism_more_multiblock:raw_bauxite"]}
+{
+  "values": [
+    "mekanism_more_multiblock:raw_bauxite"
+  ],
+  "replace": false
+}

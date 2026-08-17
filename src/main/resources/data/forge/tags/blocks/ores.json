@@ -1,0 +1,23 @@
+{
+  "values": [
+    "mekanism_more_multiblock:antimony_ore",
+    "mekanism_more_multiblock:bauxite_ore",
+    "mekanism_more_multiblock:chromium_ore",
+    "mekanism_more_multiblock:cooperite_ore",
+    "mekanism_more_multiblock:deepslate_antimony_ore",
+    "mekanism_more_multiblock:deepslate_bauxite_ore",
+    "mekanism_more_multiblock:deepslate_chromium_ore",
+    "mekanism_more_multiblock:deepslate_cooperite_ore",
+    "mekanism_more_multiblock:deepslate_magnesium_ore",
+    "mekanism_more_multiblock:deepslate_naquadah_ore",
+    "mekanism_more_multiblock:deepslate_nickel_ore",
+    "mekanism_more_multiblock:deepslate_saltpeter_ore",
+    "mekanism_more_multiblock:deepslate_titanium_ore",
+    "mekanism_more_multiblock:magnesium_ore",
+    "mekanism_more_multiblock:naquadah_ore",
+    "mekanism_more_multiblock:nickel_ore",
+    "mekanism_more_multiblock:saltpeter_ore",
+    "mekanism_more_multiblock:titanium_ore"
+  ],
+  "replace": false
+}

@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["CEC", "EPE", "CEC"], "key": {"C": {"item": "mekanism_more_multiblock:assline_casing"}, "E": {"item": "mekanism:ultimate_control_circuit"}, "P": {"item": "mekanism_more_multiblock:assline_conveyor"}}, "result": {"item": "mekanism_more_multiblock:assembly_line_controller", "count": 1}}

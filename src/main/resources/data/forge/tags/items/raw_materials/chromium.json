@@ -1,1 +1,6 @@
-{"replace": false, "values": ["mekanism_more_multiblock:raw_chromium"]}
+{
+  "values": [
+    "mekanism_more_multiblock:raw_chromium"
+  ],
+  "replace": false
+}

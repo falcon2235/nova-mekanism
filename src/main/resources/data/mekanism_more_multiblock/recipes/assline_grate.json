@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["IBI", "BSB", "IBI"], "key": {"I": {"item": "mekanism:ingot_steel"}, "B": {"item": "minecraft:iron_bars"}, "S": {"item": "mekanism_more_multiblock:special_steel_ingot"}}, "result": {"item": "mekanism_more_multiblock:assline_grate", "count": 4}}

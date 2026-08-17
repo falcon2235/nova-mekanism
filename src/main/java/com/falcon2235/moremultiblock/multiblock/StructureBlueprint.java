@@ -59,6 +59,7 @@ public final class StructureBlueprint {
             case HADRON_COLLIDER -> colliderLoop(pos, facing);
             case VOID_MINER -> voidMinerRig(pos, facing);
             case OIL_RIG -> oilRig(pos, facing);
+            case ASSEMBLY_LINE -> asslineLane(pos, facing);
             case COMBUSTION_GENERATOR -> coilBox(pos, facing, MMMRegistry.chemCasing(type),
                     MMMRegistry.chemCoil(type), type.width, type.height, type.depth);
             default -> box(pos, facing, MMMRegistry.chemCasing(type), type.width, type.height, type.depth);
@@ -180,13 +181,15 @@ public final class StructureBlueprint {
         return cells;
     }
 
-    // --- GTNH circuit assembly line (3x3x5) ---
+    // --- GTNH circuit assembly line (grate roof, glass+arm middle, casing floor) ---
     private static List<Cell> assemblyLine(BlockPos pos, Direction facing) {
         Direction back = facing.getOpposite();
         Direction right = facing.getClockWise();
         ChemMachineType type = ChemMachineType.CIRCUIT_ASSEMBLER;
         Block casing = MMMRegistry.chemCasing(type);
         Block glass = MMMRegistry.ASSEMBLY_GLASS.get();
+        Block conveyor = MMMRegistry.ASSLINE_CONVEYOR.get();
+        Block grate = MMMRegistry.ASSLINE_GRATE.get();
         int halfW = (type.width - 1) / 2;
         List<Cell> cells = new ArrayList<>();
         BlockPos.MutableBlockPos c = new BlockPos.MutableBlockPos();
@@ -197,8 +200,14 @@ public final class StructureBlueprint {
                     if (anchor) {
                         continue;
                     }
-                    boolean middle = k >= 1 && k <= type.height - 2;
-                    Block block = (middle && Math.abs(r) == halfW) ? glass : casing;
+                    Block block;
+                    if (k == 0) {
+                        block = grate;
+                    } else if (k <= type.height - 2) {
+                        block = Math.abs(r) == halfW ? glass : conveyor;
+                    } else {
+                        block = casing;
+                    }
                     c.set(pos).move(back, d).move(Direction.DOWN, k).move(right, r);
                     cells.add(new Cell(c.immutable(), block));
                 }
@@ -396,6 +405,40 @@ public final class StructureBlueprint {
                     boolean coilRing = d > 0 && d < depth - 1;
                     c.set(pos).move(back, d).move(Direction.UP, u).move(right, r);
                     cells.add(new Cell(c.immutable(), coilRing ? coil : casing));
+                }
+            }
+        }
+        return cells;
+    }
+
+    // --- assembly line (GTCEu pattern FIF/RTR/SAG/#Y#; controller at u=2, left column) ---
+    private static List<Cell> asslineLane(BlockPos pos, Direction facing) {
+        Direction back = facing.getOpposite();
+        Direction right = facing.getClockWise();
+        Block casing = MMMRegistry.chemCasing(ChemMachineType.ASSEMBLY_LINE);
+        Block conveyor = MMMRegistry.ASSLINE_CONVEYOR.get();
+        Block glass = MMMRegistry.ASSEMBLY_GLASS.get();
+        Block grate = MMMRegistry.ASSLINE_GRATE.get();
+        List<Cell> cells = new ArrayList<>();
+        BlockPos.MutableBlockPos c = new BlockPos.MutableBlockPos();
+        for (int d = 0; d < MultiblockValidator.ASSLINE_LENGTH; d++) {
+            for (int u = 0; u < MultiblockValidator.ASSLINE_HEIGHT; u++) {
+                for (int r = 0; r <= 2; r++) {
+                    if (d == 0 && u == 2 && r == 0) {
+                        continue; // controller
+                    }
+                    int kind = MultiblockValidator.asslineKind(d, r, u);
+                    if (kind == 0) {
+                        continue; // "any" cell
+                    }
+                    Block block = switch (kind) {
+                        case 2 -> conveyor;
+                        case 3 -> glass;
+                        case 4 -> grate;
+                        default -> casing;
+                    };
+                    c.set(pos).move(back, d).move(Direction.UP, u - 2).move(right, r);
+                    cells.add(new Cell(c.immutable(), block));
                 }
             }
         }

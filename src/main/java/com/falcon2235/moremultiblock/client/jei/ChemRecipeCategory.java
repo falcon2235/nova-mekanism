@@ -30,7 +30,18 @@ import net.minecraft.world.item.ItemStack;
 public class ChemRecipeCategory implements IRecipeCategory<ChemRecipe> {
 
     public static final int WIDTH = 184;
-    public static final int HEIGHT = 64;
+    /**
+     * Slots occupy the top 64px; below them sit the stats line and up to two wrapped
+     * note lines. Kept compact because recipe viewers (EMI via TooManyRecipeViewers)
+     * frame a category by its declared size and an oversized panel overflows.
+     */
+    public static final int HEIGHT = 96;
+    /** Time / energy line, below the slot band. */
+    private static final int STATS_Y = 64;
+    /** First line of the notes area, below the stats line. */
+    private static final int NOTES_Y = 75;
+    /** Notes must not run past the panel. */
+    private static final int NOTES_MAX_Y = HEIGHT - 8;
 
     private final ChemMachineType type;
     private final RecipeType<ChemRecipe> recipeType;
@@ -141,15 +152,17 @@ public class ChemRecipeCategory implements IRecipeCategory<ChemRecipe> {
     public void draw(ChemRecipe recipe, IRecipeSlotsView slotsView, GuiGraphics g, double mouseX, double mouseY) {
         var font = Minecraft.getInstance().font;
 
-        // arrow between input and output columns (past the 5-slot input row)
+        // arrow between the input grid and the output column
         int ax = 112;
         int ay = 10;
         g.fill(ax, ay, ax + 22, ay + 6, 0xFF3B3B3B);
         g.fill(ax, ay + 1, ax + 20, ay + 5, 0xFF00C853);
 
-        // time / energy text (energy shown in RF/t: our machines expose FE = Joules * 2/5)
-        g.drawString(font, (recipe.ticks / 20) + "s", ax, ay + 12, 0xFF606060, false);
-        g.drawString(font, formatFe(recipe.energyPerTick * 2 / 5) + " RF/t", ax - 6, ay + 24, 0xFF606060, false);
+        // Time and energy live on one line in the notes area. Drawn beside the arrow
+        // they used to run under the output slots whenever the value was long
+        // ("100M RF/t" on the collider), so they are kept out of the slot band.
+        String stats = (recipe.ticks / 20) + "s  |  " + formatFe(recipe.energyPerTick * 2 / 5) + " RF/t";
+        g.drawString(font, stats, 6, STATS_Y, 0xFF404040, false);
 
         // gas / fluid amounts next to their slots (inputs left, outputs right-aligned)
         if (!recipe.gasInput.isEmpty()) {
@@ -171,16 +184,31 @@ public class ChemRecipeCategory implements IRecipeCategory<ChemRecipe> {
             g.drawString(font, amount, 141 - font.width(amount), 51, 0xFF606060, false);
         }
 
-        // optional recipe note (e.g. the void miner's weighted roll chance)
-        if (recipe.note != null) {
-            g.drawString(font, recipe.note, 6, HEIGHT - 10, 0xFF606060, false);
-        }
-
-        // required heating coil (coil-tower machines only); higher tiers halve the time per tier
+        // Notes area below the slots: the coil requirement and the recipe note are
+        // stacked (never overdrawn on each other) and wrapped to the panel width.
+        int ny = NOTES_Y;
         if (type.coilTower) {
             Component coil = Component.translatable("gui." + MekanismMoreMultiblock.MODID + ".coil_req",
                     MMMRegistry.COIL_TIERS.get(recipe.coilTier).get().getName());
-            g.drawString(font, coil, 6, HEIGHT - 10, 0xFF606060, false);
+            ny = drawWrapped(g, font, coil, ny);
         }
+        if (recipe.note != null) {
+            drawWrapped(g, font, recipe.note, ny);
+        }
+    }
+
+    /**
+     * Draws a component wrapped to the panel width, stopping at the panel edge so a
+     * long note can never spill out; returns the y below the last line drawn.
+     */
+    private static int drawWrapped(GuiGraphics g, net.minecraft.client.gui.Font font, Component text, int y) {
+        for (var line : font.split(text, WIDTH - 12)) {
+            if (y > NOTES_MAX_Y) {
+                break;
+            }
+            g.drawString(font, line, 6, y, 0xFF606060, false);
+            y += font.lineHeight;
+        }
+        return y;
     }
 }

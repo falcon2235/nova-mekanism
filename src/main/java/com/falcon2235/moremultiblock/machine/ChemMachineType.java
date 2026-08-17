@@ -138,7 +138,28 @@ public enum ChemMachineType {
      * Grand terra plate (Botania integration): compresses manasteel + mana pearl +
      * mana diamond into terrasteel, 16 at a time, at a heavy energy cost.
      */
-    GRAND_TERRA_PLATE("grand_terra_plate", 3, 3, 3, false);
+    GRAND_TERRA_PLATE("grand_terra_plate", 3, 3, 3, false),
+    /**
+     * Research station: scans a sample part together with a blank data orb into a
+     * research-data module (GT scanner style). Research data installs into the
+     * assembly line's module slot to unlock its recipes.
+     */
+    RESEARCH_STATION("research_station", 3, 3, 3, false),
+    /**
+     * Assembly line, modelled on GTCEu's Assembly Line: an 8-slice production lane —
+     * solid casing floor, casing side rails around a conveyor belt row, reinforced
+     * glass walls around an open transfer channel, grate roof. Recipes require the
+     * matching research data installed in the module slot; builds whole machine
+     * controllers and end-game parts.
+     */
+    ASSEMBLY_LINE("assembly_line", 3, 4, 8, false),
+    /**
+     * Grand imbuement chamber (Ars Nouveau integration): a sourcestone vault that
+     * runs imbuement 16 at a time — lapis/amethyst into source gems — and can
+     * source-charge this mod's uncharged superconductors as a magical alternative
+     * to the AE2 charging route.
+     */
+    GRAND_IMBUEMENT("grand_imbuement_chamber", 3, 3, 3, false);
 
     public final String id;
     public final int width;

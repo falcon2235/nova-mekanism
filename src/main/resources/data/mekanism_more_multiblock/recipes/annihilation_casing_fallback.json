@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "conditions": [{"type": "forge:not", "value": {"type": "forge:mod_loaded", "modid": "draconicevolution"}}],
+  "pattern": ["SFS", "FNF", "SFS"],
+  "key": {
+    "S": {"item": "mekanism_more_multiblock:superconductor"},
+    "F": {"item": "mekanism_more_multiblock:fusion_casing"},
+    "N": {"item": "mekanism_more_multiblock:neutronium"}
+  },
+  "result": {"item": "mekanism_more_multiblock:annihilation_casing", "count": 4}
+}

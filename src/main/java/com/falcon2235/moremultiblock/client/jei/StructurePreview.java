@@ -80,13 +80,16 @@ public final class StructurePreview {
         // TOP layer for the assembly line (like GT's CAL), face centre for plain boxes.
         int anchorY = switch (mode) {
             case TOWER, BARREL, FRAME, DRILL, RIG -> 0;
+            case LINE -> 2;      // controller on the grate level (GTCEu "SAG" row)
             case ASSEMBLY -> h - 1;
             default -> halfH; // LOOP (mid layer), BOX, RING, SPHERE
         };
+        // the GTCEu assembly line's controller sits in the LEFT column, not the centre
+        int anchorX = mode == StructureEntry.Mode.LINE ? 0 : halfW;
         for (int z = 0; z < d; z++) {
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
-                    boolean anchor = x == halfW && y == anchorY && z == 0;
+                    boolean anchor = x == anchorX && y == anchorY && z == 0;
                     BlockState cell;
                     switch (mode) {
                         case TOWER -> {
@@ -162,6 +165,19 @@ public final class StructurePreview {
                                 default -> null;
                             };
                         }
+                        case LINE -> {
+                            // GTCEu assembly line (FIF/RTR/SAG/#Y#): casing floor and
+                            // energy spine, arm row (coil param), glass walls (vent
+                            // param), grates rendered as casing.
+                            int kind = com.falcon2235.moremultiblock.multiblock.MultiblockValidator
+                                    .asslineKind(z, x, y);
+                            cell = switch (kind) {
+                                case 2 -> coil != null ? coil : casing;
+                                case 3 -> vent != null ? vent : casing;
+                                case 1, 4 -> casing;
+                                default -> null;
+                            };
+                        }
                         case RIG -> {
                             // Oil drilling rig: base plate, corner legs, drill-pipe string
                             // (coil param), 3x3 crown platform.
@@ -192,11 +208,14 @@ public final class StructurePreview {
                             }
                         }
                         case ASSEMBLY -> {
-                            // GTNH circuit assembly line: solid casing top + bottom, glass
-                            // side walls (vent param) with a casing spine on the middle layer.
+                            // GTNH circuit assembly line: grate roof (casing approx.),
+                            // glass side walls (vent param) with the assembly-arm spine
+                            // (coil param) on the middle layer, casing floor.
                             boolean middleLayer = y > 0 && y < h - 1;
                             if (middleLayer && (x == 0 || x == w - 1)) {
                                 cell = vent != null ? vent : casing;
+                            } else if (middleLayer) {
+                                cell = coil != null ? coil : casing;
                             } else {
                                 cell = casing;
                             }
@@ -221,7 +240,7 @@ public final class StructurePreview {
 
         // controller last, popped out of the front face (-Z) toward the viewer
         pose.pushPose();
-        pose.translate(halfW, anchorY, -CONTROLLER_POP);
+        pose.translate(anchorX, anchorY, -CONTROLLER_POP);
         dispatcher.renderSingleBlock(controller, pose, buffers, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
         pose.popPose();
 

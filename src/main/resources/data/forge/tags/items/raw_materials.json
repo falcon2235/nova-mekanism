@@ -1,0 +1,13 @@
+{
+  "values": [
+    "mekanism_more_multiblock:raw_titanium",
+    "mekanism_more_multiblock:raw_magnesium",
+    "mekanism_more_multiblock:raw_nickel",
+    "mekanism_more_multiblock:raw_chromium",
+    "mekanism_more_multiblock:raw_bauxite",
+    "mekanism_more_multiblock:raw_cooperite",
+    "mekanism_more_multiblock:raw_antimony",
+    "mekanism_more_multiblock:raw_naquadah"
+  ],
+  "replace": false
+}

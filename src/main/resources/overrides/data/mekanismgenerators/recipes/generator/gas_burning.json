@@ -4,8 +4,8 @@
     {"type": "forge:mod_loaded", "modid": "mekanismgenerators"}
   ],
   "key": {
-    "T": {"item": "mekanism_more_multiblock:titanium_ingot"},
-    "E": {"item": "mekanism:elite_control_circuit"},
+    "T": {"item": "mekanism_more_multiblock:cupronickel_ingot"},
+    "E": {"item": "mekanism:advanced_control_circuit"},
     "C": {"item": "mekanism:electrolytic_core"},
     "X": {"item": "mekanism:steel_casing"}
   },

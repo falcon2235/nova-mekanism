@@ -1,1 +1,6 @@
-{"type": "forge:add_features", "biomes": "#minecraft:is_overworld", "features": "mekanism_more_multiblock:nickel_ore", "step": "underground_ores"}
+{
+  "type": "mekanism_more_multiblock:configurable_ore",
+  "biomes": "#minecraft:is_overworld",
+  "features": "mekanism_more_multiblock:nickel_ore",
+  "ore": "nickel"
+}

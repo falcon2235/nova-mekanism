@@ -1,15 +1,15 @@
 # Store descriptions for Nova Mekanism
 
 Copy-paste sources for CurseForge / Modrinth / GitHub. The **Summary** is the one-line
-field on CurseForge; the **Description** is the main body. Updated for v1.1.0.
+field on CurseForge; the **Description** is the main body. Updated for v1.1.1.
 
 ---
 
-## Summary (one line)
+## Summary (one line — CurseForge limit is 256 characters; both fit)
 
-**EN:** A GregTech-inspired end-game expansion for Mekanism, integrated with AE2, Botania, MEGA Cells and Draconic Evolution — parallel processors, deep ore chains, oil power, a hadron collider, void mining, mana multiblocks, fusion, artificial stars and a chunk-sized black hole reactor.
+**EN (244 chars):** A GregTech-style end-game expansion for Mekanism with AE2, Botania and Draconic Evolution integration: parallel multiblocks, deep ore chains, oil power, a hadron collider, void mining, mana machines, fusion and a chunk-sized black hole reactor.
 
-**JP:** GregTech風のMekanism向け超大型エンドコンテンツ。AE2・Botania・MEGA Cells・Draconic Evolution と連携し、並列処理・鉱石チェーン・石油発電・ハドロン衝突型加速器・ボイド採掘・マナマルチブロック・核融合・人工恒星・チャンク大のブラックホール炉まで。
+**JP (127 chars):** GregTech風のMekanism向け大型エンドコンテンツ。AE2・Botania・Draconic Evolution連携、並列マルチブロック、鉱石チェーン、石油発電、ハドロン衝突型加速器、ボイド採掘、マナ機械、核融合、チャンク大のブラックホール炉。
 
 ---
 
@@ -56,7 +56,7 @@ Nova Mekanism is a large end-game expansion for Mekanism. It keeps Mekanism's cl
 
 - Minecraft **1.20.1** — **Forge** (not NeoForge)
 - **Mekanism** and **Mekanism Generators** — required
-- **Applied Energistics 2, Botania, MEGA Cells, Draconic Evolution** — required (deep cross-mod integration)
+- **Applied Energistics 2, Botania, MEGA Cells, Draconic Evolution, Ars Nouveau** — all optional: each adds its own multiblocks and materials, and everything falls back to plain recipes without them
 - **JEI** — optional, but strongly recommended for viewing recipes and structures
 
 ## Getting started
@@ -112,7 +112,7 @@ Nova Mekanismは、Mekanism向けの大規模エンドコンテンツMODです�
 
 - Minecraft **1.20.1** — **Forge**（NeoForgeではありません）
 - **Mekanism** と **Mekanism Generators** — 必須
-- **Applied Energistics 2・Botania・MEGA Cells・Draconic Evolution** — 必須（深いクロスMOD連携）
+- **Applied Energistics 2・Botania・MEGA Cells・Draconic Evolution・Ars Nouveau** — すべて任意。導入すれば専用マルチブロックと素材が追加され、無い場合は通常レシピにフォールバックします
 - **JEI** — 任意（レシピ・構造確認のため強く推奨）
 
 ## はじめ方

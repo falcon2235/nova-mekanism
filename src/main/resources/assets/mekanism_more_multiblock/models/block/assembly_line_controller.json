@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "mekanism_more_multiblock:block/assembly_line_controller_front",
+    "side": "mekanism_more_multiblock:block/assline_casing",
+    "top": "mekanism_more_multiblock:block/assline_casing"
+  }
+}

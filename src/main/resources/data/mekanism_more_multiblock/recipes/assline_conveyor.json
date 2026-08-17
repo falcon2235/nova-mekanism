@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["III", "ECE", "III"], "key": {"I": {"item": "mekanism:ingot_steel"}, "E": {"item": "mekanism:elite_control_circuit"}, "C": {"item": "mekanism_more_multiblock:multiblock_casing"}}, "result": {"item": "mekanism_more_multiblock:assline_conveyor", "count": 2}}

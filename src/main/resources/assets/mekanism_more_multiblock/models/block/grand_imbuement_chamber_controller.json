@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "mekanism_more_multiblock:block/grand_imbuement_chamber_controller_front",
+    "side": "mekanism_more_multiblock:block/sourcestone_casing",
+    "top": "mekanism_more_multiblock:block/sourcestone_casing"
+  }
+}

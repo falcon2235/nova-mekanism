@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "conditions": [{"type": "forge:not", "value": {"type": "forge:mod_loaded", "modid": "ae2"}}],
+  "pattern": ["SRS", "RCR", "SRS"],
+  "key": {
+    "S": {"item": "mekanism_more_multiblock:special_steel_ingot"},
+    "R": {"item": "minecraft:redstone_block"},
+    "C": {"item": "mekanism_more_multiblock:supreme_control_circuit"}
+  },
+  "result": {"item": "mekanism_more_multiblock:collider_magnet", "count": 2}
+}

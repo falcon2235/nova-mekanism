@@ -16,11 +16,16 @@ Nova Mekanism turns Mekanism's processing into a full progression of multiblock 
 | Mod loader | **Forge 47.4.x** (not NeoForge) |
 | **Mekanism** | 10.4.x — **required** |
 | **Mekanism Generators** | 10.4.x — **required** (deuterium/tritium fusion) |
-| **Applied Energistics 2** | 15.x — **required** (inscriber/charger machines, processors) |
-| **Botania** | 440+ — **required** (mana machines, manasteel/elementium/terrasteel) |
-| **MEGA Cells** | any — **required** (cell components in end-game circuits) |
-| **Draconic Evolution** | any — **required** (fusion crafting, awakened/chaotic materials) |
+| **Applied Energistics 2** | 15.x — optional (inscriber/charger multiblocks, processors) |
+| **Botania** | 440+ — optional (mana multiblocks, manasteel/elementium/terrasteel) |
+| **MEGA Cells** | any — optional (cell components in end-game circuits) |
+| **Draconic Evolution** | any — optional (fusion crafting, awakened/chaotic materials) |
+| **Ars Nouveau** | any — optional (imbuement multiblock, source-charged parts) |
 | JEI | 15.20.x — optional (recipe & structure viewer) |
+
+Every integration is **optional**: with the mod present you get its machines and its
+materials in the recipes; without it, the affected items fall back to plain
+workbench recipes, so the whole progression stays completable in any pack.
 
 ---
 
@@ -38,7 +43,8 @@ Nova Mekanism turns Mekanism's processing into a full progression of multiblock 
 - **JEI bill of materials** — every structure preview lists exactly how many of each block the multiblock needs.
 - **Quantum conduits** — a transmitter tier above Mekanism's ultimate: quantum universal cable / mechanical pipe / pressurized tube / logistical pipe. Anything pushed in is routed instantly; right-click a face with an empty hand to toggle extraction from tanks/chests. Crafted from 8 ultimate transmitters + a superconductor.
 - **Fully configurable** — `config/mekanism_more_multiblock-common.toml` exposes every machine rate (miner, rigs, generators, LHC, conduits) plus global recipe energy/time multipliers for expert-pack tuning.
-- **Hardened Mekanism recipes** — the Gas-Burning Generator is gated behind titanium and the Digital Miner behind special steel (plus the existing SPS/fission hardening).
+- **Modpack ready** — integrations are optional with workbench fallbacks, ore generation can be switched off per ore, the Mekanism recipe hardening can be turned off entirely, and every material carries the standard `forge:ores/*`, `forge:raw_materials/*`, `forge:ingots/*` and `forge:dusts/*` tags for recipe unification.
+- **Hardened Mekanism recipes** — the Gas-Burning Generator is gated behind cupronickel and the Digital Miner behind special steel (plus the existing SPS/fission hardening).
 - **Cross-mod integration** — AE2 inscribing/charging as 16× multiblocks (real presses as modules); Botania mana machines fed by **mana hatches** (spark them to pull from pools); superconductors must be charged (AE2 charger or the Large Charger); circuits demand manasteel/elementium/MEGA cell components; the Annihilation Casing and LHC controller are forged in **Draconic Evolution fusion crafting**; the black-hole chain consumes awakened cores and chaos shards.
 - **Tweaks to Mekanism** — the SPS (antimatter) is made harder and the fission reactor casing recipe is hardened, via a built-in high-priority data pack.
 
@@ -66,6 +72,9 @@ Parallel machines share a fixed **3×3×4** hollow casing box (GregTech-style bl
 | Grand Mana Pool | 5×3×5 | Botania mana infusion ×16 (mana from mana hatches) |
 | Grand Elven Gate | 5×5×3 | Botania elven trade ×16 (elementium, dragonstone, pixie dust) |
 | Grand Terra Plate | 3×3×3 | Terrasteel ×16 (8,000,000 mana per batch) |
+| Grand Imbuement Chamber | 3×3×3 | Ars Nouveau imbuement ×16 (source gems, source-charging) |
+| Research Station | 3×3×3 | Scans a sample + data orb into research data |
+| **Assembly Line** | 3×4×8 | GT-style line; recipes need the matching research installed |
 | Oil Drilling Rig | 5×7×5 rig | Pumps crude oil from bedrock (10 mB/t) |
 | **Large Combustion Generator** | 3×3×4 engine | Burns diesel (20 mB/t) into **500,000 RF/t** |
 | **Void Ore Miner** | 7×9×7 rig | Mines 10 random rarity-weighted RAW ores per second from nothing (1M RF/t; speed upgrades roll faster) |
@@ -87,10 +96,11 @@ The Electric and Alloy Blast Furnaces use tiered heating coils — **copper → 
 2. **Platinum group** (cooperite/saltpeter ores) — nitric acid → sludge → centrifuge → electrolyzer → platinum, palladium, rhodium, ruthenium, iridium.
 3. **Naquadah line** (naquadah/antimony ores) — fluoroantimonic acid dissolution → centrifuge/mixer separations → enriched naquadah, naquadria, trinium; **naquadah alloy** in the alloy blast furnace.
 4. **Antimatter** — just before the end-game, build the **Large Hadron Collider** (33×3×33) to collide hydrogen straight into antimatter at ~100,000,000 RF/t, alongside the hardened SPS route.
-5. **Fusion** — deuterium + tritium → helium plasma → (+ antimatter) → **molten stellar matter** → **stellar core**. Also fuses naquadria into **neutronium**.
-6. **Artificial star** — stellar core + a huge charge of hydrogen at **100,000,000 RF/t for 10 minutes** → **black hole seed**.
-7. **Black hole stabilizer** — black hole seed at **1,000,000,000 RF/t for 30 minutes** → **10× trans-dimensional metal**.
-8. **The pinnacle** — trans-dimensional metal → alloy → circuit (each requiring hundreds of millions of RF/t) → a fully-charged, craftable **Mekanism Creative Energy Cube**.
+5. **Research** — scan a finished part plus a data orb in the **Research Station**, install the resulting research data in the **Assembly Line**, and build the machines that are gated behind it (fusion reactor and void miner controllers, bulk superconductors, trans-dimensional circuits).
+6. **Fusion** — deuterium + tritium → helium plasma → (+ antimatter) → **molten stellar matter** → **stellar core**. Also fuses naquadria into **neutronium**.
+7. **Artificial star** — stellar core + a huge charge of hydrogen at **100,000,000 RF/t for 10 minutes** → **black hole seed**.
+8. **Black hole stabilizer** — black hole seed at **1,000,000,000 RF/t for 30 minutes** → **10× trans-dimensional metal**.
+9. **The pinnacle** — trans-dimensional metal → alloy → circuit (each requiring hundreds of millions of RF/t) → a fully-charged, craftable **Mekanism Creative Energy Cube**.
 
 ---
 
@@ -105,7 +115,7 @@ Building a 16×16×16 cube by hand is not fun. Craft a **Construction Terminal**
 Requires **JDK 17**. The project uses ForgeGradle 6.
 
 ```bash
-./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.1.0.jar
+./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.1.1.jar
 ./gradlew runClient      # launch a dev client
 ```
 

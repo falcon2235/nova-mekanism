@@ -33,6 +33,7 @@ public class MekanismMoreMultiblock {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         MMMRegistry.register(modEventBus);
         ChemRegistry.register(modEventBus);
+        com.falcon2235.moremultiblock.worldgen.ConfigurableOreModifier.register(modEventBus);
         net.minecraftforge.fml.ModLoadingContext.get().registerConfig(
                 net.minecraftforge.fml.config.ModConfig.Type.COMMON, MMMConfig.SPEC);
         // Recipes bake config values in, so drop the cache whenever the config (re)loads.
@@ -54,6 +55,11 @@ public class MekanismMoreMultiblock {
      */
     private static void addPackFinders(AddPackFindersEvent event) {
         if (event.getPackType() != PackType.SERVER_DATA) {
+            return;
+        }
+        if (!MMMConfig.hardenMekanismRecipes()) {
+            // Modpack authors can opt out of the Mekanism recipe nerfs entirely.
+            LOGGER.info("Recipe override pack disabled by config (integration.hardenMekanismRecipes)");
             return;
         }
         Path path = ModList.get().getModFileById(MODID).getFile().findResource("overrides");
@@ -82,7 +88,8 @@ public class MekanismMoreMultiblock {
                 {"megacells", "cell_component_4m"},
                 {"draconicevolution", "awakened_core"},
                 {"draconicevolution", "chaos_shard"},
-                {"draconicevolution", "wyvern_core"}}) {
+                {"draconicevolution", "wyvern_core"},
+                {"ars_nouveau", "source_gem"}}) {
             boolean loaded = ModList.get().isLoaded(probe[0]);
             boolean item = loaded && net.minecraftforge.registries.ForgeRegistries.ITEMS
                     .containsKey(new ResourceLocation(probe[0], probe[1]));

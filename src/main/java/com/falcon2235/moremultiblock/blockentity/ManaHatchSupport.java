@@ -22,16 +22,29 @@ public final class ManaHatchSupport {
     }
 
     public static BlockEntity create(BlockPos pos, BlockState state) {
+        // Botania is an optional dependency: a world that used mana hatches and then
+        // dropped Botania would otherwise try to build the Botania-typed block entity
+        // on load and blow up in the verifier.
+        if (!net.minecraftforge.fml.ModList.get().isLoaded("botania")) {
+            return null;
+        }
         return ManaHatchAccess.create(pos, state);
+    }
+
+    /** Whether the Botania-backed mana hatch can operate at all in this instance. */
+    public static boolean available() {
+        return net.minecraftforge.fml.ModList.get().isLoaded("botania");
     }
 
     /** Total mana buffered in the hatches among the given structure positions. */
     public static long available(Level level, List<BlockPos> positions) {
-        return ManaHatchAccess.available(level, positions);
+        return available() ? ManaHatchAccess.available(level, positions) : 0L;
     }
 
     /** Drains the given mana amount across the structure's hatches (assumes availability). */
     public static void drain(Level level, List<BlockPos> positions, int amount) {
-        ManaHatchAccess.drain(level, positions, amount);
+        if (available()) {
+            ManaHatchAccess.drain(level, positions, amount);
+        }
     }
 }

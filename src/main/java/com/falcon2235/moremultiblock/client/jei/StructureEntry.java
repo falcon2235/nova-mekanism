@@ -30,7 +30,9 @@ public class StructureEntry {
         /** Void ore miner (drill rig: base plate, corner legs, glowing mast, crown platform). */
         DRILL,
         /** Oil drilling rig (GT fluid drill: 5x5 base, corner legs, drill-pipe string, crown). */
-        RIG
+        RIG,
+        /** Assembly line (GTCEu: casing floor, conveyor row, glass channel, grate roof). */
+        LINE
     }
 
     public final ResourceLocation id;

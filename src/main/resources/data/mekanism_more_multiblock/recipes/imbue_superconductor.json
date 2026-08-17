@@ -1,0 +1,9 @@
+{
+  "type": "ars_nouveau:imbuement",
+  "conditions": [{"type": "forge:mod_loaded", "modid": "ars_nouveau"}],
+  "count": 1,
+  "input": {"item": "mekanism_more_multiblock:uncharged_superconductor"},
+  "output": "mekanism_more_multiblock:superconductor",
+  "pedestalItems": [],
+  "source": 2000
+}

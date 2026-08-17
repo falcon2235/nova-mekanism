@@ -1,1 +1,18 @@
-{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": [" G ", "CMC", " R "], "key": {"G": {"tag": "forge:glass"}, "C": {"item": "mekanism:basic_control_circuit"}, "M": {"item": "mekanism_more_multiblock:multiblock_casing"}, "R": {"item": "minecraft:redstone"}}, "result": {"item": "mekanism_more_multiblock:construction_terminal", "count": 1}}
+{
+  "type": "ars_nouveau:enchanting_apparatus",
+  "conditions": [{"type": "forge:mod_loaded", "modid": "ars_nouveau"}],
+  "keepNbtOfReagent": false,
+  "output": {"item": "mekanism_more_multiblock:construction_terminal"},
+  "reagent": [{"item": "mekanism_more_multiblock:multiblock_casing"}],
+  "pedestalItems": [
+    {"item": "ars_nouveau:source_gem"},
+    {"item": "ars_nouveau:source_gem"},
+    {"item": "ars_nouveau:source_gem"},
+    {"item": "ars_nouveau:source_gem"},
+    {"item": "mekanism:basic_control_circuit"},
+    {"item": "mekanism:basic_control_circuit"},
+    {"tag": "forge:ingots/steel"},
+    {"tag": "forge:ingots/steel"}
+  ],
+  "sourceCost": 3000
+}

@@ -583,6 +583,88 @@ public final class ChemRecipes {
                         item(MMMRegistry.SUPERCONDUCTOR.get(), 16), GasStack.EMPTY, FluidStack.EMPTY,
                         60, 25_000L));
             }
+            case RESEARCH_STATION -> {
+                // GT-style scanning: a blank data orb + a sample of the finished part
+                // -> a research-data module for the assembly line. 20,000 RF/t, 2 min.
+                record Research(ItemStack sample, net.minecraftforge.registries.RegistryObject<net.minecraft.world.item.Item> data) {
+                }
+                for (Research research : new Research[]{
+                        new Research(item(MMMRegistry.SUPERCONDUCTOR.get(), 1), MMMRegistry.RESEARCH_DATA_SUPERCONDUCTOR),
+                        new Research(item(MMMRegistry.FUSION_COIL.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_FUSION),
+                        new Research(item(MMMRegistry.VOID_DRILL.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_VOID_MINING),
+                        new Research(item(MMMRegistry.TRANSDIMENSIONAL_ALLOY.get(), 1), MMMRegistry.RESEARCH_DATA_TRANSDIMENSIONAL)}) {
+                    list.add(new ChemRecipe(
+                            item(MMMRegistry.DATA_ORB.get(), 1), research.sample(),
+                            GasStack.EMPTY, FluidStack.EMPTY,
+                            item(research.data().get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
+                            2_400, 50_000L, 0));
+                }
+            }
+            case ASSEMBLY_LINE -> {
+                // GT assembly line: every recipe demands its research-data module.
+                // Bulk superconductors (the assembler still makes singles without research).
+                ItemStack elementiumBulk = loaded("botania") ? modItem("botania", "elementium_ingot", 4) : ItemStack.EMPTY;
+                ItemStack scBulkOut = loaded("ae2") ? item(MMMRegistry.UNCHARGED_SUPERCONDUCTOR.get(), 8)
+                        : item(MMMRegistry.SUPERCONDUCTOR.get(), 8);
+                list.add(researchNote(new ChemRecipe(
+                        item(MMMRegistry.NAQUADAH_ALLOY_INGOT.get(), 4), item(MMMRegistry.PLATINUM_INGOT.get(), 4),
+                        item(MMMRegistry.IRIDIUM_INGOT.get(), 4),
+                        elementiumBulk.isEmpty() ? item(MMMRegistry.RHODIUM_INGOT.get(), 4) : elementiumBulk,
+                        item(MMMRegistry.NAQUADAH_ENRICHED_INGOT.get(), 4),
+                        GasStack.EMPTY, GasStack.EMPTY, moltenSuperAlloy(576),
+                        scBulkOut, GasStack.EMPTY, FluidStack.EMPTY,
+                        600, 50_000L, 0), MMMRegistry.RESEARCH_DATA_SUPERCONDUCTOR));
+                // fusion reactor controller (moved off the crafting grid)
+                list.add(researchNote(new ChemRecipe(
+                        item(MMMRegistry.SUPERCONDUCTOR.get(), 8), item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 4),
+                        item(MMMRegistry.SPECIAL_STEEL_INGOT.get(), 16), item(MMMRegistry.FUSION_GLASS.get().asItem(), 4),
+                        item(MMMRegistry.NAQUADAH_ALLOY_INGOT.get(), 8),
+                        GasStack.EMPTY, GasStack.EMPTY, moltenSuperAlloy(1_152),
+                        new ItemStack(MMMRegistry.CHEM_CONTROLLERS.get(ChemMachineType.FUSION_REACTOR).get()),
+                        GasStack.EMPTY, FluidStack.EMPTY,
+                        1_200, 100_000L, 0), MMMRegistry.RESEARCH_DATA_FUSION));
+                // void ore miner controller (moved off the crafting grid)
+                ItemStack voidGem = loaded("botania") ? modItem("botania", "dragonstone", 4) : ItemStack.EMPTY;
+                list.add(researchNote(new ChemRecipe(
+                        item(MMMRegistry.NAQUADAH_ALLOY_INGOT.get(), 8), item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 4),
+                        item(MMMRegistry.VOID_MINER_CASING.get().asItem(), 2),
+                        voidGem.isEmpty() ? item(net.minecraft.world.item.Items.DIAMOND, 8) : voidGem,
+                        item(MMMRegistry.TITANIUM_INGOT.get(), 16),
+                        GasStack.EMPTY, GasStack.EMPTY, moltenNaquadahAlloy(288),
+                        new ItemStack(MMMRegistry.CHEM_CONTROLLERS.get(ChemMachineType.VOID_MINER).get()),
+                        GasStack.EMPTY, FluidStack.EMPTY,
+                        1_200, 100_000L, 0), MMMRegistry.RESEARCH_DATA_VOID_MINING));
+                // trans-dimensional circuit (moved from the circuit assembler)
+                ItemStack megaComponent = loaded("megacells") ? modItem("megacells", "cell_component_4m", 1) : ItemStack.EMPTY;
+                list.add(researchNote(new ChemRecipe(
+                        item(MMMRegistry.TRANSDIMENSIONAL_ALLOY.get(), 2), mekItem("ultimate_control_circuit", 2),
+                        item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 2), item(MMMRegistry.TRANSDIMENSIONAL_METAL.get(), 1),
+                        megaComponent.isEmpty() ? item(net.minecraft.world.item.Items.GOLD_INGOT, 2) : megaComponent,
+                        GasStack.EMPTY, GasStack.EMPTY, moltenStellarMatter(144),
+                        item(MMMRegistry.TRANSDIMENSIONAL_CIRCUIT.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
+                        600, 1_000_000_000L, 0), MMMRegistry.RESEARCH_DATA_TRANSDIMENSIONAL));
+            }
+            case GRAND_IMBUEMENT -> {
+                // Ars Nouveau imbuement, 16x parallel — energy stands in for source.
+                if (loaded("ars_nouveau")) {
+                    ItemStack sourceGem16 = modItem("ars_nouveau", "source_gem", 16);
+                    if (!sourceGem16.isEmpty()) {
+                        list.add(new ChemRecipe(
+                                item(net.minecraft.world.item.Items.LAPIS_LAZULI, 16), GasStack.EMPTY, FluidStack.EMPTY,
+                                sourceGem16.copy(), GasStack.EMPTY, FluidStack.EMPTY,
+                                100, 5_000L));
+                        list.add(new ChemRecipe(
+                                item(net.minecraft.world.item.Items.AMETHYST_SHARD, 16), GasStack.EMPTY, FluidStack.EMPTY,
+                                sourceGem16.copy(), GasStack.EMPTY, FluidStack.EMPTY,
+                                100, 5_000L));
+                    }
+                    // source-charging: the magical alternative to the AE2 charging route
+                    list.add(new ChemRecipe(
+                            item(MMMRegistry.UNCHARGED_SUPERCONDUCTOR.get(), 16), GasStack.EMPTY, FluidStack.EMPTY,
+                            item(MMMRegistry.SUPERCONDUCTOR.get(), 16), GasStack.EMPTY, FluidStack.EMPTY,
+                            60, 25_000L));
+                }
+            }
             case GRAND_MANA_POOL -> {
                 // Botania mana infusion, 16x parallel. Mana comes from the structure's
                 // mana hatches (spark them to pull from mana pools); energy runs the rig.
@@ -744,16 +826,8 @@ public final class ChemRecipes {
                         GasStack.EMPTY, GasStack.EMPTY, moltenSuperAlloy(144),
                         scOutput, GasStack.EMPTY, FluidStack.EMPTY,
                         400, 25_000L, 0));
-                // trans-dimensional circuit: alloy + supreme circuit + metal, soldered with
-                // molten stellar matter. With MEGA Cells the gold becomes a 4M cell component.
-                ItemStack megaComponent = loaded("megacells") ? modItem("megacells", "cell_component_4m", 1) : ItemStack.EMPTY;
-                list.add(new ChemRecipe(
-                        item(MMMRegistry.TRANSDIMENSIONAL_ALLOY.get(), 2), mekItem("ultimate_control_circuit", 2),
-                        item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 2), item(MMMRegistry.TRANSDIMENSIONAL_METAL.get(), 1),
-                        megaComponent.isEmpty() ? item(net.minecraft.world.item.Items.GOLD_INGOT, 2) : megaComponent,
-                        GasStack.EMPTY, GasStack.EMPTY, moltenStellarMatter(144),
-                        item(MMMRegistry.TRANSDIMENSIONAL_CIRCUIT.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
-                        600, 1_000_000_000L, 0));
+                // (the trans-dimensional circuit moved to the ASSEMBLY_LINE — it now
+                // needs trans-dimensional research data installed there)
             }
             case ELECTROLYZER -> {
                 // GTCEu: platinum raw powder -> platinum + chlorine
@@ -862,6 +936,16 @@ public final class ChemRecipes {
         return recipe.withNote(net.minecraft.network.chat.Component.translatable(
                 "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".press_req",
                 press.getHoverName()));
+    }
+
+    /** Marks an assembly-line recipe as requiring the given research-data module. */
+    private static ChemRecipe researchNote(ChemRecipe recipe,
+            net.minecraftforge.registries.RegistryObject<net.minecraft.world.item.Item> data) {
+        ItemStack module = item(data.get(), 1);
+        return recipe.requireUpgrade(module)
+                .withNote(net.minecraft.network.chat.Component.translatable(
+                        "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".research_req",
+                        module.getHoverName()));
     }
 
     /** JEI note showing a recipe's Botania mana cost. */

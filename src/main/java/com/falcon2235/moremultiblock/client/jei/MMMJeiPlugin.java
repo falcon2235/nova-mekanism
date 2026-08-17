@@ -125,6 +125,7 @@ public class MMMJeiPlugin implements IModPlugin {
             boolean collider = type == ChemMachineType.HADRON_COLLIDER;
             boolean voidMiner = type == ChemMachineType.VOID_MINER;
             boolean oilRig = type == ChemMachineType.OIL_RIG;
+            boolean assline = type == ChemMachineType.ASSEMBLY_LINE;
             if (fusion) {
                 coil = MMMRegistry.FUSION_COIL.get();
             } else if (collider) {
@@ -133,11 +134,13 @@ public class MMMJeiPlugin implements IModPlugin {
                 coil = MMMRegistry.VOID_DRILL.get();
             } else if (oilRig) {
                 coil = MMMRegistry.DRILL_PIPE.get();
+            } else if (assline || assembly) {
+                coil = MMMRegistry.ASSLINE_CONVEYOR.get();
             }
             // "accent" block: heat vent (barrel), glass roof (assembly), fusion/face glass,
             // stabilizer glass panels
             Block vent = barrel ? MMMRegistry.HEAT_VENT.get()
-                    : assembly ? MMMRegistry.ASSEMBLY_GLASS.get()
+                    : (assembly || assline) ? MMMRegistry.ASSEMBLY_GLASS.get()
                     : stabilizer ? MMMRegistry.STABILIZER_GLASS.get()
                     : (fusion || star || collider) ? MMMRegistry.FUSION_GLASS.get() : null;
             StructureEntry.Mode mode = barrel ? StructureEntry.Mode.BARREL
@@ -148,6 +151,7 @@ public class MMMJeiPlugin implements IModPlugin {
                     : collider ? StructureEntry.Mode.LOOP
                     : voidMiner ? StructureEntry.Mode.DRILL
                     : oilRig ? StructureEntry.Mode.RIG
+                    : assline ? StructureEntry.Mode.LINE
                     : type.coilTower ? StructureEntry.Mode.TOWER : StructureEntry.Mode.BOX;
             var chemState = block.defaultBlockState().setValue(ChemMachineBlock.FACING, Direction.NORTH);
             list.add(new StructureEntry(

@@ -533,6 +533,89 @@ public final class MultiblockValidator {
         return null;
     }
 
+    public static final int ASSLINE_WIDTH = 3;    // slice width
+    public static final int ASSLINE_HEIGHT = 4;   // floor, conveyor row, glass channel, grate roof
+    public static final int ASSLINE_LENGTH = 8;   // slices back from the controller
+
+    /**
+     * Classifies a GTCEu assembly line cell, copied from GTCEu's pattern
+     * <pre>slice("FIF", "RTR", "SAG", "#Y#")</pre>
+     * The line runs backwards from the controller; each slice, bottom to top:
+     * <pre>
+     * u=3   (open)  casing/energy  (open)     — "#Y#"
+     * u=2   S/grate  casing        grate      — "SAG" (controller at u=2 left, d=0)
+     * u=1   glass    assembly arm  glass      — "RTR"
+     * u=0   casing   casing(bus)   casing     — "FIF"
+     * </pre>
+     * {@code r} is 0..2 measured rightward from the controller's column.
+     * Returns 0 = not part of the structure (GT "any", unchecked), 1 = casing
+     * (ports allowed), 2 = assembly arm (conveyor), 3 = laminated glass, 4 = grate.
+     */
+    public static int asslineKind(int d, int r, int u) {
+        return switch (u) {
+            case 0 -> 1;                                   // FIF: casing floor + bus line
+            case 1 -> r == 1 ? 2 : 3;                      // RTR: glass walls, arm centre
+            case 2 -> r == 1 ? 1 : 4;                      // SAG/DAG: grates, control casing centre
+            default -> r == 1 ? 1 : 0;                     // #Y#: only the centre exists
+        };
+    }
+
+    /**
+     * Validates the GTCEu-style assembly line (see {@link #asslineKind}). The
+     * controller sits at d=0, u=2, in the LEFT column of the line. Casing cells
+     * accept a port; arm/glass/grate cells are exact; "any" cells are unchecked.
+     */
+    public static Component validateAssline(Level level, BlockPos controllerPos, Direction facing,
+                                            Block casing, Block conveyor, Block glass, Block grate,
+                                            List<BlockPos> portsOut) {
+        Direction back = facing.getOpposite();
+        Direction right = facing.getClockWise();
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+
+        for (int d = 0; d < ASSLINE_LENGTH; d++) {
+            for (int u = 0; u < ASSLINE_HEIGHT; u++) {
+                for (int r = 0; r <= 2; r++) {
+                    if (d == 0 && u == 2 && r == 0) {
+                        continue; // the controller itself
+                    }
+                    int kind = asslineKind(d, r, u);
+                    if (kind == 0) {
+                        continue; // "any" cell — not part of the structure
+                    }
+                    cursor.set(controllerPos).move(back, d).move(Direction.UP, u - 2).move(right, r);
+                    BlockState state = level.getBlockState(cursor);
+                    switch (kind) {
+                        case 2 -> {
+                            if (!state.is(conveyor)) {
+                                return Component.translatable(LANG + "invalid_coil", posString(cursor));
+                            }
+                        }
+                        case 3 -> {
+                            if (!state.is(glass)) {
+                                return Component.translatable(LANG + "invalid_glass", posString(cursor));
+                            }
+                        }
+                        case 4 -> {
+                            if (!state.is(grate)) {
+                                return Component.translatable(LANG + "invalid_vent", posString(cursor));
+                            }
+                        }
+                        default -> { // casing (floor, control centre, energy spine)
+                            if (state.getBlock() instanceof PortBlock) {
+                                if (portsOut != null) {
+                                    portsOut.add(cursor.immutable());
+                                }
+                            } else if (!state.is(casing)) {
+                                return Component.translatable(LANG + "invalid_wall", posString(cursor));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     /** Width offset of grid column {@code rr}: the controller column ({@code rr = 7}) maps to r = 0. */
     private static int stabilizerR(int rr) {
         return rr - (STABILIZER_SIZE / 2 - 1);
@@ -656,19 +739,20 @@ public final class MultiblockValidator {
 
     /**
      * Validates the Circuit Assembly Line, copied from GTNH/BartWorks'
-     * {@code MTECircuitAssemblyLine} slice layout (rotated so the line runs backwards
-     * from the controller):
+     * {@code MTECircuitAssemblyLine} slice layout (the line runs backwards from the
+     * controller; GT's original extends sideways, same slices):
      * <pre>
-     * top layer     casing  casing  casing   (grate roof; controller front-centre)
-     * middle layer  glass   casing  glass    (glass side walls, solid casing spine)
-     * bottom layer  casing  casing  casing   (floor / bus line)
+     * top layer     grate   grate     grate   (grate roof; controller front-centre)
+     * middle layer  glass   assembly  glass   (glass side walls, assembly-arm spine)
+     * bottom layer  casing  casing    casing  (floor; buses/ports live here)
      * </pre>
      * The controller sits on the TOP layer at the front centre, like the GT original.
-     * Ports may replace casing on the top and bottom layers; the glass walls and the
-     * middle spine must be exact.
+     * Ports may replace casing on the bottom layer only; grates, glass walls and the
+     * assembly-arm spine must be exact.
      */
     public static Component validateAssemblyLine(Level level, BlockPos controllerPos, Direction facing,
-                                                 Block casing, Block glass, int width, int height, int depth,
+                                                 Block casing, Block glass, Block conveyor, Block grate,
+                                                 int width, int height, int depth,
                                                  List<BlockPos> portsOut) {
         Direction back = facing.getOpposite();
         Direction right = facing.getClockWise();
@@ -685,17 +769,20 @@ public final class MultiblockValidator {
                         continue;
                     }
                     BlockState state = level.getBlockState(cursor);
-                    boolean middle = k >= 1 && k <= height - 2;
-
-                    if (middle) {
+                    if (k == 0) {
+                        // grate roof
+                        if (!state.is(grate)) {
+                            return Component.translatable(LANG + "invalid_vent", posString(cursor));
+                        }
+                    } else if (k <= height - 2) {
                         if (Math.abs(r) == halfW) {
                             // glass side walls
                             if (!state.is(glass)) {
                                 return Component.translatable(LANG + "invalid_glass", posString(cursor));
                             }
-                        } else if (!state.is(casing)) {
-                            // solid assembly-casing spine (no ports here)
-                            return Component.translatable(LANG + "invalid_wall", posString(cursor));
+                        } else if (!state.is(conveyor)) {
+                            // assembly-arm spine down the middle
+                            return Component.translatable(LANG + "invalid_coil", posString(cursor));
                         }
                     } else if (state.getBlock() instanceof PortBlock) {
                         if (portsOut != null) {

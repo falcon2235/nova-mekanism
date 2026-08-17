@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "conditions": [{"type": "forge:not", "value": {"type": "forge:mod_loaded", "modid": "ars_nouveau"}}],
+  "pattern": ["GCG", "CEC", "GCG"],
+  "key": {
+    "G": {"item": "minecraft:gold_ingot"},
+    "C": {"item": "mekanism:elite_control_circuit"},
+    "E": {"item": "mekanism:teleportation_core"}
+  },
+  "result": {"item": "mekanism_more_multiblock:data_orb", "count": 2}
+}

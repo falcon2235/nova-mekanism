@@ -163,6 +163,19 @@ public final class MMMRegistry {
     // Botania integration: mana pool / elven gate / terra plate machine casings
     public static final RegistryObject<Block> LIVINGROCK_CASING =
             registerBlock("livingrock_casing", () -> new Block(props()));
+    // assembly line (GTCEu style) + research station casings
+    public static final RegistryObject<Block> ASSLINE_CASING =
+            registerBlock("assline_casing", () -> new Block(props()));
+    public static final RegistryObject<Block> ASSLINE_GRATE =
+            registerBlock("assline_grate", () -> new Block(props()));
+    public static final RegistryObject<Block> ASSLINE_CONVEYOR =
+            registerBlock("assline_conveyor", () -> new Block(props()));
+    public static final RegistryObject<Block> RESEARCH_CASING =
+            registerBlock("research_casing", () -> new Block(props()));
+    // Ars Nouveau integration: grand imbuement chamber casing
+    public static final RegistryObject<Block> SOURCESTONE_CASING =
+            registerBlock("sourcestone_casing", () -> new Block(props().lightLevel(state -> 5)));
+
     /** Mana hatch: buffers mana for the Botania machines; accepts a spark on top. */
     public static final RegistryObject<com.falcon2235.moremultiblock.block.ManaHatchBlock> MANA_HATCH =
             registerBlock("mana_hatch", () -> new com.falcon2235.moremultiblock.block.ManaHatchBlock(props()));
@@ -334,6 +347,13 @@ public final class MMMRegistry {
     public static final RegistryObject<Item> SUPERCONDUCTOR = registerItem("superconductor");
     /** Assembler output that must be charged (AE2 charger / large charger) into a superconductor. */
     public static final RegistryObject<Item> UNCHARGED_SUPERCONDUCTOR = registerItem("uncharged_superconductor");
+    /** Blank research medium consumed by the research station. */
+    public static final RegistryObject<Item> DATA_ORB = registerItem("data_orb");
+    // research-data modules: install in the assembly line's module slot to unlock recipes
+    public static final RegistryObject<Item> RESEARCH_DATA_SUPERCONDUCTOR = registerItem("research_data_superconductor");
+    public static final RegistryObject<Item> RESEARCH_DATA_FUSION = registerItem("research_data_fusion");
+    public static final RegistryObject<Item> RESEARCH_DATA_VOID_MINING = registerItem("research_data_void_mining");
+    public static final RegistryObject<Item> RESEARCH_DATA_TRANSDIMENSIONAL = registerItem("research_data_transdimensional");
     /** Black hole seed: the artificial star generator's pinnacle product. */
     public static final RegistryObject<Item> BLACK_HOLE_SEED = registerItem("black_hole_seed");
     /** Reactor module (antimatter-forged) that unlocks the alternative polonium synthesis recipe. */
@@ -465,6 +485,9 @@ public final class MMMRegistry {
             case GRAND_MANA_POOL -> LIVINGROCK_CASING.get();
             case GRAND_ELVEN_GATE -> ELVEN_GATE_CASING.get();
             case GRAND_TERRA_PLATE -> TERRA_PLATE_CASING.get();
+            case RESEARCH_STATION -> RESEARCH_CASING.get();
+            case ASSEMBLY_LINE -> ASSLINE_CASING.get();
+            case GRAND_IMBUEMENT -> SOURCESTONE_CASING.get();
         };
     }
 

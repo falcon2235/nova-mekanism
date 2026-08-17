@@ -50,9 +50,11 @@ public class ChemMachineMenu extends AbstractContainerMenu {
             });
         }
         // upgrade slots: speed, energy, and a special module slot below
-        addSlot(new SlotItemHandler(be.getUpgrades(), 0, 134, 25));
-        addSlot(new SlotItemHandler(be.getUpgrades(), 1, 134, 47));
-        addSlot(new SlotItemHandler(be.getUpgrades(), 2, 134, 65));
+        // Upgrade column: kept inside the machine area so the bottom slot never
+        // crosses into the inventory label / player inventory below.
+        addSlot(new SlotItemHandler(be.getUpgrades(), 0, 134, 17));
+        addSlot(new SlotItemHandler(be.getUpgrades(), 1, 134, 37));
+        addSlot(new SlotItemHandler(be.getUpgrades(), 2, 134, 57));
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {

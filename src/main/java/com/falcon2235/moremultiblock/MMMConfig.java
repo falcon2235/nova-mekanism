@@ -46,6 +46,16 @@ public final class MMMConfig {
     private static final ForgeConfigSpec.LongValue CONDUIT_GAS_MB_PER_TICK;
     private static final ForgeConfigSpec.IntValue CONDUIT_ITEMS_PER_PULL;
 
+    // --- modpack integration switches ---
+    private static final ForgeConfigSpec.BooleanValue HARDEN_MEKANISM_RECIPES;
+    private static final java.util.Map<String, ForgeConfigSpec.BooleanValue> ORE_GENERATION =
+            new java.util.LinkedHashMap<>();
+
+    /** Ores this mod can generate; pack authors disable the ones their pack already covers. */
+    public static final java.util.List<String> ORE_NAMES = java.util.List.of(
+            "titanium", "magnesium", "nickel", "chromium", "bauxite",
+            "cooperite", "saltpeter", "antimony", "naquadah");
+
     // --- global balance multipliers ---
     private static final ForgeConfigSpec.DoubleValue RECIPE_ENERGY_MULTIPLIER;
     private static final ForgeConfigSpec.DoubleValue RECIPE_TIME_MULTIPLIER;
@@ -109,6 +119,24 @@ public final class MMMConfig {
         COLLIDER_ANTIMATTER_MB_PER_OP = b
                 .comment("Antimatter produced per 5-second operation (mB). 500 = 5 mB/t.")
                 .defineInRange("antimatterMbPerOperation", 500, 1, 64_000);
+        b.pop();
+
+        b.comment("Switches for modpack authors: world generation and the changes this",
+                        "mod makes to other mods' recipes.")
+                .push("integration");
+        HARDEN_MEKANISM_RECIPES = b
+                .comment("Apply this mod's high-priority data pack, which hardens some Mekanism",
+                        "recipes (SPS, fission reactor casing, enriched iron, gas-burning",
+                        "generator, digital miner). Set false to leave Mekanism untouched.",
+                        "Takes effect on game restart.")
+                .define("hardenMekanismRecipes", true);
+        b.comment("Per-ore world generation. Disable the ores your pack already covers",
+                        "with another mod. Takes effect for newly generated chunks.")
+                .push("ore_generation");
+        for (String ore : ORE_NAMES) {
+            ORE_GENERATION.put(ore, b.define(ore, true));
+        }
+        b.pop();
         b.pop();
 
         b.comment("Quantum conduits (the transmitter tier above Mekanism's ultimate).",
@@ -235,6 +263,17 @@ public final class MMMConfig {
 
     public static int conduitItemsPerPull() {
         return get(CONDUIT_ITEMS_PER_PULL, 64);
+    }
+
+    /** Whether the bundled override pack (which nerfs some Mekanism recipes) is applied. */
+    public static boolean hardenMekanismRecipes() {
+        return get(HARDEN_MEKANISM_RECIPES, Boolean.TRUE);
+    }
+
+    /** Whether the named ore should be placed by world generation. */
+    public static boolean generateOre(String ore) {
+        ForgeConfigSpec.BooleanValue value = ORE_GENERATION.get(ore);
+        return value == null || get(value, Boolean.TRUE);
     }
 
     public static double recipeEnergyMultiplier() {

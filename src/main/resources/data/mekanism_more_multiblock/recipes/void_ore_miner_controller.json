@@ -1,1 +1,0 @@
-{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["ACA", "CNC", "ACA"], "key": {"A": {"item": "mekanism_more_multiblock:naquadah_alloy_ingot"}, "C": {"item": "mekanism_more_multiblock:supreme_control_circuit"}, "N": {"item": "mekanism_more_multiblock:void_miner_casing"}}, "result": {"item": "mekanism_more_multiblock:void_ore_miner_controller", "count": 1}}

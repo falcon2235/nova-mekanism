@@ -3,6 +3,53 @@
 All notable changes to Nova Mekanism are documented here. This project targets
 Minecraft 1.20.1 (Forge) and follows loose semantic versioning.
 
+## [1.1.1] - 2026-08-17
+
+### Added
+- **Assembly Line** (3×4×8) and **Research Station** (3×3×3), modelled on
+  GregTech's: scan a sample part plus a blank **data orb** into **research
+  data**, install that data in the assembly line's module slot, and it unlocks
+  the recipes gated behind it — the fusion reactor and void ore miner
+  controllers (both moved off the crafting grid), bulk superconductors and the
+  trans-dimensional circuit.
+- **Ars Nouveau integration** — a **Grand Imbuement Chamber** (3×3×3) running
+  imbuement 16 at a time, plus source-charging for superconductors. The
+  construction terminal is forged in the enchanting apparatus and the data orb
+  uses source gems when Ars is present.
+
+### Changed — modpack readiness
+- **AE2, Botania, MEGA Cells, Draconic Evolution and Ars Nouveau are now
+  OPTIONAL dependencies.** Six items that previously only had a modded recipe
+  (annihilation casing, LHC controller, collider magnet, void drill,
+  construction terminal, data orb) gained workbench fallbacks, so the
+  progression is completable with Mekanism alone.
+- New `[integration]` config: `hardenMekanismRecipes` turns off the bundled
+  Mekanism recipe nerfs entirely, and `[integration.ore_generation]` switches
+  each of the nine ores off individually (via a config-aware biome modifier)
+  for packs that already cover them.
+- Complete **Forge tags**: `forge:ores/*` for all nine ores (+ deepslate),
+  `forge:raw_materials/*`, and the umbrella `forge:ores` / `forge:raw_materials`
+  tags, so recipe unifiers and other mods see our materials.
+- The Gas-Burning Generator now unlocks at cupronickel + advanced circuits
+  (was titanium + elite), moving it one step earlier.
+- Assembly line and circuit assembly line structures rebuilt to match the
+  GTCEu / GTNH originals (grate roofs, assembly arms, laminated glass).
+
+### Fixed
+- **22 blocks dropped nothing when mined** — every block added since 1.0.3 was
+  missing from `minecraft:mineable/pickaxe` while using
+  `requiresCorrectToolForDrops()`. Tags are now generated from the registry so
+  they cannot drift again.
+- The machine GUI now shows the structure validator's message, with the
+  offending block's coordinates, instead of a bare "NOT FORMED"; bars gained
+  value tooltips.
+- GUI/JEI overlaps: the progress arrow no longer sits under the output slots,
+  recipe energy text no longer runs under the output column, and the structure
+  preview is clipped into its own box so it cannot cover the bill of materials
+  in any recipe viewer.
+- Ingot, dust and raw-ore textures redrawn in Mekanism's visual language;
+  casing textures gained metal grain and directional shading.
+
 ## [1.1.0] - 2026-07-13
 
 ### Added — cross-mod integration (AE2, Botania, MEGA Cells, Draconic Evolution are now required)
@@ -125,6 +172,7 @@ Minecraft 1.20.1 (Forge) and follows loose semantic versioning.
   materials, a craftable Creative Energy Cube, and a construction terminal that
   auto-builds any structure.
 
+[1.1.1]: https://github.com/falcon2235/nova-mekanism/releases/tag/v1.1.1
 [1.1.0]: https://github.com/falcon2235/nova-mekanism/releases/tag/v1.1.0
 [1.0.4]: https://github.com/falcon2235/nova-mekanism/releases/tag/v1.0.4
 [1.0.3]: https://github.com/falcon2235/nova-mekanism/releases/tag/v1.0.3

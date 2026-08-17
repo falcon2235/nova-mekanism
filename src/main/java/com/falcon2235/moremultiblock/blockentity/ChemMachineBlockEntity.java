@@ -102,7 +102,8 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
             return switch (slot) {
                 case 0 -> ControllerBlockEntity.isSpeedUpgrade(stack);
                 case 1 -> ControllerBlockEntity.isEnergyUpgrade(stack);
-                default -> stack.is(MMMRegistry.POLONIUM_SYNTHESIS_UPGRADE.get()) || isInscriberPress(stack);
+                default -> stack.is(MMMRegistry.POLONIUM_SYNTHESIS_UPGRADE.get()) || isInscriberPress(stack)
+                        || isResearchData(stack);
             };
         }
 
@@ -274,6 +275,8 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
             case GRAND_MANA_POOL -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.STAINLESS;
             case GRAND_ELVEN_GATE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ASSEMBLY;
             case GRAND_TERRA_PLATE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ALLOY;
+            case RESEARCH_STATION, ASSEMBLY_LINE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ASSEMBLY;
+            case GRAND_IMBUEMENT -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.STAINLESS;
         };
     }
 
@@ -294,6 +297,7 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
         } else if (type == ChemMachineType.CIRCUIT_ASSEMBLER) {
             error = MultiblockValidator.validateAssemblyLine(level, worldPosition, facing,
                     MMMRegistry.chemCasing(type), MMMRegistry.ASSEMBLY_GLASS.get(),
+                    MMMRegistry.ASSLINE_CONVEYOR.get(), MMMRegistry.ASSLINE_GRATE.get(),
                     type.width, type.height, type.depth, ports);
         } else if (type == ChemMachineType.FUSION_REACTOR) {
             error = MultiblockValidator.validateFusion(level, worldPosition, facing,
@@ -315,6 +319,10 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
         } else if (type == ChemMachineType.OIL_RIG) {
             error = MultiblockValidator.validateOilRig(level, worldPosition, facing,
                     MMMRegistry.chemCasing(type), MMMRegistry.DRILL_PIPE.get(), ports);
+        } else if (type == ChemMachineType.ASSEMBLY_LINE) {
+            error = MultiblockValidator.validateAssline(level, worldPosition, facing,
+                    MMMRegistry.chemCasing(type), MMMRegistry.ASSLINE_CONVEYOR.get(),
+                    MMMRegistry.ASSEMBLY_GLASS.get(), MMMRegistry.ASSLINE_GRATE.get(), ports);
         } else if (type.coilTower) {
             error = MultiblockValidator.validateEbf(level, worldPosition, facing,
                     MMMRegistry.chemCasing(type), type.height, ports, coilTierOut);
@@ -333,7 +341,14 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
                 }
             }
         }
-        statusMessage = formed ? Component.translatable(LANG + "formed_simple") : error;
+        Component newStatus = formed ? Component.translatable(LANG + "formed_simple") : error;
+        // Sync the status to clients when it changes so the GUI can show exactly which
+        // block is wrong (invaluable for the 33x33 structures).
+        if (!newStatus.equals(statusMessage)) {
+            statusMessage = newStatus;
+            BlockState state = getBlockState();
+            level.sendBlockUpdated(worldPosition, state, state, net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
+        }
         revalidateIn = formed ? REVALIDATE_FORMED : REVALIDATE_UNFORMED;
     }
 
@@ -677,6 +692,14 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
         net.minecraft.resources.ResourceLocation id =
                 net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());
         return id != null && "ae2".equals(id.getNamespace()) && id.getPath().endsWith("_press");
+    }
+
+    /** Whether the stack is one of this mod's research-data modules (assembly line unlocks). */
+    public static boolean isResearchData(ItemStack stack) {
+        return stack.is(MMMRegistry.RESEARCH_DATA_SUPERCONDUCTOR.get())
+                || stack.is(MMMRegistry.RESEARCH_DATA_FUSION.get())
+                || stack.is(MMMRegistry.RESEARCH_DATA_VOID_MINING.get())
+                || stack.is(MMMRegistry.RESEARCH_DATA_TRANSDIMENSIONAL.get());
     }
 
     /** Whether the recipe's required upgrade module (if any) is installed in the special slot. */
@@ -1301,12 +1324,25 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
     public CompoundTag getUpdateTag() {
         CompoundTag tag = new CompoundTag();
         tag.putBoolean("Active", active);
+        tag.putBoolean("Formed", formed);
+        if (statusMessage != null) {
+            tag.putString("Status", Component.Serializer.toJson(statusMessage));
+        }
         return tag;
     }
 
     @Override
     public void handleUpdateTag(CompoundTag tag) {
         active = tag.getBoolean("Active");
+        if (tag.contains("Formed")) {
+            formed = tag.getBoolean("Formed");
+        }
+        if (tag.contains("Status")) {
+            Component parsed = Component.Serializer.fromJson(tag.getString("Status"));
+            if (parsed != null) {
+                statusMessage = parsed;
+            }
+        }
     }
 
     @Nullable
