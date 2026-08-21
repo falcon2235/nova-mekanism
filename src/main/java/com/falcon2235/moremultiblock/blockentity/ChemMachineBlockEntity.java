@@ -103,7 +103,7 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
                 case 0 -> ControllerBlockEntity.isSpeedUpgrade(stack);
                 case 1 -> ControllerBlockEntity.isEnergyUpgrade(stack);
                 default -> stack.is(MMMRegistry.POLONIUM_SYNTHESIS_UPGRADE.get()) || isInscriberPress(stack)
-                        || isResearchData(stack);
+                        || isResearchData(stack) || isMatterPattern(stack);
             };
         }
 
@@ -277,6 +277,7 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
             case GRAND_TERRA_PLATE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ALLOY;
             case RESEARCH_STATION, ASSEMBLY_LINE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ASSEMBLY;
             case GRAND_IMBUEMENT -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.STAINLESS;
+            case MATTER_REPLICATOR -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.FUSION;
         };
     }
 
@@ -303,7 +304,8 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
             error = MultiblockValidator.validateFusion(level, worldPosition, facing,
                     MMMRegistry.chemCasing(type), MMMRegistry.FUSION_COIL.get(),
                     MMMRegistry.FUSION_GLASS.get(), ports);
-        } else if (type == ChemMachineType.STAR_GENERATOR || type == ChemMachineType.ANNIHILATION_GENERATOR) {
+        } else if (type == ChemMachineType.STAR_GENERATOR || type == ChemMachineType.ANNIHILATION_GENERATOR
+                || type == ChemMachineType.MATTER_REPLICATOR) {
             error = MultiblockValidator.validateStar(level, worldPosition, facing,
                     MMMRegistry.chemCasing(type), MMMRegistry.FUSION_GLASS.get(), type.width, ports);
         } else if (type == ChemMachineType.STABILIZER) {
@@ -657,7 +659,8 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
 
     @Nullable
     private ChemRecipe findRecipe() {
-        for (ChemRecipe recipe : ChemRecipes.get(machineType())) {
+        // Most-specific-first: a broader recipe must not shadow a narrower one.
+        for (ChemRecipe recipe : ChemRecipes.getForMatching(machineType())) {
             if (recipe.coilTier <= coilTier && canRun(recipe)) {
                 return recipe;
             }
@@ -699,7 +702,23 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
         return stack.is(MMMRegistry.RESEARCH_DATA_SUPERCONDUCTOR.get())
                 || stack.is(MMMRegistry.RESEARCH_DATA_FUSION.get())
                 || stack.is(MMMRegistry.RESEARCH_DATA_VOID_MINING.get())
-                || stack.is(MMMRegistry.RESEARCH_DATA_TRANSDIMENSIONAL.get());
+                || stack.is(MMMRegistry.RESEARCH_DATA_TRANSDIMENSIONAL.get())
+                || stack.is(MMMRegistry.RESEARCH_DATA_CRYOGENICS.get())
+                || stack.is(MMMRegistry.RESEARCH_DATA_METALLURGY.get())
+                || stack.is(MMMRegistry.RESEARCH_DATA_PETROCHEMISTRY.get())
+                || stack.is(MMMRegistry.RESEARCH_DATA_PARTICLE.get())
+                || stack.is(MMMRegistry.RESEARCH_DATA_ANTIMATTER.get())
+                || stack.is(MMMRegistry.RESEARCH_DATA_REPLICATION.get())
+                || stack.is(MMMRegistry.RESEARCH_DATA_DIGITAL.get())
+                || stack.is(MMMRegistry.RESEARCH_DATA_ARCANE.get());
+    }
+
+    /** Whether the stack is an imprinted matter pattern (the replicator's module). */
+    public static boolean isMatterPattern(ItemStack stack) {
+        return stack.is(MMMRegistry.PATTERN_NETHER_STAR.get())
+                || stack.is(MMMRegistry.PATTERN_DRAGON_EGG.get())
+                || stack.is(MMMRegistry.PATTERN_CHAOS_SHARD.get())
+                || stack.is(MMMRegistry.PATTERN_GAIA_SPIRIT.get());
     }
 
     /** Whether the recipe's required upgrade module (if any) is installed in the special slot. */
@@ -765,7 +784,9 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
      * matching stacks or claiming empty slots.
      */
     private boolean fitsItemOutputs(ChemRecipe r) {
-        java.util.List<ItemStack> outs = r.itemOutputs();
+        // Includes the chance output: the machine waits rather than rolling a rare
+        // result it has nowhere to put.
+        java.util.List<ItemStack> outs = r.allPossibleOutputs();
         if (outs.isEmpty()) {
             return true;
         }
@@ -837,6 +858,11 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
         }
         for (ItemStack out : r.itemOutputs()) {
             insertItemOutput(out.copy());
+        }
+        // GT-style chance output, rolled once per completed operation
+        if (!r.chanceOutput.isEmpty() && level != null
+                && level.random.nextInt(100) < r.chancePercent) {
+            insertItemOutput(r.chanceOutput.copy());
         }
         if (!r.gasOutput.isEmpty()) {
             gasOut = growGas(gasOut, r.gasOutput);

@@ -146,6 +146,8 @@ New-Raw 'raw_magnesium' (C 154 160 168) (C 190 196 204) (C 108 114 122)
 New-Raw 'raw_naquadah'  (C 40 78 52)    (C 88 160 104)  (C 24 50 32)
 New-Raw 'raw_nickel'    (C 176 182 160) (C 208 214 192) (C 128 134 112)
 New-Raw 'raw_titanium'  (C 110 123 139) (C 150 163 179) (C 74 85 104)
+New-Raw 'raw_zinc'      (C 156 172 182) (C 198 214 224) (C 106 120 130)
+New-Raw 'singularity_fragment' (C 62 40 96)   (C 168 120 235) (C 30 16 52)
 
 # ---------------- ingots ----------------
 New-Ingot 'aluminum_ingot'          (C 214 220 228) (C 240 244 250) (C 156 164 176)
@@ -164,9 +166,12 @@ New-Ingot 'special_steel_ingot'     (C 130 144 166) (C 176 192 214) (C 84 96 116
 New-Ingot 'super_alloy_ingot'       (C 152 122 186) (C 202 180 228) (C 100 74 132)
 New-Ingot 'titanium_ingot'          (C 192 200 208) (C 224 232 240) (C 130 140 152)
 New-Ingot 'trinium_ingot'           (C 214 206 162) (C 244 238 206) (C 158 150 108)
+New-Ingot 'zinc_ingot'                (C 186 200 206) (C 224 238 242) (C 126 140 148)
+New-Ingot 'extra_super_duralumin_ingot' (C 206 200 182) (C 240 236 218) (C 146 140 122)
 New-Ingot 'transdimensional_metal'  (C 176 110 210) (C 226 176 250) (C 108 58 140)
 New-Ingot 'transdimensional_alloy'  (C 132 84 196)  (C 196 150 246) (C 78 42 126)
 New-Ingot 'neutronium'              (C 232 232 236) (C 255 255 255) (C 150 150 158)
+New-Ingot 'graviton_alloy_ingot'     (C 92 178 214)  (C 168 238 255) (C 46 110 148)
 
 # ---------------- dusts ----------------
 New-Dust 'alumina'                    (C 242 242 244) (C 255 255 255)
@@ -206,4 +211,8 @@ New-Dust 'super_alloy_dust'           (C 158 130 190) (C 206 186 230)
 New-Dust 'titanium_dust'              (C 196 200 206) (C 232 236 242)
 New-Dust 'titanium_oxide'             (C 232 234 238) (C 255 255 255)
 New-Dust 'trinium_sulfide'            (C 206 196 150) (C 238 230 190)
+New-Dust 'zinc_dust'                    (C 180 196 204) (C 220 234 240)
+New-Dust 'neutron_rich_mass'             (C 208 210 220) (C 244 246 252)
+New-Dust 'stellar_ash'                   (C 118 106 94)  (C 168 152 132)
+New-Dust 'extra_super_duralumin_dust'   (C 202 196 178) (C 238 234 214)
 Write-Host 'done'

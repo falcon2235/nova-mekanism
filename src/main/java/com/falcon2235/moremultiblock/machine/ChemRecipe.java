@@ -40,6 +40,10 @@ public class ChemRecipe {
     public net.minecraft.network.chat.Component note;
     /** Botania mana this recipe drains from the structure's mana hatches; 0 = none. */
     public int manaCost;
+    /** Extra output rolled per operation (GT-style chance output); EMPTY = none. */
+    public ItemStack chanceOutput = ItemStack.EMPTY;
+    /** Percent chance (1-100) that {@link #chanceOutput} is produced. */
+    public int chancePercent;
     /**
      * Minimum heating-coil tier required (blast furnace only; 0 elsewhere).
      * Each coil tier above this halves the processing time.
@@ -134,6 +138,16 @@ public class ChemRecipe {
         return this;
     }
 
+    /**
+     * Fluent: add a GT-style chance output — rolled once per completed operation.
+     * The machine only runs when there is room for it, so a roll is never voided.
+     */
+    public ChemRecipe withChance(ItemStack output, int percent) {
+        this.chanceOutput = output;
+        this.chancePercent = Math.max(1, Math.min(100, percent));
+        return this;
+    }
+
     /** The non-empty item outputs, in slot order. */
     public java.util.List<ItemStack> itemOutputs() {
         java.util.List<ItemStack> list = new java.util.ArrayList<>(4);
@@ -141,6 +155,26 @@ public class ChemRecipe {
             if (!out.isEmpty()) {
                 list.add(out);
             }
+        }
+        return list;
+    }
+
+    /** The non-empty item INPUTS, in slot order (used by the shadowing audit). */
+    public java.util.List<ItemStack> itemOutputsInputs() {
+        java.util.List<ItemStack> list = new java.util.ArrayList<>(5);
+        for (ItemStack in : new ItemStack[]{itemInput, itemInput2, itemInput3, itemInput4, itemInput5}) {
+            if (!in.isEmpty()) {
+                list.add(in);
+            }
+        }
+        return list;
+    }
+
+    /** Guaranteed outputs plus the chance output, for output-space checks. */
+    public java.util.List<ItemStack> allPossibleOutputs() {
+        java.util.List<ItemStack> list = itemOutputs();
+        if (!chanceOutput.isEmpty()) {
+            list.add(chanceOutput);
         }
         return list;
     }

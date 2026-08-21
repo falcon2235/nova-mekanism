@@ -53,7 +53,7 @@ public final class MMMConfig {
 
     /** Ores this mod can generate; pack authors disable the ones their pack already covers. */
     public static final java.util.List<String> ORE_NAMES = java.util.List.of(
-            "titanium", "magnesium", "nickel", "chromium", "bauxite",
+            "titanium", "magnesium", "nickel", "chromium", "bauxite", "zinc",
             "cooperite", "saltpeter", "antimony", "naquadah");
 
     // --- global balance multipliers ---

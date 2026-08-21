@@ -3,6 +3,60 @@
 All notable changes to Nova Mekanism are documented here. This project targets
 Minecraft 1.20.1 (Forge) and follows loose semantic versioning.
 
+## [1.1.2] - 2026-08-22
+
+### Added — rare-material replication
+- **Matter Replicator** (5×5×5 containment sphere): dissolve a rare artefact
+  with a blank **matter pattern** in the Large Chemical Reactor — the artefact
+  is destroyed and its structure is imprinted onto the pattern. Install that
+  pattern (never consumed) and feed **primordial matter**, and every run rolls
+  a chance at a copy: nether star 40%, dragon egg 20%, chaos shard 25%, Gaia
+  spirit 40%. Every run also yields **exotic residue**, which the reactor turns
+  back into feedstock — a closed GT-style loop that still needs a steady
+  antimatter and stellar-matter supply.
+- **GT-style chance outputs.** Recipes can now roll an extra product; the
+  machine waits instead of running when the output slots are full, so a rare
+  roll is never voided. JEI shows the chance slot with its odds.
+
+### Changed — deeper end-game chains
+- **Neutronium is now a 4-step chain** (was one fusion recipe): naquadria →
+  **degenerate matter** (fusion) → **neutron-rich mass** (centrifuge) →
+  **molten neutronium** (alloy blast furnace) → neutronium (vacuum freezer).
+- **Stellar cores need distilling first**: molten stellar matter → **stellar
+  plasma** (distillation tower) → stellar core (freezer). Both steps shed
+  **stellar ash**, which the reactor re-ignites into molten stellar matter.
+- **Trans-dimensional metal is a 2-step chain**: the stabilizer now sheds
+  **singularity fragments**, which only stabilise once dissolved in primordial
+  matter — linking the black-hole line into the replication line.
+- **Most machine controllers moved to the Assembly Line** (14 of them), each
+  behind its own research: petrochemistry, digital logic, particle physics,
+  antimatter engineering, matter replication and arcane engineering, plus
+  cryogenics and metallurgy. The foundation machines (blast furnace, reactor,
+  distillation, mixer, electrolyzer, centrifuge, **alloy blast furnace**,
+  **vacuum freezer**) and the circuit assembler / research station / assembly
+  line stay on the crafting grid — the ABF and freezer supply the molten alloy
+  every assembly-line recipe is soldered with.
+- **Zinc** ore and **Extra Super Duralumin** (7075) added and worked into
+  several multiblock and intermediate recipes.
+- **Graviton coil** (tier 5, above antimatter) and **graviton alloy** added;
+  the trans-dimensional alloy now requires the new coil.
+
+### Fixed
+- **Matter replicator built and previewed as a box** in JEI and the
+  construction terminal while its validator required a sphere — the structure
+  could never be formed from the shown plan.
+- **Pattern imprinting was unreachable.** Every imprint recipe took a blank
+  pattern plus exotic plasma and differed only in volume, so the cheapest
+  always won and only nether-star patterns could ever be made.
+- **Recipes could shadow each other.** Machines pick the first recipe they can
+  satisfy, so a broader recipe hid narrower ones — the naquadria fusion step
+  and the tier-3 netherite-ingot smelt were both unreachable. Matching now runs
+  most-specific-first (and prefers the best recipe the installed coil allows),
+  and a startup audit reports any recipe that is still unreachable.
+- Chance outputs were produced but never shown in JEI, and their odds label
+  could overlap the gas output slot.
+- Three new gases displayed their raw translation keys (wrong key prefix).
+
 ## [1.1.1] - 2026-08-17
 
 ### Added

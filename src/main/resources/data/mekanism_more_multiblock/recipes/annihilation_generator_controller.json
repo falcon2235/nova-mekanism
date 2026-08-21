@@ -1,1 +1,0 @@
-{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["CEC", "EPE", "CEC"], "key": {"C": {"item": "mekanism_more_multiblock:annihilation_casing"}, "E": {"item": "mekanism_more_multiblock:supreme_control_circuit"}, "P": {"item": "mekanism_more_multiblock:stellar_core"}}, "result": {"item": "mekanism_more_multiblock:annihilation_generator_controller", "count": 1}}

@@ -20,6 +20,7 @@
     "mekanism_more_multiblock:deepslate_nickel_ore",
     "mekanism_more_multiblock:deepslate_saltpeter_ore",
     "mekanism_more_multiblock:deepslate_titanium_ore",
+    "mekanism_more_multiblock:deepslate_zinc_ore",
     "mekanism_more_multiblock:electrolyzer_casing",
     "mekanism_more_multiblock:elven_gate_casing",
     "mekanism_more_multiblock:engine_casing",
@@ -35,6 +36,7 @@
     "mekanism_more_multiblock:nickel_ore",
     "mekanism_more_multiblock:oil_rig_casing",
     "mekanism_more_multiblock:ptfe_casing",
+    "mekanism_more_multiblock:replicator_casing",
     "mekanism_more_multiblock:research_casing",
     "mekanism_more_multiblock:saltpeter_ore",
     "mekanism_more_multiblock:sourcestone_casing",
@@ -42,7 +44,8 @@
     "mekanism_more_multiblock:star_casing",
     "mekanism_more_multiblock:terra_plate_casing",
     "mekanism_more_multiblock:titanium_ore",
-    "mekanism_more_multiblock:void_miner_casing"
+    "mekanism_more_multiblock:void_miner_casing",
+    "mekanism_more_multiblock:zinc_ore"
   ],
   "replace": false
 }

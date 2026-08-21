@@ -1,0 +1,6 @@
+{
+  "type": "mekanism_more_multiblock:configurable_ore",
+  "biomes": "#minecraft:is_overworld",
+  "features": "mekanism_more_multiblock:zinc_ore",
+  "ore": "zinc"
+}

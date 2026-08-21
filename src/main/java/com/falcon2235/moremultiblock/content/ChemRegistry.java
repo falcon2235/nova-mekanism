@@ -122,6 +122,42 @@ public final class ChemRegistry {
     public static final FluidRegistryObject<?, ?, ?, ?, ?> LIQUID_HELIUM =
             FLUIDS.register("liquid_helium", props -> props.tint(0xFFC8ECF8));
 
+    // --- deep end-game chains ---
+    /**
+     * Degenerate matter: the fusion reactor's raw naquadria product, matter crushed
+     * past the electron shell. Centrifuged into neutron-rich mass.
+     */
+    public static final GasRegistryObject<Gas> DEGENERATE_MATTER =
+            GASES.register("degenerate_matter", 0xFF7A88A8);
+
+    /** Stellar plasma: molten stellar matter distilled down before it can be frozen into a core. */
+    public static final GasRegistryObject<Gas> STELLAR_PLASMA =
+            GASES.register("stellar_plasma", 0xFFFFE0A0);
+
+    /** Molten neutronium: neutron-rich mass pressed together; freezes into the solid metal. */
+    public static final FluidRegistryObject<?, ?, ?, ?, ?> MOLTEN_NEUTRONIUM =
+            FLUIDS.register("molten_neutronium", props -> props.tint(0xFFDCDCE4));
+
+    // --- matter replication line ---
+    /**
+     * Exotic plasma: what is left when a rare artefact is torn apart in the chemical
+     * reactor. It still carries the item's structure, which the research station
+     * imprints onto a blank pattern.
+     */
+    public static final GasRegistryObject<Gas> EXOTIC_PLASMA =
+            GASES.register("exotic_plasma", 0xFFE85AF0);
+
+    /**
+     * Primordial matter: undifferentiated mass-energy, the replicator's feedstock.
+     * Condensed from antimatter and stellar matter, or recycled from exotic residue.
+     */
+    public static final FluidRegistryObject<?, ?, ?, ?, ?> PRIMORDIAL_MATTER =
+            FLUIDS.register("primordial_matter", props -> props.tint(0xFFF0E8B0));
+
+    /** Molten graviton alloy: neutronium + stellar matter, frozen into the tier-5 coil material. */
+    public static final FluidRegistryObject<?, ?, ?, ?, ?> MOLTEN_GRAVITON_ALLOY =
+            FLUIDS.register("molten_graviton_alloy", props -> props.tint(0xFF6EE0FF));
+
     /** Molten trans-dimensional alloy: alloy blast furnace output, frozen into the alloy ingot. */
     public static final FluidRegistryObject<?, ?, ?, ?, ?> MOLTEN_TRANSDIMENSIONAL_ALLOY =
             FLUIDS.register("molten_transdimensional_alloy", props -> props.tint(0xFFC060E0));

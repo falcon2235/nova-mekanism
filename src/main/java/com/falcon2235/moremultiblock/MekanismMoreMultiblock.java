@@ -80,6 +80,15 @@ public class MekanismMoreMultiblock {
 
     /** Sanity log so override problems are visible in the log instead of silently reverting recipes. */
     private static void onServerStarted(ServerStartedEvent event) {
+        // Recipe reachability: a machine picks the first recipe it can satisfy, so a
+        // broad recipe can hide a narrower one forever. Report any that are unreachable.
+        var shadowed = com.falcon2235.moremultiblock.machine.ChemRecipes.findShadowedRecipes();
+        if (shadowed.isEmpty()) {
+            LOGGER.info("Recipe audit — every recipe is reachable");
+        } else {
+            LOGGER.warn("Recipe audit — {} unreachable recipe(s):", shadowed.size());
+            shadowed.forEach(line -> LOGGER.warn("  {}", line));
+        }
         // Integration debug: which optional mods and key items resolved. If a mod shows
         // loaded=true but an item false, the item id is wrong for that mod version.
         for (String[] probe : new String[][]{

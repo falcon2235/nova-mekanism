@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["GAG", "ACA", "GAG"], "key": {"G": {"item": "mekanism_more_multiblock:graviton_alloy_ingot"}, "A": {"item": "mekanism:pellet_antimatter"}, "C": {"item": "mekanism_more_multiblock:supreme_control_circuit"}}, "result": {"item": "mekanism_more_multiblock:graviton_coil", "count": 2}}

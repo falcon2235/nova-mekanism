@@ -126,12 +126,38 @@ public class ChemRecipeCategory implements IRecipeCategory<ChemRecipe> {
         for (int i = 0; i < outs.size() && i < outPos.length; i++) {
             builder.addSlot(RecipeIngredientRole.OUTPUT, outPos[i][0], outPos[i][1]).addItemStack(outs.get(i));
         }
+        // The chance output gets its own slot (its odds are drawn under it in draw());
+        // without this it was produced but never displayed.
+        int chanceIdx = chanceSlotIndex(recipe);
+        if (!recipe.chanceOutput.isEmpty() && chanceIdx < outPos.length) {
+            builder.addSlot(RecipeIngredientRole.OUTPUT, outPos[chanceIdx][0], outPos[chanceIdx][1])
+                    .addItemStack(recipe.chanceOutput);
+        }
         if (!recipe.gasOutput.isEmpty()) {
             builder.addSlot(RecipeIngredientRole.OUTPUT, outX, 26).addIngredient(MekanismJEI.TYPE_GAS, recipe.gasOutput);
         }
         if (!recipe.fluidOutput.isEmpty()) {
             builder.addSlot(RecipeIngredientRole.OUTPUT, outX, 46).addIngredient(ForgeTypes.FLUID_STACK, recipe.fluidOutput);
         }
+    }
+
+    /**
+     * Grid index for the chance output. It follows the guaranteed outputs, but skips
+     * the left column's lower cells whenever a gas or fluid output occupies them —
+     * the slot at (144,26) IS the gas slot, and the "%" label drawn 18px under the
+     * slot must not run into the gas (y26) or fluid (y46) slots either.
+     */
+    private static int chanceSlotIndex(ChemRecipe recipe) {
+        int idx = recipe.itemOutputs().size();
+        boolean gas = !recipe.gasOutput.isEmpty();
+        boolean fluid = !recipe.fluidOutput.isEmpty();
+        if (gas && idx == 0) {
+            idx = 1; // label under (144,6) would overwrite the gas slot below it
+        }
+        if ((gas || fluid) && idx == 2) {
+            idx = 3; // (144,26) is the gas slot; a label at y44 would touch the fluid slot
+        }
+        return idx;
     }
 
     /** Compact FE/t label so huge fusion values (400M / 1B RF/t) still fit the panel. */
@@ -182,6 +208,16 @@ public class ChemRecipeCategory implements IRecipeCategory<ChemRecipe> {
         if (!recipe.fluidOutput.isEmpty()) {
             String amount = recipe.fluidOutput.getAmount() + " mB";
             g.drawString(font, amount, 141 - font.width(amount), 51, 0xFF606060, false);
+        }
+
+        // Odds label under the chance output's slot, so a rolled result is never a surprise
+        if (!recipe.chanceOutput.isEmpty()) {
+            int index = chanceSlotIndex(recipe);
+            int[][] outPos = {{144, 6}, {162, 6}, {144, 26}, {162, 26}};
+            if (index < outPos.length) {
+                String odds = recipe.chancePercent + "%";
+                g.drawString(font, odds, outPos[index][0], outPos[index][1] + 18, 0xFFE08020, false);
+            }
         }
 
         // Notes area below the slots: the coil requirement and the recipe note are

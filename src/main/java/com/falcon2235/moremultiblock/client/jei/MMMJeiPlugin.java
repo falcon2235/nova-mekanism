@@ -70,6 +70,50 @@ public class MMMJeiPlugin implements IModPlugin {
         }
         registration.addRecipes(PbfRecipeCategory.TYPE, List.of(new PbfRecipeCategory.PbfDisplayRecipe()));
         registration.addRecipes(StructureCategory.TYPE, buildStructures());
+        addInfoPages(registration);
+    }
+
+    /**
+     * "Information" pages (the book icon in JEI) explaining the parts of the mod that a
+     * recipe list alone cannot: what an unfamiliar intermediate belongs to, which loop
+     * feeds which, and how the module-slot machines are operated.
+     */
+    private static void addInfoPages(IRecipeRegistration registration) {
+        info(registration, new ItemStack(MMMRegistry.CONSTRUCTION_TERMINAL.get()), "construction_terminal");
+        info(registration, new ItemStack(MMMRegistry.DATA_ORB.get()), "data_orb");
+        info(registration, new ItemStack(MMMRegistry.BLANK_MATTER_PATTERN.get()), "matter_pattern");
+        info(registration, new ItemStack(MMMRegistry.EXOTIC_RESIDUE.get()), "exotic_residue");
+        info(registration, new ItemStack(MMMRegistry.STELLAR_ASH.get()), "stellar_ash");
+        info(registration, new ItemStack(MMMRegistry.NEUTRON_RICH_MASS.get()), "neutron_rich_mass");
+        info(registration, new ItemStack(MMMRegistry.SINGULARITY_FRAGMENT.get()), "singularity_fragment");
+        info(registration, new ItemStack(MMMRegistry.GRAVITON_ALLOY.get()), "graviton_alloy");
+        info(registration, new ItemStack(MMMRegistry.UNCHARGED_SUPERCONDUCTOR.get()), "uncharged_superconductor");
+        info(registration, new ItemStack(MMMRegistry.MANA_HATCH.get()), "mana_hatch");
+        info(registration, new ItemStack(MMMRegistry.GRAVITON_COIL.get()), "graviton_coil");
+        // machines whose operation is not obvious from their recipe list
+        info(registration, new ItemStack(MMMRegistry.CHEM_CONTROLLERS.get(ChemMachineType.MATTER_REPLICATOR).get()),
+                "matter_replicator");
+        info(registration, new ItemStack(MMMRegistry.CHEM_CONTROLLERS.get(ChemMachineType.ASSEMBLY_LINE).get()),
+                "assembly_line");
+        info(registration, new ItemStack(MMMRegistry.CHEM_CONTROLLERS.get(ChemMachineType.RESEARCH_STATION).get()),
+                "research_station");
+        info(registration, new ItemStack(MMMRegistry.CHEM_CONTROLLERS.get(ChemMachineType.LARGE_INSCRIBER).get()),
+                "large_inscriber");
+        info(registration, new ItemStack(MMMRegistry.CHEM_CONTROLLERS.get(ChemMachineType.VOID_MINER).get()),
+                "void_miner");
+        info(registration, new ItemStack(MMMRegistry.CHEM_CONTROLLERS.get(ChemMachineType.COMBUSTION_GENERATOR).get()),
+                "combustion_generator");
+        info(registration, new ItemStack(MMMRegistry.QUANTUM_CABLE.get()), "quantum_conduit");
+    }
+
+    /** Registers one info page; the text lives in the lang file under jei.<key>. */
+    private static void info(IRecipeRegistration registration, ItemStack stack, String key) {
+        if (stack.isEmpty()) {
+            return;
+        }
+        registration.addIngredientInfo(stack, mezz.jei.api.constants.VanillaTypes.ITEM_STACK,
+                net.minecraft.network.chat.Component.translatable(
+                        "jei." + MekanismMoreMultiblock.MODID + "." + key));
     }
 
     /**
@@ -120,7 +164,8 @@ public class MMMJeiPlugin implements IModPlugin {
             boolean barrel = type == ChemMachineType.ALLOY_BLAST_FURNACE;
             boolean assembly = type == ChemMachineType.CIRCUIT_ASSEMBLER;
             boolean fusion = type == ChemMachineType.FUSION_REACTOR;
-            boolean star = type == ChemMachineType.STAR_GENERATOR || type == ChemMachineType.ANNIHILATION_GENERATOR;
+            boolean star = type == ChemMachineType.STAR_GENERATOR || type == ChemMachineType.ANNIHILATION_GENERATOR
+                    || type == ChemMachineType.MATTER_REPLICATOR;
             boolean stabilizer = type == ChemMachineType.STABILIZER;
             boolean collider = type == ChemMachineType.HADRON_COLLIDER;
             boolean voidMiner = type == ChemMachineType.VOID_MINER;

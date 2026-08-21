@@ -66,6 +66,7 @@ public final class VoidOreTable {
             addById(list, "mekanism", "raw_uranium", 35);
             addById(list, "mekanism", "fluorite_gem", 35);
             // --- ours ---
+            add(list, MMMRegistry.RAW_ZINC.get(), 75);
             add(list, MMMRegistry.RAW_NICKEL.get(), 70);
             add(list, MMMRegistry.RAW_MAGNESIUM.get(), 65);
             add(list, MMMRegistry.RAW_BAUXITE.get(), 60);

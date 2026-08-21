@@ -40,6 +40,8 @@ workbench recipes, so the whole progression stays completable in any pack.
 - **Alternative antimatter route** — the **Large Hadron Collider** collides hydrogen protons straight into antimatter as an end-game-adjacent alternative to a hardened SPS, and a Large Chemical Reactor polonium recipe (gated behind an antimatter-pellet upgrade) offers a second polonium path.
 - **GT-style petroleum power** — an **Oil Drilling Rig** pumps crude oil, the distillation tower and chemical reactor refine it (distill → desulfurize) into diesel, and a **Large Combustion Generator** burns it at 500,000 RF/t; the end-game **Annihilation Generator** converts hydrogen + antimatter under liquid-helium cooling into 800,000,000 RF/t.
 - **Void Ore Miner** — mines 10 of a random rarity-weighted RAW ore every second (22 ore types, naquadah as the jackpot) for 1,000,000 RF/t; Mekanism speed upgrades roll faster.
+- **Rare-material replication** — dissolve a nether star, dragon egg, chaos shard or Gaia spirit onto a reusable **matter pattern**, then let the **Matter Replicator** roll chance copies from primordial matter. Every run returns exotic residue that loops back into feedstock.
+- **GTNH-depth end-game chains** — neutronium takes four machines (fusion → centrifuge → alloy blast furnace → freezer), stellar cores need distilling, and trans-dimensional metal starts as singularity fragments. Byproducts (stellar ash, exotic residue) recycle through the chemical reactor.
 - **JEI bill of materials** — every structure preview lists exactly how many of each block the multiblock needs.
 - **Quantum conduits** — a transmitter tier above Mekanism's ultimate: quantum universal cable / mechanical pipe / pressurized tube / logistical pipe. Anything pushed in is routed instantly; right-click a face with an empty hand to toggle extraction from tanks/chests. Crafted from 8 ultimate transmitters + a superconductor.
 - **Fully configurable** — `config/mekanism_more_multiblock-common.toml` exposes every machine rate (miner, rigs, generators, LHC, conduits) plus global recipe energy/time multipliers for expert-pack tuning.
@@ -82,11 +84,12 @@ Parallel machines share a fixed **3×3×4** hollow casing box (GregTech-style bl
 | **Fusion Reactor** | 15×3×15 ring | D-T fusion → helium plasma → molten stellar matter |
 | **Annihilation Generator** | 7×7×7 sphere | Hydrogen + antimatter + liquid helium → **800,000,000 RF/t** |
 | **Artificial Star Generator** | 9×9×9 sphere | Stellar core + hydrogen → black hole seed |
-| **Black Hole Stabilizer** | 16×16×16 cube | Black hole seed → trans-dimensional metal + Creative Energy Cube |
+| **Black Hole Stabilizer** | 16×16×16 cube | Black hole seed → singularity fragments + Creative Energy Cube |
+| **Matter Replicator** | 5×5×5 sphere | Imprinted pattern + primordial matter → chance copies of rare artefacts |
 
 ### Heating coils
 
-The Electric and Alloy Blast Furnaces use tiered heating coils — **copper → cupronickel → titanium → plutonium → antimatter**. Higher tiers halve the processing time per tier above a recipe's requirement, and the coils glow while the furnace runs.
+The Electric and Alloy Blast Furnaces use tiered heating coils — **copper → cupronickel → titanium → plutonium → antimatter → graviton**. Higher tiers halve the processing time per tier above a recipe's requirement, and the coils glow while the furnace runs.
 
 ---
 
@@ -96,10 +99,10 @@ The Electric and Alloy Blast Furnaces use tiered heating coils — **copper → 
 2. **Platinum group** (cooperite/saltpeter ores) — nitric acid → sludge → centrifuge → electrolyzer → platinum, palladium, rhodium, ruthenium, iridium.
 3. **Naquadah line** (naquadah/antimony ores) — fluoroantimonic acid dissolution → centrifuge/mixer separations → enriched naquadah, naquadria, trinium; **naquadah alloy** in the alloy blast furnace.
 4. **Antimatter** — just before the end-game, build the **Large Hadron Collider** (33×3×33) to collide hydrogen straight into antimatter at ~100,000,000 RF/t, alongside the hardened SPS route.
-5. **Research** — scan a finished part plus a data orb in the **Research Station**, install the resulting research data in the **Assembly Line**, and build the machines that are gated behind it (fusion reactor and void miner controllers, bulk superconductors, trans-dimensional circuits).
-6. **Fusion** — deuterium + tritium → helium plasma → (+ antimatter) → **molten stellar matter** → **stellar core**. Also fuses naquadria into **neutronium**.
+5. **Research** — scan a finished part plus a data orb in the **Research Station**, install the resulting research data in the **Assembly Line**, and build the machines gated behind it. **Most machine controllers are built here** — petrochemistry, digital logic, particle physics, antimatter engineering, matter replication and arcane engineering each unlock their own machines, alongside bulk superconductors and trans-dimensional circuits. Only the foundation machines stay on the crafting grid.
+6. **Fusion** — deuterium + tritium → helium plasma → (+ antimatter) → **molten stellar matter** → distilled into **stellar plasma** → frozen into a **stellar core**. Naquadria fuses into **degenerate matter**, which is centrifuged, pressed and frozen across four machines into **neutronium**. Both chains shed byproducts (stellar ash, exotic residue) that loop back into feedstock.
 7. **Artificial star** — stellar core + a huge charge of hydrogen at **100,000,000 RF/t for 10 minutes** → **black hole seed**.
-8. **Black hole stabilizer** — black hole seed at **1,000,000,000 RF/t for 30 minutes** → **10× trans-dimensional metal**.
+8. **Black hole stabilizer** — black hole seed at **1,000,000,000 RF/t for 30 minutes** → **singularity fragments**, dissolved in primordial matter into **trans-dimensional metal**.
 9. **The pinnacle** — trans-dimensional metal → alloy → circuit (each requiring hundreds of millions of RF/t) → a fully-charged, craftable **Mekanism Creative Energy Cube**.
 
 ---
@@ -115,7 +118,7 @@ Building a 16×16×16 cube by hand is not fun. Craft a **Construction Terminal**
 Requires **JDK 17**. The project uses ForgeGradle 6.
 
 ```bash
-./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.1.1.jar
+./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.1.2.jar
 ./gradlew runClient      # launch a dev client
 ```
 

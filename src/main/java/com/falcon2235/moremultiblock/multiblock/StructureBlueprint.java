@@ -54,7 +54,7 @@ public final class StructureBlueprint {
             case ALLOY_BLAST_FURNACE -> alloyBarrel(pos, facing);
             case CIRCUIT_ASSEMBLER -> assemblyLine(pos, facing);
             case FUSION_REACTOR -> fusionRing(pos, facing);
-            case STAR_GENERATOR, ANNIHILATION_GENERATOR -> starSphere(pos, facing, type);
+            case STAR_GENERATOR, ANNIHILATION_GENERATOR, MATTER_REPLICATOR -> starSphere(pos, facing, type);
             case STABILIZER -> stabilizerCage(pos, facing);
             case HADRON_COLLIDER -> colliderLoop(pos, facing);
             case VOID_MINER -> voidMinerRig(pos, facing);

@@ -58,6 +58,7 @@ $ores = @{
   nickel    = @('nickel_ore','deepslate_nickel_ore')
   chromium  = @('chromium_ore','deepslate_chromium_ore')
   bauxite   = @('bauxite_ore','deepslate_bauxite_ore')
+  zinc      = @('zinc_ore','deepslate_zinc_ore')
   cooperite = @('cooperite_ore','deepslate_cooperite_ore')
   saltpeter = @('saltpeter_ore','deepslate_saltpeter_ore')
   antimony  = @('antimony_ore','deepslate_antimony_ore')
@@ -76,7 +77,7 @@ WriteJson (Join-Path $data 'forge\tags\blocks\ores.json') @{ replace = $false; v
 WriteJson (Join-Path $data 'forge\tags\items\ores.json')  @{ replace = $false; values = @($allOreBlocks | Sort-Object -Unique) }
 
 # ---- forge:raw_materials/* for the raw drops ----
-$raws = @('titanium','magnesium','nickel','chromium','bauxite','cooperite','antimony','naquadah')
+$raws = @('titanium','magnesium','nickel','chromium','bauxite','zinc','cooperite','antimony','naquadah')
 $allRaw = New-Object System.Collections.Generic.List[string]
 foreach($mat in $raws){
   $id = "${NS}:raw_$mat"

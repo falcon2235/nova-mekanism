@@ -175,6 +175,9 @@ public final class MMMRegistry {
     // Ars Nouveau integration: grand imbuement chamber casing
     public static final RegistryObject<Block> SOURCESTONE_CASING =
             registerBlock("sourcestone_casing", () -> new Block(props().lightLevel(state -> 5)));
+    /** Matter replicator shell: holds a pattern's field while a copy condenses. */
+    public static final RegistryObject<Block> REPLICATOR_CASING =
+            registerBlock("replicator_casing", () -> new Block(props().lightLevel(state -> 6)));
 
     /** Mana hatch: buffers mana for the Botania machines; accepts a spark on top. */
     public static final RegistryObject<com.falcon2235.moremultiblock.block.ManaHatchBlock> MANA_HATCH =
@@ -217,10 +220,16 @@ public final class MMMRegistry {
             registerBlock("plutonium_coil", () -> new CoilBlock(props()));
     public static final RegistryObject<Block> ANTIMATTER_COIL =
             registerBlock("antimatter_coil", () -> new CoilBlock(props()));
+    /** End-game coil, wound from graviton alloy; the tier above antimatter. */
+    public static final RegistryObject<Block> GRAVITON_COIL =
+            registerBlock("graviton_coil", () -> new CoilBlock(props().lightLevel(state -> 6)));
 
-    /** Heating coils ordered by tier: copper(0) → cupronickel(1) → titanium(2) → plutonium(3) → antimatter(4). */
+    /**
+     * Heating coils ordered by tier: copper(0) → cupronickel(1) → titanium(2) →
+     * plutonium(3) → antimatter(4) → graviton(5).
+     */
     public static final List<RegistryObject<Block>> COIL_TIERS =
-            List.of(COPPER_COIL, CUPRONICKEL_COIL, TITANIUM_COIL, PLUTONIUM_COIL, ANTIMATTER_COIL);
+            List.of(COPPER_COIL, CUPRONICKEL_COIL, TITANIUM_COIL, PLUTONIUM_COIL, ANTIMATTER_COIL, GRAVITON_COIL);
 
     /** Tier index of the given coil block state, or -1 when it is not a coil. */
     public static int coilTierOf(net.minecraft.world.level.block.state.BlockState state) {
@@ -293,6 +302,19 @@ public final class MMMRegistry {
     public static final RegistryObject<Item> SPECIAL_STEEL_DUST = registerItem("special_steel_dust");
     public static final RegistryObject<Item> SPECIAL_STEEL_INGOT = registerItem("special_steel_ingot");
 
+    // zinc: the missing ingredient of the 7075 aluminium alloy below
+    public static final RegistryObject<Item> RAW_ZINC = registerItem("raw_zinc");
+    public static final RegistryObject<Item> ZINC_DUST = registerItem("zinc_dust");
+    public static final RegistryObject<Item> ZINC_INGOT = registerItem("zinc_ingot");
+
+    /**
+     * Extra super duralumin (7075): aluminium alloyed with zinc, magnesium and copper.
+     * A light, very strong structural alloy — the frame material for the mid-game
+     * machine casings and their moving parts.
+     */
+    public static final RegistryObject<Item> DURALUMIN_DUST = registerItem("extra_super_duralumin_dust");
+    public static final RegistryObject<Item> DURALUMIN_INGOT = registerItem("extra_super_duralumin_ingot");
+
     // super alloy chain (beyond atomic alloy): molten in the alloy blast furnace, frozen solid in the vacuum freezer
     public static final RegistryObject<Item> SUPER_ALLOY_DUST = registerItem("super_alloy_dust");
     public static final RegistryObject<Item> SUPER_ALLOY_INGOT = registerItem("super_alloy_ingot");
@@ -349,17 +371,58 @@ public final class MMMRegistry {
     public static final RegistryObject<Item> UNCHARGED_SUPERCONDUCTOR = registerItem("uncharged_superconductor");
     /** Blank research medium consumed by the research station. */
     public static final RegistryObject<Item> DATA_ORB = registerItem("data_orb");
+
+    // --- end-game intermediates (the deep neutronium / stellar / singularity chains) ---
+    /** Centrifuged out of degenerate matter; four of them press into molten neutronium. */
+    public static final RegistryObject<Item> NEUTRON_RICH_MASS = registerItem("neutron_rich_mass");
+    /** Burnt-out stellar residue. Recycled back into molten stellar matter — the stellar loop. */
+    public static final RegistryObject<Item> STELLAR_ASH = registerItem("stellar_ash");
+    /** Shed by a collapsing black hole seed; dissolved in primordial matter into trans-dim metal. */
+    public static final RegistryObject<Item> SINGULARITY_FRAGMENT = registerItem("singularity_fragment");
+
+    // --- matter replication line ---
+    /** Left over by every replication; the line dissolves it back into feedstock. */
+    public static final RegistryObject<Item> EXOTIC_RESIDUE = registerItem("exotic_residue");
+    /** Blank lattice that a dissolved rare item's signature is imprinted onto. */
+    public static final RegistryObject<Item> BLANK_MATTER_PATTERN = registerItem("blank_matter_pattern");
+    // Imprinted patterns: installed in the replicator's module slot, never consumed.
+    public static final RegistryObject<Item> PATTERN_NETHER_STAR = registerItem("matter_pattern_nether_star");
+    public static final RegistryObject<Item> PATTERN_DRAGON_EGG = registerItem("matter_pattern_dragon_egg");
+    public static final RegistryObject<Item> PATTERN_CHAOS_SHARD = registerItem("matter_pattern_chaos_shard");
+    public static final RegistryObject<Item> PATTERN_GAIA_SPIRIT = registerItem("matter_pattern_gaia_spirit");
     // research-data modules: install in the assembly line's module slot to unlock recipes
     public static final RegistryObject<Item> RESEARCH_DATA_SUPERCONDUCTOR = registerItem("research_data_superconductor");
     public static final RegistryObject<Item> RESEARCH_DATA_FUSION = registerItem("research_data_fusion");
     public static final RegistryObject<Item> RESEARCH_DATA_VOID_MINING = registerItem("research_data_void_mining");
     public static final RegistryObject<Item> RESEARCH_DATA_TRANSDIMENSIONAL = registerItem("research_data_transdimensional");
+    /** Cryogenics: the vacuum freezer and the cold end of the metallurgy line. */
+    public static final RegistryObject<Item> RESEARCH_DATA_CRYOGENICS = registerItem("research_data_cryogenics");
+    /** Metallurgy: the alloy blast furnace. */
+    public static final RegistryObject<Item> RESEARCH_DATA_METALLURGY = registerItem("research_data_metallurgy");
+    /** Petrochemistry: the oil rig and the combustion generator. */
+    public static final RegistryObject<Item> RESEARCH_DATA_PETROCHEMISTRY = registerItem("research_data_petrochemistry");
+    /** Particle physics: the collider, the star generator and the black hole stabilizer. */
+    public static final RegistryObject<Item> RESEARCH_DATA_PARTICLE = registerItem("research_data_particle");
+    /** Antimatter engineering: the annihilation generator. */
+    public static final RegistryObject<Item> RESEARCH_DATA_ANTIMATTER = registerItem("research_data_antimatter");
+    /** Matter replication: the replicator itself. */
+    public static final RegistryObject<Item> RESEARCH_DATA_REPLICATION = registerItem("research_data_replication");
+    /** Digital logic: the AE2 parallel machines and this mod's parallel processors. */
+    public static final RegistryObject<Item> RESEARCH_DATA_DIGITAL = registerItem("research_data_digital");
+    /** Arcane engineering: the Botania / Ars Nouveau parallel machines. */
+    public static final RegistryObject<Item> RESEARCH_DATA_ARCANE = registerItem("research_data_arcane");
     /** Black hole seed: the artificial star generator's pinnacle product. */
     public static final RegistryObject<Item> BLACK_HOLE_SEED = registerItem("black_hole_seed");
     /** Reactor module (antimatter-forged) that unlocks the alternative polonium synthesis recipe. */
     public static final RegistryObject<Item> POLONIUM_SYNTHESIS_UPGRADE = registerItem("polonium_synthesis_upgrade");
     /** Neutronium: fused in the fusion reactor (GT: naquadria fusion); the stabilizer's material. */
     public static final RegistryObject<Item> NEUTRONIUM = registerItem("neutronium");
+    /**
+     * Graviton alloy: neutronium compressed with stellar matter and superconductor
+     * windings in the alloy blast furnace. Withstands the heat the antimatter coil
+     * cannot, and is what the tier-5 graviton coil is wound from.
+     */
+    public static final RegistryObject<Item> GRAVITON_ALLOY = registerItem("graviton_alloy_ingot");
     /** Trans-dimensional metal: the ultimate creative-tier material from the black hole stabilizer. */
     public static final RegistryObject<Item> TRANSDIMENSIONAL_METAL = registerItem("transdimensional_metal");
     /** Trans-dimensional alloy: metal alloyed in the alloy blast furnace (frozen from its molten form). */
@@ -391,6 +454,10 @@ public final class MMMRegistry {
             registerBlock("bauxite_ore", () -> new Block(oreProps(3.0F)));
     public static final RegistryObject<Block> DEEPSLATE_BAUXITE_ORE =
             registerBlock("deepslate_bauxite_ore", () -> new Block(oreProps(4.5F)));
+    public static final RegistryObject<Block> ZINC_ORE =
+            registerBlock("zinc_ore", () -> new Block(oreProps(3.0F)));
+    public static final RegistryObject<Block> DEEPSLATE_ZINC_ORE =
+            registerBlock("deepslate_zinc_ore", () -> new Block(oreProps(4.5F)));
     public static final RegistryObject<Block> COOPERITE_ORE =
             registerBlock("cooperite_ore", () -> new Block(oreProps(3.0F)));
     public static final RegistryObject<Block> DEEPSLATE_COOPERITE_ORE =
@@ -488,6 +555,7 @@ public final class MMMRegistry {
             case RESEARCH_STATION -> RESEARCH_CASING.get();
             case ASSEMBLY_LINE -> ASSLINE_CASING.get();
             case GRAND_IMBUEMENT -> SOURCESTONE_CASING.get();
+            case MATTER_REPLICATOR -> REPLICATOR_CASING.get();
         };
     }
 

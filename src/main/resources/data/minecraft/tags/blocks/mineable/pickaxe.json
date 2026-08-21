@@ -36,6 +36,7 @@
     "mekanism_more_multiblock:deepslate_nickel_ore",
     "mekanism_more_multiblock:deepslate_saltpeter_ore",
     "mekanism_more_multiblock:deepslate_titanium_ore",
+    "mekanism_more_multiblock:deepslate_zinc_ore",
     "mekanism_more_multiblock:distillation_controller",
     "mekanism_more_multiblock:drill_pipe",
     "mekanism_more_multiblock:electrolyzer_casing",
@@ -58,6 +59,7 @@
     "mekanism_more_multiblock:grand_imbuement_chamber_controller",
     "mekanism_more_multiblock:grand_mana_pool_controller",
     "mekanism_more_multiblock:grand_terra_plate_controller",
+    "mekanism_more_multiblock:graviton_coil",
     "mekanism_more_multiblock:hadron_collider_controller",
     "mekanism_more_multiblock:heat_proof_casing",
     "mekanism_more_multiblock:heat_vent",
@@ -69,6 +71,7 @@
     "mekanism_more_multiblock:livingrock_casing",
     "mekanism_more_multiblock:magnesium_ore",
     "mekanism_more_multiblock:mana_hatch",
+    "mekanism_more_multiblock:matter_replicator_controller",
     "mekanism_more_multiblock:mixer_controller",
     "mekanism_more_multiblock:multiblock_casing",
     "mekanism_more_multiblock:naquadah_ore",
@@ -90,6 +93,7 @@
     "mekanism_more_multiblock:quantum_gas_tube",
     "mekanism_more_multiblock:quantum_item_pipe",
     "mekanism_more_multiblock:reactor_controller",
+    "mekanism_more_multiblock:replicator_casing",
     "mekanism_more_multiblock:research_casing",
     "mekanism_more_multiblock:research_station_controller",
     "mekanism_more_multiblock:saltpeter_ore",
@@ -105,7 +109,8 @@
     "mekanism_more_multiblock:vacuum_freezer_controller",
     "mekanism_more_multiblock:void_drill",
     "mekanism_more_multiblock:void_miner_casing",
-    "mekanism_more_multiblock:void_ore_miner_controller"
+    "mekanism_more_multiblock:void_ore_miner_controller",
+    "mekanism_more_multiblock:zinc_ore"
   ],
   "replace": false
 }

@@ -32,9 +32,161 @@ public final class ChemRecipes {
         return CACHE.computeIfAbsent(type, ChemRecipes::build);
     }
 
+    /** Recipes ordered for MATCHING (see {@link #getForMatching}). */
+    private static final Map<ChemMachineType, List<ChemRecipe>> MATCH_CACHE = new EnumMap<>(ChemMachineType.class);
+
+    /**
+     * The recipe list a machine should test against, most specific first.
+     *
+     * <p>A machine runs the first recipe whose inputs it can satisfy, so a recipe with
+     * FEWER requirements shadows every later recipe that needs everything it needs plus
+     * more. In the fusion reactor, for instance, "helium plasma + antimatter -> stellar
+     * matter" would otherwise fire forever and the naquadria step of the neutronium
+     * chain (same gases, plus an ingot) could never run. Sorting by descending
+     * requirement count fixes that class of conflict for every machine at once.
+     * Display order (JEI) is deliberately left untouched.
+     */
+    public static synchronized List<ChemRecipe> getForMatching(ChemMachineType type) {
+        return MATCH_CACHE.computeIfAbsent(type, t -> {
+            List<ChemRecipe> sorted = new ArrayList<>(get(t));
+            sorted.sort((a, b) -> {
+                int bySpecificity = Integer.compare(requirementCount(b), requirementCount(a));
+                if (bySpecificity != 0) {
+                    return bySpecificity;
+                }
+                // Same inputs, different coil requirement: run the best recipe the
+                // installed coil allows, so upgrading a blast furnace actually pays off
+                // (ancient debris -> netherite ingot on a plutonium coil, not scrap).
+                return Integer.compare(b.coilTier, a.coilTier);
+            });
+            return List.copyOf(sorted);
+        });
+    }
+
+    /** How many distinct things a recipe demands; higher = more specific. */
+    private static int requirementCount(ChemRecipe r) {
+        int n = 0;
+        for (ItemStack in : new ItemStack[]{r.itemInput, r.itemInput2, r.itemInput3, r.itemInput4, r.itemInput5}) {
+            if (!in.isEmpty()) {
+                n++;
+            }
+        }
+        if (!r.gasInput.isEmpty()) {
+            n++;
+        }
+        if (!r.gasInput2.isEmpty()) {
+            n++;
+        }
+        if (!r.fluidInput.isEmpty()) {
+            n++;
+        }
+        if (!r.requiredUpgrade.isEmpty()) {
+            n++;
+        }
+        if (r.manaCost > 0) {
+            n++;
+        }
+        return n;
+    }
+
+    /**
+     * Reports recipes that can never be selected because an earlier one in the matching
+     * order demands a subset of the same things — i.e. whenever the shadowed recipe
+     * could run, the earlier one runs instead. Returns human-readable lines; an empty
+     * list means every recipe is reachable.
+     */
+    public static List<String> findShadowedRecipes() {
+        List<String> problems = new ArrayList<>();
+        for (ChemMachineType type : ChemMachineType.values()) {
+            // These machines drive themselves from custom tick logic; their "recipes"
+            // exist only to be displayed in JEI, so overlap between them is meaningless.
+            // (The oil rig is NOT here: it runs its no-input recipe through findRecipe.)
+            if (type == ChemMachineType.VOID_MINER || type == ChemMachineType.COMBUSTION_GENERATOR
+                    || type == ChemMachineType.ANNIHILATION_GENERATOR) {
+                continue;
+            }
+            List<ChemRecipe> ordered = getForMatching(type);
+            for (int j = 0; j < ordered.size(); j++) {
+                for (int i = 0; i < j; i++) {
+                    if (shadows(ordered.get(i), ordered.get(j))) {
+                        problems.add(String.format("%s: recipe #%d (%s) is shadowed by #%d (%s)",
+                                type.id, j, describe(ordered.get(j)), i, describe(ordered.get(i))));
+                        break;
+                    }
+                }
+            }
+        }
+        return problems;
+    }
+
+    /** True when {@code a}'s requirements are a subset of {@code b}'s, so a always wins. */
+    private static boolean shadows(ChemRecipe a, ChemRecipe b) {
+        if (a == b) {
+            return false;
+        }
+        // A different required module makes them mutually exclusive, never shadowing.
+        if (!a.requiredUpgrade.isEmpty()
+                && !ItemStack.isSameItemSameTags(a.requiredUpgrade, b.requiredUpgrade)) {
+            return false;
+        }
+        if (a.coilTier > b.coilTier || a.manaCost > b.manaCost) {
+            return false;
+        }
+        for (ItemStack need : a.itemOutputsInputs()) {
+            if (!coveredBy(need, b)) {
+                return false;
+            }
+        }
+        if (!gasCoveredBy(a.gasInput, b) || !gasCoveredBy(a.gasInput2, b)) {
+            return false;
+        }
+        return a.fluidInput.isEmpty()
+                || (a.fluidInput.isFluidEqual(b.fluidInput) && a.fluidInput.getAmount() <= b.fluidInput.getAmount());
+    }
+
+    private static boolean coveredBy(ItemStack need, ChemRecipe b) {
+        int available = 0;
+        for (ItemStack in : b.itemOutputsInputs()) {
+            if (ItemStack.isSameItemSameTags(in, need)) {
+                available += in.getCount();
+            }
+        }
+        return available >= need.getCount();
+    }
+
+    private static boolean gasCoveredBy(GasStack need, ChemRecipe b) {
+        if (need.isEmpty()) {
+            return true;
+        }
+        long available = 0;
+        for (GasStack in : new GasStack[]{b.gasInput, b.gasInput2}) {
+            if (!in.isEmpty() && in.isTypeEqual(need)) {
+                available += in.getAmount();
+            }
+        }
+        return available >= need.getAmount();
+    }
+
+    private static String describe(ChemRecipe r) {
+        StringBuilder sb = new StringBuilder();
+        for (ItemStack in : r.itemOutputsInputs()) {
+            sb.append(in.getCount()).append('x').append(in.getItem()).append(' ');
+        }
+        if (!r.gasInput.isEmpty()) {
+            sb.append("gas:").append(r.gasInput.getAmount()).append(' ');
+        }
+        if (!r.fluidInput.isEmpty()) {
+            sb.append("fluid:").append(r.fluidInput.getAmount()).append(' ');
+        }
+        List<ItemStack> outs = r.itemOutputs();
+        sb.append("-> ").append(outs.isEmpty() ? "(gas/fluid)" : outs.get(0).getItem());
+        return sb.toString().trim();
+    }
+
     /** Drops all cached recipes so the next access rebuilds them with fresh config values. */
     public static synchronized void invalidateCache() {
         CACHE.clear();
+        MATCH_CACHE.clear();
     }
 
     private static List<ChemRecipe> build(ChemMachineType type) {
@@ -126,6 +278,19 @@ public final class ChemRecipes {
                         item(net.minecraft.world.item.Items.DIAMOND, 1), GasStack.EMPTY, FluidStack.EMPTY,
                         600, 2_000L, 4));
 
+                // --- tier 5 (graviton coil): gravitational compression ---
+                // Nothing below a graviton coil can hold this heat: raw netherite scrap
+                // is squeezed straight into a full ingot, no gold needed.
+                list.add(new ChemRecipe(
+                        item(net.minecraft.world.item.Items.NETHERITE_SCRAP.asItem(), 4), GasStack.EMPTY, FluidStack.EMPTY,
+                        item(net.minecraft.world.item.Items.NETHERITE_INGOT, 1), GasStack.EMPTY, FluidStack.EMPTY,
+                        400, 8_000L, 5));
+                // recycle spent graviton alloy back into neutronium
+                list.add(new ChemRecipe(
+                        item(MMMRegistry.GRAVITON_ALLOY.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
+                        item(MMMRegistry.NEUTRONIUM.get(), 2), GasStack.EMPTY, FluidStack.EMPTY,
+                        500, 20_000L, 5));
+
                 // special steel chain smelting (tier 1)
                 list.add(new ChemRecipe(
                         item(MMMRegistry.ALUMINA.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
@@ -135,6 +300,21 @@ public final class ChemRecipes {
                         item(MMMRegistry.SPECIAL_STEEL_DUST.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
                         item(MMMRegistry.SPECIAL_STEEL_INGOT.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
                         280, 400L, 2));
+
+                // zinc: raw ore and dust both smelt to the ingot (tier 0, it melts easily)
+                list.add(new ChemRecipe(
+                        item(MMMRegistry.RAW_ZINC.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
+                        item(MMMRegistry.ZINC_INGOT.get(), 2), GasStack.EMPTY, FluidStack.EMPTY,
+                        200, 100L, 0));
+                list.add(new ChemRecipe(
+                        item(MMMRegistry.ZINC_DUST.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
+                        item(MMMRegistry.ZINC_INGOT.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
+                        200, 100L, 0));
+                // extra super duralumin (7075): the blended dust needs a hot, even soak
+                list.add(new ChemRecipe(
+                        item(MMMRegistry.DURALUMIN_DUST.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
+                        item(MMMRegistry.DURALUMIN_INGOT.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
+                        300, 500L, 2));
 
                 // platinum-group metal smelting (dust -> ingot; higher metals need hotter coils)
                 list.add(new ChemRecipe(
@@ -336,6 +516,89 @@ public final class ChemRecipes {
                         ItemStack.EMPTY, new GasStack(MekanismGases.POLONIUM, 100L), FluidStack.EMPTY,
                         200, 400L)
                         .requireUpgrade(new ItemStack(MMMRegistry.POLONIUM_SYNTHESIS_UPGRADE.get())));
+                // --- matter replication line, stage 1: dissolution ---
+                // Tear a rare artefact apart in aqua regia. The plasma still carries its
+                // structure; the artefact itself is gone, so this is a one-off cost per
+                // pattern, not a duplication step.
+                record Dissolve(ItemStack rare, int plasma, int ticks,
+                                net.minecraftforge.registries.RegistryObject<net.minecraft.world.item.Item> pattern) {
+                }
+                java.util.List<Dissolve> rares = new ArrayList<>();
+                rares.add(new Dissolve(item(net.minecraft.world.item.Items.NETHER_STAR, 1), 2_000, 1_200,
+                        MMMRegistry.PATTERN_NETHER_STAR));
+                rares.add(new Dissolve(item(net.minecraft.world.item.Items.DRAGON_EGG, 1), 4_000, 2_400,
+                        MMMRegistry.PATTERN_DRAGON_EGG));
+                if (loaded("draconicevolution")) {
+                    ItemStack shard = modItem("draconicevolution", "chaos_shard", 1);
+                    if (!shard.isEmpty()) {
+                        rares.add(new Dissolve(shard, 3_000, 1_800, MMMRegistry.PATTERN_CHAOS_SHARD));
+                    }
+                }
+                if (loaded("botania")) {
+                    ItemStack gaia = modItem("botania", "life_essence", 1);
+                    if (!gaia.isEmpty()) {
+                        rares.add(new Dissolve(gaia, 2_000, 1_200, MMMRegistry.PATTERN_GAIA_SPIRIT));
+                    }
+                }
+                for (Dissolve d : rares) {
+                    // The blank pattern is imprinted here, in the same step that destroys
+                    // the artefact. Imprinting used to be a separate research-station step
+                    // fed only by plasma, but every artefact yields the same plasma — so
+                    // those recipes were indistinguishable and only the cheapest could ever
+                    // run. Consuming the artefact itself keeps each recipe unique.
+                    list.add(new ChemRecipe(
+                            d.rare(), item(MMMRegistry.BLANK_MATTER_PATTERN.get(), 1), ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                            new GasStack(ChemRegistry.AQUA_REGIA, 1_000L), GasStack.EMPTY, FluidStack.EMPTY,
+                            item(d.pattern().get(), 1), ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                            new GasStack(ChemRegistry.EXOTIC_PLASMA, d.plasma()), FluidStack.EMPTY,
+                            d.ticks(), 20_000_000L, 0));
+                }
+                // Exotic plasma is the dissolution's other product: condensed with
+                // antimatter it becomes replicator feedstock, so nothing is wasted.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        new GasStack(ChemRegistry.EXOTIC_PLASMA, 2_000L), new GasStack(MekanismGases.ANTIMATTER, 50L), FluidStack.EMPTY,
+                        ItemStack.EMPTY, GasStack.EMPTY, primordialMatter(1_000),
+                        500, 300_000_000L, 0));
+
+                // --- the stellar loop: ash is re-ignited into molten stellar matter ---
+                // Every distillation and freeze sheds ash; four of them plus a little
+                // helium plasma go back in, so the stellar line partly feeds itself.
+                list.add(new ChemRecipe(
+                        item(MMMRegistry.STELLAR_ASH.get(), 4), ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        new GasStack(ChemRegistry.HELIUM_PLASMA, 500L), GasStack.EMPTY, FluidStack.EMPTY,
+                        ItemStack.EMPTY, GasStack.EMPTY, moltenStellarMatter(300),
+                        500, 100_000_000L, 0));
+
+                // --- trans-dimensional metal, step 2 of 2 ---
+                // The stabilizer now sheds singularity fragments instead of finished metal;
+                // they only stabilise once dissolved in primordial matter, which links the
+                // black-hole line into the replication line.
+                list.add(new ChemRecipe(
+                        item(MMMRegistry.SINGULARITY_FRAGMENT.get(), 3), ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        GasStack.EMPTY, GasStack.EMPTY, primordialMatter(500),
+                        item(MMMRegistry.TRANSDIMENSIONAL_METAL.get(), 1), ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        GasStack.EMPTY, FluidStack.EMPTY,
+                        900, 600_000_000L, 0)
+                        .withChance(item(MMMRegistry.EXOTIC_RESIDUE.get(), 1), 30)
+                        .withNote(stepNote("transdim", 2, 2, "done")));
+
+                // --- stage 3: primordial matter, the replicator's feedstock ---
+                // Antimatter annihilated against stellar matter, held as raw mass-energy.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        new GasStack(MekanismGases.ANTIMATTER, 100L), GasStack.EMPTY, moltenStellarMatter(500),
+                        ItemStack.EMPTY, GasStack.EMPTY, primordialMatter(1_000),
+                        600, 500_000_000L, 0));
+                // --- the loop: exotic residue is dissolved back into feedstock ---
+                // Each replication returns residue; four of them plus a little antimatter
+                // rebuild a full bucket of matter, so a running line feeds itself.
+                list.add(new ChemRecipe(
+                        item(MMMRegistry.EXOTIC_RESIDUE.get(), 4), ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        new GasStack(MekanismGases.ANTIMATTER, 20L), GasStack.EMPTY, FluidStack.EMPTY,
+                        ItemStack.EMPTY, GasStack.EMPTY, primordialMatter(750),
+                        400, 200_000_000L, 0));
+
                 // GT desulfurization: hydrogen strips the sulfur out of the fuel fraction,
                 // yielding clean diesel + a sulfur dust byproduct.
                 list.add(new ChemRecipe(
@@ -354,6 +617,14 @@ public final class ChemRecipes {
                         ItemStack.EMPTY, GasStack.EMPTY, acidicOsmiumSolution(2_000),
                         item(MMMRegistry.OSMIUM_TETROXIDE.get(), 5), new GasStack(MekanismGases.HYDROGEN_CHLORIDE, 1_000L), water(1_000),
                         400, 300L));
+                // Stellar core chain, step 2: boil molten stellar matter down to the
+                // plasma the vacuum freezer can actually condense. Ash falls out here too.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, GasStack.EMPTY, moltenStellarMatter(500),
+                        ItemStack.EMPTY, new GasStack(ChemRegistry.STELLAR_PLASMA, 500L), FluidStack.EMPTY,
+                        400, 40_000_000L)
+                        .withChance(item(MMMRegistry.STELLAR_ASH.get(), 1), 40)
+                        .withNote(stepNote("stellar", 2, 3, "freezer")));
                 // GT oil processing: distill crude oil into the sulfur-laden fuel fraction
                 list.add(new ChemRecipe(
                         ItemStack.EMPTY, GasStack.EMPTY, crudeOil(1_000),
@@ -367,6 +638,13 @@ public final class ChemRecipes {
                         GasStack.EMPTY, FluidStack.EMPTY,
                         item(MMMRegistry.CUPRONICKEL_DUST.get(), 2), GasStack.EMPTY, FluidStack.EMPTY,
                         100, 200L, 0));
+                // extra super duralumin (7075) = aluminium + zinc + magnesium + copper
+                list.add(new ChemRecipe(
+                        item(MMMRegistry.ALUMINUM_DUST.get(), 3), item(MMMRegistry.ZINC_DUST.get(), 1),
+                        item(MMMRegistry.MAGNESIUM_DUST.get(), 1), mekItem("dust_copper", 1),
+                        GasStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
+                        item(MMMRegistry.DURALUMIN_DUST.get(), 4), GasStack.EMPTY, FluidStack.EMPTY,
+                        160, 350L, 0));
                 // chromium + iron + nickel dust -> 3 special steel dust
                 list.add(new ChemRecipe(
                         item(MMMRegistry.CHROMIUM_DUST.get(), 1), mekItem("dust_iron", 1), item(MMMRegistry.NICKEL_DUST.get(), 1),
@@ -418,14 +696,35 @@ public final class ChemRecipes {
                         GasStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
                         ItemStack.EMPTY, GasStack.EMPTY, moltenNaquadahAlloy(144),
                         700, 3_000L, 4));
-                // trans-dimensional alloy: alloy trans-dim metal + neutronium + naquadah alloy.
-                // 300,000,000 RF/t = 750,000,000 J/t; antimatter coil.
+                // Neutronium chain, step 3 of 4: press the neutron-rich mass together.
+                // The binder is a superconductor, NOT graviton alloy — graviton alloy is
+                // made from neutronium, so using it here would close a crafting loop.
+                // Antimatter coil (tier 4); 160,000,000 RF/t.
+                list.add(new ChemRecipe(
+                        item(MMMRegistry.NEUTRON_RICH_MASS.get(), 4), item(MMMRegistry.SUPERCONDUCTOR.get(), 1),
+                        ItemStack.EMPTY, ItemStack.EMPTY,
+                        GasStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
+                        ItemStack.EMPTY, GasStack.EMPTY, moltenNeutronium(288),
+                        800, 400_000_000L, 4)
+                        .withNote(stepNote("neutronium", 3, 4, "freezer")));
+                // graviton alloy: neutronium compressed with a stellar core and
+                // superconductor windings. Still an antimatter-coil (tier 4) job — this is
+                // the material the tier-5 coil is made of, so it must not need one.
+                // 200,000,000 RF/t = 500,000,000 J/t.
+                list.add(new ChemRecipe(
+                        item(MMMRegistry.NEUTRONIUM.get(), 2), item(MMMRegistry.STELLAR_CORE.get(), 1),
+                        item(MMMRegistry.SUPERCONDUCTOR.get(), 2), ItemStack.EMPTY,
+                        GasStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
+                        ItemStack.EMPTY, GasStack.EMPTY, moltenGravitonAlloy(144),
+                        900, 500_000_000L, 4));
+                // trans-dimensional alloy: alloy trans-dim metal + neutronium + naquadah
+                // alloy. 300,000,000 RF/t = 750,000,000 J/t; needs the graviton coil (tier 5).
                 list.add(new ChemRecipe(
                         item(MMMRegistry.TRANSDIMENSIONAL_METAL.get(), 2), item(MMMRegistry.NEUTRONIUM.get(), 1),
                         item(MMMRegistry.NAQUADAH_ALLOY_INGOT.get(), 1), ItemStack.EMPTY,
                         GasStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
                         ItemStack.EMPTY, GasStack.EMPTY, moltenTransAlloy(144),
-                        800, 750_000_000L, 4));
+                        800, 750_000_000L, 5));
             }
             case VACUUM_FREEZER -> {
                 // molten super alloy -> solid super alloy ingot (2 per 288 mB)
@@ -438,11 +737,29 @@ public final class ChemRecipes {
                         ItemStack.EMPTY, GasStack.EMPTY, moltenNaquadahAlloy(144),
                         item(MMMRegistry.NAQUADAH_ALLOY_INGOT.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
                         400, 1_000L, 0));
-                // molten stellar matter (fusion output) -> solid stellar core
+                // Stellar core chain, final step: freeze distilled stellar plasma into a
+                // core. (Molten stellar matter can no longer be frozen directly — it must
+                // be distilled first, see the distillation tower.) Some of the charge
+                // always burns out as stellar ash, which the reactor recycles.
                 list.add(new ChemRecipe(
-                        ItemStack.EMPTY, GasStack.EMPTY, moltenStellarMatter(100),
+                        ItemStack.EMPTY, new GasStack(ChemRegistry.STELLAR_PLASMA, 500L), FluidStack.EMPTY,
                         item(MMMRegistry.STELLAR_CORE.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
-                        600, 2_000L, 0));
+                        600, 20_000_000L, 0)
+                        .withChance(item(MMMRegistry.STELLAR_ASH.get(), 1), 30)
+                        .withNote(stepNote("stellar", 3, 3, "done")));
+                // Neutronium chain, step 4 of 4: freeze it solid. Some of the mass sloughs
+                // off as exotic residue, which the replication line turns back into feedstock.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, GasStack.EMPTY, moltenNeutronium(288),
+                        item(MMMRegistry.NEUTRONIUM.get(), 2), GasStack.EMPTY, FluidStack.EMPTY,
+                        600, 200_000_000L, 0)
+                        .withChance(item(MMMRegistry.EXOTIC_RESIDUE.get(), 1), 25)
+                        .withNote(stepNote("neutronium", 4, 4, "done")));
+                // molten graviton alloy -> solid graviton alloy ingot
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, GasStack.EMPTY, moltenGravitonAlloy(144),
+                        item(MMMRegistry.GRAVITON_ALLOY.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
+                        700, 300_000_000L, 0));
                 // molten trans-dimensional alloy -> solid alloy ingot (200,000,000 RF/t = 500,000,000 J/t)
                 list.add(new ChemRecipe(
                         ItemStack.EMPTY, GasStack.EMPTY, moltenTransAlloy(144),
@@ -475,16 +792,20 @@ public final class ChemRecipes {
                         new GasStack(ChemRegistry.HELIUM_PLASMA, 1_000L), new GasStack(MekanismGases.ANTIMATTER, 10L), FluidStack.EMPTY,
                         ItemStack.EMPTY, GasStack.EMPTY, moltenStellarMatter(100),
                         400, 1_000_000_000L, 0));
-                // neutronium (GT: naquadria fusion): fuse naquadria with helium plasma +
-                // antimatter. With Draconic Evolution the fusion needs a draconium seed.
+                // Neutronium chain, step 1 of 4: crush naquadria past its electron shell
+                // into degenerate matter. (It is no longer a one-shot neutronium recipe —
+                // the gas has to be centrifuged, pressed and frozen; see the centrifuge,
+                // alloy blast furnace and vacuum freezer.)
+                // With Draconic Evolution the fusion needs a draconium seed.
                 ItemStack draconium = loaded("draconicevolution")
                         ? modItem("draconicevolution", "draconium_ingot", 4) : ItemStack.EMPTY;
                 list.add(new ChemRecipe(
                         item(MMMRegistry.NAQUADRIA_INGOT.get(), 1), draconium, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
                         new GasStack(ChemRegistry.HELIUM_PLASMA, 1_000L), new GasStack(MekanismGases.ANTIMATTER, 50L), FluidStack.EMPTY,
-                        item(MMMRegistry.NEUTRONIUM.get(), 4), ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
-                        GasStack.EMPTY, FluidStack.EMPTY,
-                        600, 800_000_000L, 0));
+                        ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        new GasStack(ChemRegistry.DEGENERATE_MATTER, 1_000L), FluidStack.EMPTY,
+                        600, 800_000_000L, 0)
+                        .withNote(stepNote("neutronium", 1, 4, "centrifuge")));
             }
             case STABILIZER -> {
                 // stabilize a black hole seed into 10 trans-dimensional metal.
@@ -492,11 +813,16 @@ public final class ChemRecipes {
                 // With Draconic Evolution the containment lattice consumes a chaos shard.
                 ItemStack chaosShard = loaded("draconicevolution")
                         ? modItem("draconicevolution", "chaos_shard", 1) : ItemStack.EMPTY;
+                // Trans-dimensional metal, step 1 of 2: the collapsing seed sheds
+                // singularity fragments. They are not yet stable metal — the large
+                // chemical reactor dissolves them in primordial matter to finish the job.
                 list.add(new ChemRecipe(
                         item(MMMRegistry.BLACK_HOLE_SEED.get(), 1), chaosShard,
                         GasStack.EMPTY, FluidStack.EMPTY,
-                        item(MMMRegistry.TRANSDIMENSIONAL_METAL.get(), 10), GasStack.EMPTY, FluidStack.EMPTY,
-                        36_000, 2_500_000_000L, 0));
+                        item(MMMRegistry.SINGULARITY_FRAGMENT.get(), 36), GasStack.EMPTY, FluidStack.EMPTY,
+                        36_000, 2_500_000_000L, 0)
+                        .withChance(item(MMMRegistry.SINGULARITY_FRAGMENT.get(), 12), 25)
+                        .withNote(stepNote("transdim", 1, 2, "reactor")));
             }
             case HADRON_COLLIDER -> {
                 // Alternative antimatter route: collide hydrogen (protons) directly into
@@ -588,16 +914,68 @@ public final class ChemRecipes {
                 // -> a research-data module for the assembly line. 20,000 RF/t, 2 min.
                 record Research(ItemStack sample, net.minecraftforge.registries.RegistryObject<net.minecraft.world.item.Item> data) {
                 }
+                // Each sample is a part the player can already build, so the research
+                // always precedes the machine it unlocks (never the other way round).
                 for (Research research : new Research[]{
                         new Research(item(MMMRegistry.SUPERCONDUCTOR.get(), 1), MMMRegistry.RESEARCH_DATA_SUPERCONDUCTOR),
                         new Research(item(MMMRegistry.FUSION_COIL.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_FUSION),
                         new Research(item(MMMRegistry.VOID_DRILL.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_VOID_MINING),
-                        new Research(item(MMMRegistry.TRANSDIMENSIONAL_ALLOY.get(), 1), MMMRegistry.RESEARCH_DATA_TRANSDIMENSIONAL)}) {
+                        new Research(item(MMMRegistry.TRANSDIMENSIONAL_ALLOY.get(), 1), MMMRegistry.RESEARCH_DATA_TRANSDIMENSIONAL),
+                        new Research(item(MMMRegistry.FROST_PROOF_CASING.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_CRYOGENICS),
+                        new Research(item(MMMRegistry.ALLOY_BLAST_CASING.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_METALLURGY),
+                        new Research(item(MMMRegistry.DRILL_PIPE.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_PETROCHEMISTRY),
+                        new Research(item(MMMRegistry.COLLIDER_MAGNET.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_PARTICLE),
+                        new Research(item(MMMRegistry.ANNIHILATION_CASING.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_ANTIMATTER),
+                        new Research(item(MMMRegistry.REPLICATOR_CASING.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_REPLICATION),
+                        new Research(item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 1), MMMRegistry.RESEARCH_DATA_DIGITAL),
+                        new Research(item(MMMRegistry.LIVINGROCK_CASING.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_ARCANE)}) {
                     list.add(new ChemRecipe(
                             item(MMMRegistry.DATA_ORB.get(), 1), research.sample(),
                             GasStack.EMPTY, FluidStack.EMPTY,
                             item(research.data().get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
                             2_400, 50_000L, 0));
+                }
+
+                // (Pattern imprinting lives in the Large Chemical Reactor, together with
+                // the dissolution that consumes the artefact — see REACTOR. Splitting it
+                // out here made every imprint recipe look identical to the machine.)
+            }
+            case MATTER_REPLICATOR -> {
+                // --- matter replication line, stage 4: growing the copy ---
+                // The pattern sits in the module slot and is never consumed; primordial
+                // matter is. Every run leaves exotic residue (which the line recycles),
+                // and the copy itself is a chance roll — GT style.
+                record Replicate(net.minecraftforge.registries.RegistryObject<net.minecraft.world.item.Item> pattern,
+                                 ItemStack result, int chance, int mb, int ticks, long energy) {
+                }
+                java.util.List<Replicate> jobs = new ArrayList<>();
+                jobs.add(new Replicate(MMMRegistry.PATTERN_NETHER_STAR,
+                        item(net.minecraft.world.item.Items.NETHER_STAR, 1), 40, 1_000, 1_200, 400_000_000L));
+                jobs.add(new Replicate(MMMRegistry.PATTERN_DRAGON_EGG,
+                        item(net.minecraft.world.item.Items.DRAGON_EGG, 1), 20, 2_000, 2_400, 800_000_000L));
+                if (loaded("draconicevolution")) {
+                    ItemStack shard = modItem("draconicevolution", "chaos_shard", 1);
+                    if (!shard.isEmpty()) {
+                        jobs.add(new Replicate(MMMRegistry.PATTERN_CHAOS_SHARD, shard, 25, 1_500, 1_800, 600_000_000L));
+                    }
+                }
+                if (loaded("botania")) {
+                    ItemStack gaia = modItem("botania", "life_essence", 1);
+                    if (!gaia.isEmpty()) {
+                        jobs.add(new Replicate(MMMRegistry.PATTERN_GAIA_SPIRIT, gaia, 40, 1_000, 1_200, 400_000_000L));
+                    }
+                }
+                for (Replicate j : jobs) {
+                    ItemStack pattern = item(j.pattern().get(), 1);
+                    list.add(new ChemRecipe(
+                            ItemStack.EMPTY, GasStack.EMPTY, primordialMatter(j.mb()),
+                            item(MMMRegistry.EXOTIC_RESIDUE.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
+                            j.ticks(), j.energy())
+                            .requireUpgrade(pattern)
+                            .withChance(j.result(), j.chance())
+                            .withNote(net.minecraft.network.chat.Component.translatable(
+                                    "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".replicate_req",
+                                    pattern.getHoverName(), j.chance() + "%", j.result().getHoverName())));
                 }
             }
             case ASSEMBLY_LINE -> {
@@ -643,6 +1021,108 @@ public final class ChemRecipes {
                         GasStack.EMPTY, GasStack.EMPTY, moltenStellarMatter(144),
                         item(MMMRegistry.TRANSDIMENSIONAL_CIRCUIT.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
                         600, 1_000_000_000L, 0), MMMRegistry.RESEARCH_DATA_TRANSDIMENSIONAL));
+
+                // --- machine controllers ---
+                // Most multiblock controllers are built here rather than on a crafting
+                // grid. The exceptions are the foundation machines (blast furnace, reactor,
+                // distillation, mixer, electrolyzer, centrifuge, ALLOY BLAST FURNACE and
+                // VACUUM FREEZER) plus the circuit assembler / research station / assembly
+                // line themselves: the alloy blast furnace and freezer produce the molten
+                // super alloy every recipe here is soldered with, so gating them behind
+                // this machine would close a loop nobody could enter.
+
+                // Petrochemistry: the oil rig and the engine that burns what it pumps.
+                list.add(controller(ChemMachineType.OIL_RIG,
+                        item(MMMRegistry.OIL_RIG_CASING.get().asItem(), 4), item(MMMRegistry.DRILL_PIPE.get().asItem(), 4),
+                        item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 2), item(MMMRegistry.DURALUMIN_INGOT.get(), 8),
+                        item(MMMRegistry.SPECIAL_STEEL_INGOT.get(), 8),
+                        moltenSuperAlloy(288), 600, 50_000L, MMMRegistry.RESEARCH_DATA_PETROCHEMISTRY));
+                list.add(controller(ChemMachineType.COMBUSTION_GENERATOR,
+                        item(MMMRegistry.ENGINE_CASING.get().asItem(), 4), item(MMMRegistry.HEAT_VENT.get().asItem(), 4),
+                        item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 2), item(MMMRegistry.DURALUMIN_INGOT.get(), 8),
+                        mekItem("alloy_atomic", 4),
+                        moltenSuperAlloy(288), 600, 50_000L, MMMRegistry.RESEARCH_DATA_PETROCHEMISTRY));
+
+                // Digital logic: the AE2 parallel rigs. Without AE2 the exotic component
+                // falls back to plain super alloy so the machines stay buildable.
+                ItemStack engProcessor = loaded("ae2") ? modItem("ae2", "engineering_processor", 8) : ItemStack.EMPTY;
+                list.add(controller(ChemMachineType.LARGE_INSCRIBER,
+                        item(MMMRegistry.INSCRIBER_CASING.get().asItem(), 4), item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 2),
+                        engProcessor.isEmpty() ? item(MMMRegistry.SUPER_ALLOY_INGOT.get(), 8) : engProcessor,
+                        item(MMMRegistry.TITANIUM_INGOT.get(), 8), item(MMMRegistry.SPECIAL_STEEL_INGOT.get(), 8),
+                        moltenSuperAlloy(288), 600, 50_000L, MMMRegistry.RESEARCH_DATA_DIGITAL));
+                ItemStack chargedCertus = loaded("ae2") ? modItem("ae2", "charged_certus_quartz_crystal", 16) : ItemStack.EMPTY;
+                list.add(controller(ChemMachineType.LARGE_CHARGER,
+                        item(MMMRegistry.CHARGER_CASING.get().asItem(), 4), item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 2),
+                        chargedCertus.isEmpty() ? mekItem("alloy_atomic", 4) : chargedCertus,
+                        item(MMMRegistry.SUPERCONDUCTOR.get(), 4), item(MMMRegistry.TITANIUM_INGOT.get(), 8),
+                        moltenSuperAlloy(288), 600, 50_000L, MMMRegistry.RESEARCH_DATA_DIGITAL));
+
+                // Particle physics: the three machines that bend space.
+                list.add(controller(ChemMachineType.HADRON_COLLIDER,
+                        item(MMMRegistry.ACCELERATOR_CASING.get().asItem(), 8), item(MMMRegistry.COLLIDER_MAGNET.get().asItem(), 4),
+                        item(MMMRegistry.SUPERCONDUCTOR.get(), 8), item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 4),
+                        item(MMMRegistry.NAQUADAH_ALLOY_INGOT.get(), 8),
+                        moltenNaquadahAlloy(576), 1_200, 200_000L, MMMRegistry.RESEARCH_DATA_PARTICLE));
+                list.add(controller(ChemMachineType.STAR_GENERATOR,
+                        item(MMMRegistry.STAR_CASING.get().asItem(), 8), item(MMMRegistry.FUSION_COIL.get().asItem(), 4),
+                        item(MMMRegistry.SUPERCONDUCTOR.get(), 8), item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 4),
+                        item(MMMRegistry.NAQUADAH_ALLOY_INGOT.get(), 8),
+                        moltenNaquadahAlloy(576), 1_200, 200_000L, MMMRegistry.RESEARCH_DATA_PARTICLE));
+                list.add(controller(ChemMachineType.STABILIZER,
+                        item(MMMRegistry.NEUTRONIUM_CASING.get().asItem(), 8), item(MMMRegistry.STABILIZER_GLASS.get().asItem(), 4),
+                        item(MMMRegistry.SUPERCONDUCTOR.get(), 8), item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 4),
+                        item(MMMRegistry.NEUTRONIUM.get(), 4),
+                        moltenStellarMatter(288), 1_800, 1_000_000L, MMMRegistry.RESEARCH_DATA_PARTICLE));
+
+                // Antimatter and replication: the two endgame rigs.
+                list.add(controller(ChemMachineType.ANNIHILATION_GENERATOR,
+                        item(MMMRegistry.ANNIHILATION_CASING.get().asItem(), 8), item(MMMRegistry.SUPERCONDUCTOR.get(), 16),
+                        item(MMMRegistry.TRANSDIMENSIONAL_CIRCUIT.get(), 2), item(MMMRegistry.NEUTRONIUM.get(), 8),
+                        item(MMMRegistry.STELLAR_CORE.get(), 2),
+                        moltenStellarMatter(576), 2_400, 10_000_000L, MMMRegistry.RESEARCH_DATA_ANTIMATTER));
+                list.add(controller(ChemMachineType.MATTER_REPLICATOR,
+                        item(MMMRegistry.REPLICATOR_CASING.get().asItem(), 8), item(MMMRegistry.TRANSDIMENSIONAL_CIRCUIT.get(), 4),
+                        item(MMMRegistry.GRAVITON_ALLOY.get(), 4), item(MMMRegistry.NEUTRONIUM.get(), 8),
+                        item(MMMRegistry.SUPERCONDUCTOR.get(), 16),
+                        moltenGravitonAlloy(576), 3_600, 50_000_000L, MMMRegistry.RESEARCH_DATA_REPLICATION));
+
+                // Arcane engineering: the Botania / Ars parallel machines. Each also
+                // demands mana, drawn from the assembly line's own mana hatches.
+                if (loaded("botania")) {
+                    ItemStack terrasteel = modItem("botania", "terrasteel_ingot", 4);
+                    ItemStack elementium = modItem("botania", "elementium_ingot", 8);
+                    ItemStack dragonstone = modItem("botania", "dragonstone", 2);
+                    if (!terrasteel.isEmpty()) {
+                        list.add(controller(ChemMachineType.GRAND_MANA_POOL,
+                                item(MMMRegistry.LIVINGROCK_CASING.get().asItem(), 8), terrasteel.copy(),
+                                item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 2), item(MMMRegistry.MANA_HATCH.get().asItem(), 2),
+                                item(MMMRegistry.SUPER_ALLOY_INGOT.get(), 4),
+                                moltenSuperAlloy(288), 800, 100_000L, MMMRegistry.RESEARCH_DATA_ARCANE));
+                        list.add(controller(ChemMachineType.GRAND_TERRA_PLATE,
+                                item(MMMRegistry.TERRA_PLATE_CASING.get().asItem(), 8), terrasteel.copyWithCount(8),
+                                item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 4), item(MMMRegistry.MANA_HATCH.get().asItem(), 4),
+                                item(MMMRegistry.SUPER_ALLOY_INGOT.get(), 8),
+                                moltenSuperAlloy(576), 1_200, 200_000L, MMMRegistry.RESEARCH_DATA_ARCANE));
+                    }
+                    if (!elementium.isEmpty() && !dragonstone.isEmpty()) {
+                        list.add(controller(ChemMachineType.GRAND_ELVEN_GATE,
+                                item(MMMRegistry.ELVEN_GATE_CASING.get().asItem(), 8), elementium,
+                                item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 2), item(MMMRegistry.MANA_HATCH.get().asItem(), 2),
+                                dragonstone,
+                                moltenSuperAlloy(288), 800, 100_000L, MMMRegistry.RESEARCH_DATA_ARCANE));
+                    }
+                }
+                if (loaded("ars_nouveau")) {
+                    ItemStack sourceGem = modItem("ars_nouveau", "source_gem", 16);
+                    if (!sourceGem.isEmpty()) {
+                        list.add(controller(ChemMachineType.GRAND_IMBUEMENT,
+                                item(MMMRegistry.SOURCESTONE_CASING.get().asItem(), 8), sourceGem,
+                                item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 2), item(MMMRegistry.SUPER_ALLOY_INGOT.get(), 4),
+                                item(MMMRegistry.TITANIUM_INGOT.get(), 8),
+                                moltenSuperAlloy(288), 800, 100_000L, MMMRegistry.RESEARCH_DATA_ARCANE));
+                    }
+                }
             }
             case GRAND_IMBUEMENT -> {
                 // Ars Nouveau imbuement, 16x parallel — energy stands in for source.
@@ -842,6 +1322,15 @@ public final class ChemRecipes {
                         100, 300L));
             }
             case CENTRIFUGE -> {
+                // Neutronium chain, step 2 of 4: spin the degenerate gas until the
+                // neutron-rich fraction settles out. The rest burns off as stellar ash,
+                // which the stellar loop reclaims.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, new GasStack(ChemRegistry.DEGENERATE_MATTER, 1_000L), FluidStack.EMPTY,
+                        item(MMMRegistry.NEUTRON_RICH_MASS.get(), 2), GasStack.EMPTY, FluidStack.EMPTY,
+                        400, 40_000_000L)
+                        .withChance(item(MMMRegistry.STELLAR_ASH.get(), 1), 35)
+                        .withNote(stepNote("neutronium", 2, 4, "alloy_blast")));
                 // GTCEu: platinum group sludge + aqua regia -> the four raw metal fractions
                 list.add(new ChemRecipe(
                         item(MMMRegistry.PLATINUM_GROUP_SLUDGE.get(), 6), ItemStack.EMPTY, ItemStack.EMPTY,
@@ -938,6 +1427,21 @@ public final class ChemRecipes {
                 press.getHoverName()));
     }
 
+    /**
+     * An assembly-line recipe that builds one multiblock controller: five component
+     * inputs soldered with a molten alloy, gated behind its research-data module.
+     */
+    private static ChemRecipe controller(ChemMachineType machine,
+            ItemStack a, ItemStack b, ItemStack c, ItemStack d, ItemStack e,
+            FluidStack solder, int ticks, long energyPerTick,
+            net.minecraftforge.registries.RegistryObject<net.minecraft.world.item.Item> data) {
+        return researchNote(new ChemRecipe(
+                a, b, c, d, e,
+                GasStack.EMPTY, GasStack.EMPTY, solder,
+                new ItemStack(MMMRegistry.CHEM_CONTROLLERS.get(machine).get()), GasStack.EMPTY, FluidStack.EMPTY,
+                ticks, energyPerTick, 0), data);
+    }
+
     /** Marks an assembly-line recipe as requiring the given research-data module. */
     private static ChemRecipe researchNote(ChemRecipe recipe,
             net.minecraftforge.registries.RegistryObject<net.minecraft.world.item.Item> data) {
@@ -946,6 +1450,18 @@ public final class ChemRecipes {
                 .withNote(net.minecraft.network.chat.Component.translatable(
                         "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".research_req",
                         module.getHoverName()));
+    }
+
+    /**
+     * JEI note marking a recipe's place in one of the deep end-game chains, so a player
+     * looking at an unfamiliar intermediate can see what it belongs to and what comes next.
+     */
+    private static net.minecraft.network.chat.Component stepNote(String chainKey, int step, int total, String nextKey) {
+        String base = "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".";
+        return net.minecraft.network.chat.Component.translatable(base + "chain_step",
+                net.minecraft.network.chat.Component.translatable(base + "chain." + chainKey),
+                step, total,
+                net.minecraft.network.chat.Component.translatable(base + "chain_next." + nextKey));
     }
 
     /** JEI note showing a recipe's Botania mana cost. */
@@ -1011,6 +1527,18 @@ public final class ChemRecipes {
 
     private static FluidStack moltenNaquadahAlloy(int amount) {
         return new FluidStack(ChemRegistry.MOLTEN_NAQUADAH_ALLOY.getStillFluid(), amount);
+    }
+
+    private static FluidStack moltenGravitonAlloy(int amount) {
+        return new FluidStack(ChemRegistry.MOLTEN_GRAVITON_ALLOY.getStillFluid(), amount);
+    }
+
+    private static FluidStack primordialMatter(int amount) {
+        return new FluidStack(ChemRegistry.PRIMORDIAL_MATTER.getStillFluid(), amount);
+    }
+
+    private static FluidStack moltenNeutronium(int amount) {
+        return new FluidStack(ChemRegistry.MOLTEN_NEUTRONIUM.getStillFluid(), amount);
     }
 
     private static FluidStack moltenStellarMatter(int amount) {

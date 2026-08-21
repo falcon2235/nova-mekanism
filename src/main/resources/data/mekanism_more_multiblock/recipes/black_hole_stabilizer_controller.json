@@ -1,1 +1,0 @@
-{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["CEC", "EBE", "CEC"], "key": {"C": {"item": "mekanism_more_multiblock:neutronium_casing"}, "E": {"item": "mekanism_more_multiblock:supreme_control_circuit"}, "B": {"item": "mekanism_more_multiblock:black_hole_seed"}}, "result": {"item": "mekanism_more_multiblock:black_hole_stabilizer_controller", "count": 1}}

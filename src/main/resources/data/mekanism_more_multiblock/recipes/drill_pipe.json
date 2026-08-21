@@ -1,1 +1,1 @@
-{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["ISI", "ISI", "ISI"], "key": {"I": {"item": "mekanism:ingot_steel"}, "S": {"item": "mekanism_more_multiblock:titanium_ingot"}}, "result": {"item": "mekanism_more_multiblock:drill_pipe", "count": 4}}
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["IDI", "IDI", "IDI"], "key": {"I": {"item": "mekanism:ingot_steel"}, "D": {"item": "mekanism_more_multiblock:extra_super_duralumin_ingot"}}, "result": {"item": "mekanism_more_multiblock:drill_pipe", "count": 4}}

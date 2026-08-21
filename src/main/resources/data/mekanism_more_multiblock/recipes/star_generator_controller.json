@@ -1,1 +1,0 @@
-{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["CEC", "ESE", "CEC"], "key": {"C": {"item": "mekanism_more_multiblock:star_casing"}, "E": {"item": "mekanism_more_multiblock:supreme_control_circuit"}, "S": {"item": "mekanism_more_multiblock:stellar_core"}}, "result": {"item": "mekanism_more_multiblock:star_generator_controller", "count": 1}}

@@ -63,4 +63,7 @@ New-CoilLit 'plutonium_coil_lit'   (C 40 70 40)  (C 235 255 210) (C 170 255 150)
 # antimatter: violet on near-black
 New-Coil    'antimatter_coil'      (C 20 12 28)  (C 220 140 255) (C 150 60 200)  (C 80 20 120)
 New-CoilLit 'antimatter_coil_lit'  (C 40 24 56)  (C 255 220 255) (C 230 150 255) (C 180 80 235)
+# graviton (tier 5): gravitational cyan on deep void blue
+New-Coil    'graviton_coil'      (C 10 18 30)  (C 150 240 255) (C 70 170 220)  (C 26 84 130)
+New-CoilLit 'graviton_coil_lit'  (C 22 38 60)  (C 240 255 255) (C 170 245 255) (C 90 200 250)
 Write-Host 'done'

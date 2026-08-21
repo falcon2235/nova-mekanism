@@ -159,7 +159,14 @@ public enum ChemMachineType {
      * source-charge this mod's uncharged superconductors as a magical alternative
      * to the AE2 charging route.
      */
-    GRAND_IMBUEMENT("grand_imbuement_chamber", 3, 3, 3, false);
+    GRAND_IMBUEMENT("grand_imbuement_chamber", 3, 3, 3, false),
+    /**
+     * Matter replicator: a 5x5x5 containment sphere of replicator casing with a
+     * window on each face. Install a matter pattern in its module slot and feed it
+     * primordial matter, and it grows copies of that rare item — probabilistically,
+     * always leaving exotic residue that the line recycles back into feedstock.
+     */
+    MATTER_REPLICATOR("matter_replicator", 5, 5, 5, false);
 
     public final String id;
     public final int width;

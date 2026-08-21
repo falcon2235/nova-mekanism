@@ -1,0 +1,1 @@
+{"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["GNG", "NFN", "GNG"], "key": {"G": {"item": "mekanism_more_multiblock:graviton_alloy_ingot"}, "N": {"item": "mekanism_more_multiblock:neutronium"}, "F": {"item": "mekanism_more_multiblock:fusion_casing"}}, "result": {"item": "mekanism_more_multiblock:replicator_casing", "count": 4}}
