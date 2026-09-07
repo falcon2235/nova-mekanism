@@ -9,7 +9,8 @@ function C([int]$r, [int]$g, [int]$b) { [System.Drawing.Color]::FromArgb(255, $r
 $styles = @{
     'default'    = @{ base = (C 74 85 104);   light = (C 113 128 150); dark = (C 45 55 72);    bolt = (C 160 174 192) }
     'heat_proof' = @{ base = (C 168 178 150); light = (C 198 206 180); dark = (C 116 126 100); bolt = (C 220 226 204) }
-    'ptfe'       = @{ base = (C 222 226 230); light = (C 244 246 249); dark = (C 164 172 182); bolt = (C 250 251 253) }
+    # GT's Chemically Inert Machine Casing: pale, faintly green-white PTFE
+    'ptfe'       = @{ base = (C 222 226 216); light = (C 240 243 236); dark = (C 176 182 170); bolt = (C 246 248 242) }
     'stainless'  = @{ base = (C 200 204 210); light = (C 232 236 241); dark = (C 142 148 158); bolt = (C 245 247 250) }
 }
 

@@ -111,7 +111,7 @@ public final class MultiblockValidator {
                     Block block = state.getBlock();
                     if (block instanceof ParallelProcessorBlock processor) {
                         units.add(new ParallelUnit(cursor.immutable(), processor.parallel));
-                    } else if (block instanceof PortBlock) {
+                    } else if (isPortLike(state)) {
                         ports.add(cursor.immutable());
                     } else if (block instanceof ControllerBlock) {
                         return Result.fail("multiple_controllers");
@@ -122,6 +122,17 @@ public final class MultiblockValidator {
             }
         }
         return new Result(true, null, List.copyOf(ports), List.copyOf(units));
+    }
+
+    /**
+     * Whether this block may stand anywhere a port may: the ports themselves plus the
+     * mana and research-data hatches. Hatches are accepted in EVERY structure so a
+     * line can be re-tooled from the wall rather than through the controller GUI.
+     */
+    private static boolean isPortLike(net.minecraft.world.level.block.state.BlockState state) {
+        return state.getBlock() instanceof PortBlock
+                || state.is(MMMRegistry.MANA_HATCH.get())
+                || state.is(MMMRegistry.RESEARCH_HATCH.get());
     }
 
     private static String posString(BlockPos pos) {
@@ -175,7 +186,7 @@ public final class MultiblockValidator {
                                 return Component.translatable(LANG + "mixed_coils", posString(cursor));
                             }
                         }
-                    } else if (state.getBlock() instanceof PortBlock) {
+                    } else if (isPortLike(state)) {
                         if (portsOut != null) {
                             portsOut.add(cursor.immutable());
                         }
@@ -224,7 +235,7 @@ public final class MultiblockValidator {
 
                     boolean plate = dy == 0 || dy == 4;
                     if (plate) {
-                        if (state.getBlock() instanceof PortBlock) {
+                        if (isPortLike(state)) {
                             if (portsOut != null) {
                                 portsOut.add(cursor.immutable());
                             }
@@ -303,7 +314,7 @@ public final class MultiblockValidator {
                         if (!state.is(glass)) {
                             return Component.translatable(LANG + "invalid_glass", posString(cursor));
                         }
-                    } else if (state.getBlock() instanceof PortBlock) {
+                    } else if (isPortLike(state)) {
                         if (portsOut != null) {
                             portsOut.add(cursor.immutable());
                         }
@@ -384,7 +395,7 @@ public final class MultiblockValidator {
                         if (!state.is(glass)) {
                             return Component.translatable(LANG + "invalid_glass", posString(cursor));
                         }
-                    } else if (state.getBlock() instanceof PortBlock) { // casing tube (ports allowed)
+                    } else if (isPortLike(state)) { // casing tube (ports allowed)
                         if (portsOut != null) {
                             portsOut.add(cursor.immutable());
                         }
@@ -453,7 +464,7 @@ public final class MultiblockValidator {
                         if (!state.is(drill)) {
                             return Component.translatable(LANG + "invalid_coil", posString(cursor));
                         }
-                    } else if (state.getBlock() instanceof PortBlock) {
+                    } else if (isPortLike(state)) {
                         if (portsOut != null) {
                             portsOut.add(cursor.immutable());
                         }
@@ -520,7 +531,7 @@ public final class MultiblockValidator {
                         if (!state.is(pipe)) {
                             return Component.translatable(LANG + "invalid_coil", posString(cursor));
                         }
-                    } else if (state.getBlock() instanceof PortBlock) {
+                    } else if (isPortLike(state)) {
                         if (portsOut != null) {
                             portsOut.add(cursor.immutable());
                         }
@@ -601,7 +612,7 @@ public final class MultiblockValidator {
                             }
                         }
                         default -> { // casing (floor, control centre, energy spine)
-                            if (state.getBlock() instanceof PortBlock) {
+                            if (isPortLike(state)) {
                                 if (portsOut != null) {
                                     portsOut.add(cursor.immutable());
                                 }
@@ -651,7 +662,7 @@ public final class MultiblockValidator {
                         if (!state.is(glass)) {
                             return Component.translatable(LANG + "invalid_glass", posString(cursor));
                         }
-                    } else if (state.getBlock() instanceof PortBlock) { // cube edge → neutronium or port
+                    } else if (isPortLike(state)) { // cube edge → neutronium or port
                         if (portsOut != null) {
                             portsOut.add(cursor.immutable());
                         }
@@ -724,7 +735,7 @@ public final class MultiblockValidator {
                         } else if (!state.is(brick)) {
                             return Component.translatable(LANG + "invalid_wall", posString(cursor));
                         }
-                    } else if (state.getBlock() instanceof PortBlock) {
+                    } else if (isPortLike(state)) {
                         if (portsOut != null) {
                             portsOut.add(cursor.immutable());
                         }
@@ -784,7 +795,7 @@ public final class MultiblockValidator {
                             // assembly-arm spine down the middle
                             return Component.translatable(LANG + "invalid_coil", posString(cursor));
                         }
-                    } else if (state.getBlock() instanceof PortBlock) {
+                    } else if (isPortLike(state)) {
                         if (portsOut != null) {
                             portsOut.add(cursor.immutable());
                         }
@@ -839,7 +850,7 @@ public final class MultiblockValidator {
                             }
                         }
                         default -> { // C, E, O, I: casing frame or a port
-                            if (state.getBlock() instanceof PortBlock) {
+                            if (isPortLike(state)) {
                                 if (portsOut != null) {
                                     portsOut.add(cursor.immutable());
                                 }
@@ -860,6 +871,75 @@ public final class MultiblockValidator {
      * machines. Returns {@code null} when valid, otherwise a translated error.
      * Width and height must be odd so the controller can sit centred on the front face.
      */
+    /**
+     * GTCEu's Large Chemical Reactor, block for block. It is a SOLID 3x3x3 — not a
+     * hollow box — laid out as (front slice first, controller at its centre):
+     *
+     * <pre>
+     *   d=0  XXX / XSX / XXX      S = controller
+     *   d=1  XCX / CPC / XCX      P = PTFE pipe casing (dead centre)
+     *   d=2  XXX / XCX / XXX      C = coil slot, X = chemically inert casing
+     * </pre>
+     *
+     * The five C slots take a heating coil or plain casing, and at least one of them
+     * must be a real coil (GT requires exactly that). The best coil tier found is
+     * written to {@code coilTierOut[0]}; ports may stand in any X or C slot.
+     */
+    public static Component validateLcr(Level level, BlockPos controllerPos, Direction facing,
+                                        Block casing, Block pipeCasing,
+                                        List<BlockPos> portsOut, int[] coilTierOut) {
+        Direction back = facing.getOpposite();
+        Direction right = facing.getClockWise();
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        int coilsFound = 0;
+        int bestTier = 0;
+
+        for (int d = 0; d <= 2; d++) {
+            for (int u = -1; u <= 1; u++) {
+                for (int r = -1; r <= 1; r++) {
+                    if (d == 0 && u == 0 && r == 0) {
+                        continue; // the controller itself
+                    }
+                    cursor.set(controllerPos).move(back, d).move(Direction.UP, u).move(right, r);
+                    BlockState state = level.getBlockState(cursor);
+                    boolean centre = u == 0 && r == 0;
+
+                    // dead centre of the middle slice: the PTFE pipe casing
+                    if (d == 1 && centre) {
+                        if (!state.is(pipeCasing)) {
+                            return Component.translatable(LANG + "invalid_pipe", posString(cursor));
+                        }
+                        continue;
+                    }
+                    // the five coil slots: back-face centre plus the middle slice's edge centres
+                    boolean coilSlot = (d == 2 && centre) || (d == 1 && Math.abs(u) + Math.abs(r) == 1);
+                    if (coilSlot) {
+                        int tier = com.falcon2235.moremultiblock.MMMRegistry.coilTierOf(state);
+                        if (tier >= 0) {
+                            coilsFound++;
+                            bestTier = Math.max(bestTier, tier);
+                            continue;
+                        }
+                    }
+                    if (isPortLike(state)) {
+                        if (portsOut != null) {
+                            portsOut.add(cursor.immutable());
+                        }
+                    } else if (!state.is(casing)) {
+                        return Component.translatable(LANG + "invalid_wall", posString(cursor));
+                    }
+                }
+            }
+        }
+        if (coilsFound == 0) {
+            return Component.translatable(LANG + "needs_coil");
+        }
+        if (coilTierOut != null) {
+            coilTierOut[0] = bestTier;
+        }
+        return null;
+    }
+
     public static Component validateBox(Level level, BlockPos controllerPos, Direction facing,
                                         int width, int height, int depth, Block casing, @Nullable Block coil,
                                         List<BlockPos> portsOut) {
@@ -889,10 +969,8 @@ public final class MultiblockValidator {
                             if (!state.is(coil)) {
                                 return Component.translatable(LANG + "invalid_coil", posString(cursor));
                             }
-                        } else if (state.getBlock() instanceof PortBlock
-                                || state.is(MMMRegistry.MANA_HATCH.get())) {
-                            // mana hatches count as ports so the Botania machines can
-                            // find them (harmless in any other box machine's wall)
+                        } else if (isPortLike(state)) {
+                            // hatches count as ports so the machines can find them
                             if (portsOut != null) {
                                 portsOut.add(cursor.immutable());
                             }

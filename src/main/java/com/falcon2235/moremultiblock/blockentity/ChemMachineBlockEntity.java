@@ -94,14 +94,18 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
 
         @Override
         public int getSlotLimit(int slot) {
-            return slot == 2 ? 1 : 8;
+            return switch (slot) {
+                case 0 -> machineType().maxSpeedUpgrades();
+                case 1 -> machineType().maxEnergyUpgrades();
+                default -> 1;
+            };
         }
 
         @Override
         public boolean isItemValid(int slot, @NotNull ItemStack stack) {
             return switch (slot) {
-                case 0 -> ControllerBlockEntity.isSpeedUpgrade(stack);
-                case 1 -> ControllerBlockEntity.isEnergyUpgrade(stack);
+                case 0 -> machineType().maxSpeedUpgrades() > 0 && ControllerBlockEntity.isSpeedUpgrade(stack);
+                case 1 -> machineType().maxEnergyUpgrades() > 0 && ControllerBlockEntity.isEnergyUpgrade(stack);
                 default -> stack.is(MMMRegistry.POLONIUM_SYNTHESIS_UPGRADE.get()) || isInscriberPress(stack)
                         || isResearchData(stack) || isMatterPattern(stack);
             };
@@ -277,7 +281,7 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
             case GRAND_TERRA_PLATE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ALLOY;
             case RESEARCH_STATION, ASSEMBLY_LINE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ASSEMBLY;
             case GRAND_IMBUEMENT -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.STAINLESS;
-            case MATTER_REPLICATOR -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.FUSION;
+            case MATTER_REPLICATOR, TRANSDIMENSIONAL_FUSION -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.FUSION;
         };
     }
 
@@ -300,12 +304,15 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
                     MMMRegistry.chemCasing(type), MMMRegistry.ASSEMBLY_GLASS.get(),
                     MMMRegistry.ASSLINE_CONVEYOR.get(), MMMRegistry.ASSLINE_GRATE.get(),
                     type.width, type.height, type.depth, ports);
+        } else if (type == ChemMachineType.REACTOR) {
+            error = MultiblockValidator.validateLcr(level, worldPosition, facing,
+                    MMMRegistry.chemCasing(type), MMMRegistry.PTFE_PIPE_CASING.get(), ports, coilTierOut);
         } else if (type == ChemMachineType.FUSION_REACTOR) {
             error = MultiblockValidator.validateFusion(level, worldPosition, facing,
                     MMMRegistry.chemCasing(type), MMMRegistry.FUSION_COIL.get(),
                     MMMRegistry.FUSION_GLASS.get(), ports);
         } else if (type == ChemMachineType.STAR_GENERATOR || type == ChemMachineType.ANNIHILATION_GENERATOR
-                || type == ChemMachineType.MATTER_REPLICATOR) {
+                || type == ChemMachineType.MATTER_REPLICATOR || type == ChemMachineType.TRANSDIMENSIONAL_FUSION) {
             error = MultiblockValidator.validateStar(level, worldPosition, facing,
                     MMMRegistry.chemCasing(type), MMMRegistry.FUSION_GLASS.get(), type.width, ports);
         } else if (type == ChemMachineType.STABILIZER) {
@@ -633,8 +640,10 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
 
     /** Mekanism upgrade formulas: 8 speed upgrades = 10x faster, energy upgrades bring the cost back down. */
     private void recomputeUpgrades() {
-        int speed = upgrades.getStackInSlot(0).getCount();
-        int energyUpgrades = upgrades.getStackInSlot(1).getCount();
+        // Clamped, not just slot-limited: a machine saved before the cap existed can
+        // still be carrying more upgrades than it may now use.
+        int speed = Math.min(upgrades.getStackInSlot(0).getCount(), machineType().maxSpeedUpgrades());
+        int energyUpgrades = Math.min(upgrades.getStackInSlot(1).getCount(), machineType().maxEnergyUpgrades());
         upgradeTimeFactor = Math.pow(10, -speed / 8.0);
         upgradeEnergyFactor = Math.pow(10, (2.0 * speed - energyUpgrades) / 8.0);
     }
@@ -710,7 +719,8 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
                 || stack.is(MMMRegistry.RESEARCH_DATA_ANTIMATTER.get())
                 || stack.is(MMMRegistry.RESEARCH_DATA_REPLICATION.get())
                 || stack.is(MMMRegistry.RESEARCH_DATA_DIGITAL.get())
-                || stack.is(MMMRegistry.RESEARCH_DATA_ARCANE.get());
+                || stack.is(MMMRegistry.RESEARCH_DATA_ARCANE.get())
+                || stack.is(MMMRegistry.RESEARCH_DATA_INFINITY.get());
     }
 
     /** Whether the stack is an imprinted matter pattern (the replicator's module). */
@@ -727,7 +737,13 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
             return true;
         }
         ItemStack module = upgrades.getStackInSlot(2);
-        return !module.isEmpty() && ItemStack.isSameItemSameTags(module, r.requiredUpgrade);
+        if (!module.isEmpty() && ItemStack.isSameItemSameTags(module, r.requiredUpgrade)) {
+            return true;
+        }
+        // Research data may also sit in a research hatch built into the structure,
+        // which keeps the module slot free for presses and matter patterns.
+        return isResearchData(r.requiredUpgrade)
+                && ResearchHatchBlockEntity.holdsAmong(level, cachedPorts, r.requiredUpgrade);
     }
 
     private int countItem(ItemStack template) {

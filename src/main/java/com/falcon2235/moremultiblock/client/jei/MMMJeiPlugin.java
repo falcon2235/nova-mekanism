@@ -101,6 +101,9 @@ public class MMMJeiPlugin implements IModPlugin {
                 "large_inscriber");
         info(registration, new ItemStack(MMMRegistry.CHEM_CONTROLLERS.get(ChemMachineType.VOID_MINER).get()),
                 "void_miner");
+        info(registration, new ItemStack(MMMRegistry.CHEM_CONTROLLERS.get(ChemMachineType.REACTOR).get()),
+                "large_chemical_reactor");
+        info(registration, new ItemStack(MMMRegistry.RESEARCH_HATCH.get()), "research_hatch");
         info(registration, new ItemStack(MMMRegistry.CHEM_CONTROLLERS.get(ChemMachineType.COMBUSTION_GENERATOR).get()),
                 "combustion_generator");
         info(registration, new ItemStack(MMMRegistry.QUANTUM_CABLE.get()), "quantum_conduit");
@@ -165,7 +168,7 @@ public class MMMJeiPlugin implements IModPlugin {
             boolean assembly = type == ChemMachineType.CIRCUIT_ASSEMBLER;
             boolean fusion = type == ChemMachineType.FUSION_REACTOR;
             boolean star = type == ChemMachineType.STAR_GENERATOR || type == ChemMachineType.ANNIHILATION_GENERATOR
-                    || type == ChemMachineType.MATTER_REPLICATOR;
+                    || type == ChemMachineType.MATTER_REPLICATOR || type == ChemMachineType.TRANSDIMENSIONAL_FUSION;
             boolean stabilizer = type == ChemMachineType.STABILIZER;
             boolean collider = type == ChemMachineType.HADRON_COLLIDER;
             boolean voidMiner = type == ChemMachineType.VOID_MINER;

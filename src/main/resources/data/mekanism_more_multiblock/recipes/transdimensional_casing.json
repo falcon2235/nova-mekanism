@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["AMA", "MSM", "AMA"],
+  "key": {
+    "A": {"item": "mekanism_more_multiblock:transdimensional_alloy"},
+    "M": {"item": "mekanism_more_multiblock:transdimensional_metal"},
+    "S": {"item": "mekanism_more_multiblock:superconductor"}
+  },
+  "result": {"item": "mekanism_more_multiblock:transdimensional_casing", "count": 4}
+}

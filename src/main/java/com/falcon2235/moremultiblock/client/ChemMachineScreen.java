@@ -64,19 +64,40 @@ public class ChemMachineScreen extends AbstractContainerScreen<ChemMachineMenu> 
         g.fill(x + imageWidth - 1, y, x + imageWidth, y + imageHeight, COLOR_PANEL_DARK);
 
         for (Slot slot : menu.slots) {
-            drawSlot(g, x + slot.x - 1, y + slot.y - 1);
+            if (slot.isActive()) {
+                drawSlot(g, x + slot.x - 1, y + slot.y - 1);
+            }
         }
 
         // Fits the 17px gap between the input grid (ends x+80) and the output
         // column (starts x+97) — a wider arrow would sit under the output slots.
         drawProgressArrow(g, x + 81, y + 33);
 
-        // vertical bars: gas in x2 + fluid in (left), gas out + fluid out (right)
-        drawVBar(g, x + 2, y + 16, menu.be.displayGasIn(), menu.be.gasCapacity(), COLOR_GAS, LANG + "gas_in");
-        drawVBar(g, x + 9, y + 16, menu.be.displayGasIn2(), menu.be.gasCapacity(), COLOR_GAS, LANG + "gas_in2");
-        drawVBar(g, x + 16, y + 16, menu.be.displayFluidIn(), menu.be.fluidCapacity(), COLOR_FLUID, LANG + "fluid_in");
-        drawVBar(g, x + 152, y + 16, menu.be.displayGasOut(), menu.be.gasCapacity(), COLOR_GAS, LANG + "gas_out");
-        drawVBar(g, x + 160, y + 16, menu.be.displayFluidOut(), menu.be.fluidCapacity(), COLOR_FLUID, LANG + "fluid_out");
+        // Tank bars: only the ones this machine can actually fill, packed together so
+        // there are no gaps where an unused tank used to sit. An always-empty bar reads
+        // as a broken machine, which is exactly the confusion this avoids.
+        var io = com.falcon2235.moremultiblock.machine.MachineIo.of(menu.be.machineType());
+        int inX = x + 2;
+        if (io.gasIn()) {
+            drawVBar(g, inX, y + 16, menu.be.displayGasIn(), menu.be.gasCapacity(), COLOR_GAS, LANG + "gas_in");
+            inX += 7;
+        }
+        if (io.gasIn2()) {
+            drawVBar(g, inX, y + 16, menu.be.displayGasIn2(), menu.be.gasCapacity(), COLOR_GAS, LANG + "gas_in2");
+            inX += 7;
+        }
+        if (io.fluidIn()) {
+            drawVBar(g, inX, y + 16, menu.be.displayFluidIn(), menu.be.fluidCapacity(), COLOR_FLUID, LANG + "fluid_in");
+        }
+        // outputs fill in from the right edge
+        int outX = x + 160;
+        if (io.fluidOut()) {
+            drawVBar(g, outX, y + 16, menu.be.displayFluidOut(), menu.be.fluidCapacity(), COLOR_FLUID, LANG + "fluid_out");
+            outX -= 8;
+        }
+        if (io.gasOut()) {
+            drawVBar(g, outX, y + 16, menu.be.displayGasOut(), menu.be.gasCapacity(), COLOR_GAS, LANG + "gas_out");
+        }
 
         // Energy bar sits above the inventory label (y=72) with a clear gap, and stops
         // short of the upgrade column at x+134.

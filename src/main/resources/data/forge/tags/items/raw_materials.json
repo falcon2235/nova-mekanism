@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "mekanism_more_multiblock:raw_titanium",
     "mekanism_more_multiblock:raw_magnesium",
@@ -9,6 +10,5 @@
     "mekanism_more_multiblock:raw_cooperite",
     "mekanism_more_multiblock:raw_antimony",
     "mekanism_more_multiblock:raw_naquadah"
-  ],
-  "replace": false
+  ]
 }

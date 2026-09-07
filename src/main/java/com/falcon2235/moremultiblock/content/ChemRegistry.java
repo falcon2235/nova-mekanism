@@ -138,6 +138,10 @@ public final class ChemRegistry {
     public static final FluidRegistryObject<?, ?, ?, ?, ?> MOLTEN_NEUTRONIUM =
             FLUIDS.register("molten_neutronium", props -> props.tint(0xFFDCDCE4));
 
+    /** Molten infinity alloy: the fusion reactor's product, frozen into the solid alloy. */
+    public static final FluidRegistryObject<?, ?, ?, ?, ?> MOLTEN_INFINITY_ALLOY =
+            FLUIDS.register("molten_infinity_alloy", props -> props.tint(0xFFFFFFFF));
+
     // --- matter replication line ---
     /**
      * Exotic plasma: what is left when a rare artefact is torn apart in the chemical

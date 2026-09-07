@@ -187,6 +187,7 @@ public final class ChemRecipes {
     public static synchronized void invalidateCache() {
         CACHE.clear();
         MATCH_CACHE.clear();
+        MachineIo.invalidateCache();
     }
 
     private static List<ChemRecipe> build(ChemMachineType type) {
@@ -515,7 +516,8 @@ public final class ChemRecipes {
                         mekItem("ingot_lead", 2), new GasStack(MekanismGases.OXYGEN, 1_000L), FluidStack.EMPTY,
                         ItemStack.EMPTY, new GasStack(MekanismGases.POLONIUM, 100L), FluidStack.EMPTY,
                         200, 400L)
-                        .requireUpgrade(new ItemStack(MMMRegistry.POLONIUM_SYNTHESIS_UPGRADE.get())));
+                        .requireUpgrade(new ItemStack(MMMRegistry.POLONIUM_SYNTHESIS_UPGRADE.get()))
+                        .withNote(moduleNote(new ItemStack(MMMRegistry.POLONIUM_SYNTHESIS_UPGRADE.get()))));
                 // --- matter replication line, stage 1: dissolution ---
                 // Tear a rare artefact apart in aqua regia. The plasma still carries its
                 // structure; the artefact itself is gone, so this is a one-off cost per
@@ -683,16 +685,16 @@ public final class ChemRecipes {
                 // alloy straight away — no mixer pre-step needed.
                 // Requires a plutonium coil (tier 3); higher tiers speed it up.
                 list.add(new ChemRecipe(
-                        item(MMMRegistry.SPECIAL_STEEL_DUST.get(), 1), item(MMMRegistry.CHROMIUM_DUST.get(), 1),
-                        item(MMMRegistry.TITANIUM_DUST.get(), 1), mekItem("alloy_atomic", 2),
+                        item(MMMRegistry.SPECIAL_STEEL_DUST.get(), 3), item(MMMRegistry.CHROMIUM_DUST.get(), 3),
+                        item(MMMRegistry.TITANIUM_DUST.get(), 3), mekItem("alloy_atomic", 6),
                         GasStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
                         ItemStack.EMPTY, GasStack.EMPTY, moltenSuperAlloy(288),
                         600, 2_000L, 3));
                 // naquadah alloy: naquadah + osmiridium + trinium -> molten naquadah alloy (blast temp 7200)
                 // Requires an antimatter coil (tier 4).
                 list.add(new ChemRecipe(
-                        item(MMMRegistry.NAQUADAH_DUST.get(), 2), item(MMMRegistry.OSMIRIDIUM_DUST.get(), 1),
-                        item(MMMRegistry.TRINIUM_INGOT.get(), 1), ItemStack.EMPTY,
+                        item(MMMRegistry.NAQUADAH_DUST.get(), 6), item(MMMRegistry.OSMIRIDIUM_DUST.get(), 3),
+                        item(MMMRegistry.TRINIUM_INGOT.get(), 3), ItemStack.EMPTY,
                         GasStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
                         ItemStack.EMPTY, GasStack.EMPTY, moltenNaquadahAlloy(144),
                         700, 3_000L, 4));
@@ -701,7 +703,7 @@ public final class ChemRecipes {
                 // made from neutronium, so using it here would close a crafting loop.
                 // Antimatter coil (tier 4); 160,000,000 RF/t.
                 list.add(new ChemRecipe(
-                        item(MMMRegistry.NEUTRON_RICH_MASS.get(), 4), item(MMMRegistry.SUPERCONDUCTOR.get(), 1),
+                        item(MMMRegistry.NEUTRON_RICH_MASS.get(), 12), item(MMMRegistry.SUPERCONDUCTOR.get(), 4),
                         ItemStack.EMPTY, ItemStack.EMPTY,
                         GasStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
                         ItemStack.EMPTY, GasStack.EMPTY, moltenNeutronium(288),
@@ -712,16 +714,16 @@ public final class ChemRecipes {
                 // the material the tier-5 coil is made of, so it must not need one.
                 // 200,000,000 RF/t = 500,000,000 J/t.
                 list.add(new ChemRecipe(
-                        item(MMMRegistry.NEUTRONIUM.get(), 2), item(MMMRegistry.STELLAR_CORE.get(), 1),
-                        item(MMMRegistry.SUPERCONDUCTOR.get(), 2), ItemStack.EMPTY,
+                        item(MMMRegistry.NEUTRONIUM.get(), 6), item(MMMRegistry.STELLAR_CORE.get(), 3),
+                        item(MMMRegistry.SUPERCONDUCTOR.get(), 6), ItemStack.EMPTY,
                         GasStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
                         ItemStack.EMPTY, GasStack.EMPTY, moltenGravitonAlloy(144),
                         900, 500_000_000L, 4));
                 // trans-dimensional alloy: alloy trans-dim metal + neutronium + naquadah
                 // alloy. 300,000,000 RF/t = 750,000,000 J/t; needs the graviton coil (tier 5).
                 list.add(new ChemRecipe(
-                        item(MMMRegistry.TRANSDIMENSIONAL_METAL.get(), 2), item(MMMRegistry.NEUTRONIUM.get(), 1),
-                        item(MMMRegistry.NAQUADAH_ALLOY_INGOT.get(), 1), ItemStack.EMPTY,
+                        item(MMMRegistry.TRANSDIMENSIONAL_METAL.get(), 6), item(MMMRegistry.NEUTRONIUM.get(), 3),
+                        item(MMMRegistry.NAQUADAH_ALLOY_INGOT.get(), 3), ItemStack.EMPTY,
                         GasStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
                         ItemStack.EMPTY, GasStack.EMPTY, moltenTransAlloy(144),
                         800, 750_000_000L, 5));
@@ -765,6 +767,11 @@ public final class ChemRecipes {
                         ItemStack.EMPTY, GasStack.EMPTY, moltenTransAlloy(144),
                         item(MMMRegistry.TRANSDIMENSIONAL_ALLOY.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
                         800, 500_000_000L, 0));
+                // molten infinity alloy -> the solid alloy the creative blocks are built from
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, GasStack.EMPTY, moltenInfinityAlloy(144),
+                        item(MMMRegistry.INFINITY_ALLOY.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
+                        1_200, 1_000_000_000L, 0));
                 // helium plasma (fusion product) condensed into liquid helium — the
                 // annihilation generator's coolant.
                 list.add(new ChemRecipe(
@@ -839,22 +846,11 @@ public final class ChemRecipes {
                                 com.falcon2235.moremultiblock.MMMConfig.colliderAntimatterMbPerOp()),
                         FluidStack.EMPTY,
                         100, com.falcon2235.moremultiblock.MMMConfig.colliderJPerTick(), 0));
-                // ultimate craft: assemble a Mekanism creative energy cube from large amounts of
-                // trans-dimensional circuits/alloy/metal. 500,000,000 RF/t = 1,250,000,000 J/t.
-                ItemStack creativeCube = chargedCreativeCube();
-                if (!creativeCube.isEmpty()) {
-                    // With Botania / MEGA Cells installed, the final craft also demands
-                    // Gaia spirits and a 256M cell component.
-                    ItemStack gaia = loaded("botania") ? modItem("botania", "life_essence", 4) : ItemStack.EMPTY;
-                    ItemStack megaTop = loaded("megacells") ? modItem("megacells", "cell_component_256m", 1) : ItemStack.EMPTY;
-                    list.add(new ChemRecipe(
-                            item(MMMRegistry.TRANSDIMENSIONAL_CIRCUIT.get(), 8), item(MMMRegistry.TRANSDIMENSIONAL_ALLOY.get(), 16),
-                            item(MMMRegistry.TRANSDIMENSIONAL_METAL.get(), 16), gaia, megaTop,
-                            GasStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
-                            creativeCube, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
-                            GasStack.EMPTY, FluidStack.EMPTY,
-                            24_000, 1_250_000_000L, 0));
-                }
+                // (The creative energy cube moved to the TRANSDIMENSIONAL_FUSION reactor
+                // in 1.2.0, so all four creative-tier blocks cost the same infinity-tier
+                // materials. What the collider used to demand — trans-dimensional
+                // circuits, alloy and metal, plus Gaia spirits and a 256M cell component
+                // — is now folded into the infinity alloy and circuit that feed it.)
             }
             case LARGE_INSCRIBER -> {
                 // AE2 inscriber, 16x parallel. Printing steps need the matching AE2 press
@@ -928,7 +924,11 @@ public final class ChemRecipes {
                         new Research(item(MMMRegistry.ANNIHILATION_CASING.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_ANTIMATTER),
                         new Research(item(MMMRegistry.REPLICATOR_CASING.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_REPLICATION),
                         new Research(item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 1), MMMRegistry.RESEARCH_DATA_DIGITAL),
-                        new Research(item(MMMRegistry.LIVINGROCK_CASING.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_ARCANE)}) {
+                        new Research(item(MMMRegistry.LIVINGROCK_CASING.get().asItem(), 1), MMMRegistry.RESEARCH_DATA_ARCANE),
+                        // The casing, not the alloy: trans-dimensional research already
+                        // scans the alloy, and two identical scans make one unreachable.
+                        new Research(item(MMMRegistry.TRANSDIMENSIONAL_CASING.get().asItem(), 1),
+                                MMMRegistry.RESEARCH_DATA_INFINITY)}) {
                     list.add(new ChemRecipe(
                             item(MMMRegistry.DATA_ORB.get(), 1), research.sample(),
                             GasStack.EMPTY, FluidStack.EMPTY,
@@ -978,6 +978,59 @@ public final class ChemRecipes {
                                     pattern.getHoverName(), j.chance() + "%", j.result().getHoverName())));
                 }
             }
+            case TRANSDIMENSIONAL_FUSION -> {
+                // --- infinity alloy: the point of the whole reactor ---
+                // Absurd quantities of every end-game material, fused at 800,000,000
+                // RF/t for five minutes, yield a single ingot's worth of molten alloy.
+                // The vacuum freezer solidifies it.
+                list.add(new ChemRecipe(
+                        item(MMMRegistry.TRANSDIMENSIONAL_ALLOY.get(), 48), item(MMMRegistry.NEUTRONIUM.get(), 48),
+                        item(MMMRegistry.GRAVITON_ALLOY.get(), 24), item(MMMRegistry.STELLAR_CORE.get(), 12),
+                        item(MMMRegistry.TRANSDIMENSIONAL_CIRCUIT.get(), 6),
+                        new GasStack(MekanismGases.ANTIMATTER, 3_000L), GasStack.EMPTY, primordialMatter(12_000),
+                        ItemStack.EMPTY, GasStack.EMPTY, moltenInfinityAlloy(144),
+                        6_000, 2_000_000_000L, 0));
+
+                // --- creative-tier storage ---
+                // Every creative block is the same shape: infinity alloy and circuits
+                // poured over the ultimate-tier block it supersedes. The creative energy
+                // cube moved here from the hadron collider so the four creative blocks
+                // all cost the same tier of material instead of one being far cheaper.
+                // The four are NOT equal. Infinite energy is the one a player already
+                // works towards all game, so the cube stays where it was; infinite gas
+                // and fluid storage cost twice that; and an infinite ITEM bin — the one
+                // that trivialises every other production line in the pack — costs four
+                // times the cube. Scaling is per-tier, not a flat multiplier, so each
+                // step up is felt in alloy, circuits, time AND draw.
+                record Creative(String ultimate, String creative, int alloy, int circuit,
+                                int transdim, int neutronium, int solder, int ticks, long energy) {
+                }
+                for (Creative c : new Creative[]{
+                        new Creative("ultimate_energy_cube", "creative_energy_cube",
+                                8, 4, 16, 8, 576, 12_000, 2_500_000_000L),
+                        new Creative("ultimate_chemical_tank", "creative_chemical_tank",
+                                16, 8, 32, 16, 1_152, 18_000, 3_500_000_000L),
+                        new Creative("ultimate_fluid_tank", "creative_fluid_tank",
+                                16, 8, 32, 16, 1_152, 18_000, 3_500_000_000L),
+                        new Creative("ultimate_bin", "creative_bin",
+                                32, 16, 64, 32, 2_304, 24_000, 5_000_000_000L)}) {
+                    ItemStack ultimate = mekItem(c.ultimate(), 1);
+                    ItemStack creative = "creative_energy_cube".equals(c.creative())
+                            ? chargedCreativeCube() : mekItem(c.creative(), 1);
+                    if (ultimate.isEmpty() || creative.isEmpty()) {
+                        continue;
+                    }
+                    list.add(new ChemRecipe(
+                            item(MMMRegistry.INFINITY_ALLOY.get(), c.alloy()),
+                            item(MMMRegistry.INFINITY_CIRCUIT.get(), c.circuit()),
+                            ultimate, item(MMMRegistry.TRANSDIMENSIONAL_ALLOY.get(), c.transdim()),
+                            item(MMMRegistry.NEUTRONIUM.get(), c.neutronium()),
+                            GasStack.EMPTY, GasStack.EMPTY, moltenInfinityAlloy(c.solder()),
+                            creative, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                            GasStack.EMPTY, FluidStack.EMPTY,
+                            c.ticks(), c.energy(), 0));
+                }
+            }
             case ASSEMBLY_LINE -> {
                 // GT assembly line: every recipe demands its research-data module.
                 // Bulk superconductors (the assembler still makes singles without research).
@@ -985,11 +1038,11 @@ public final class ChemRecipes {
                 ItemStack scBulkOut = loaded("ae2") ? item(MMMRegistry.UNCHARGED_SUPERCONDUCTOR.get(), 8)
                         : item(MMMRegistry.SUPERCONDUCTOR.get(), 8);
                 list.add(researchNote(new ChemRecipe(
-                        item(MMMRegistry.NAQUADAH_ALLOY_INGOT.get(), 4), item(MMMRegistry.PLATINUM_INGOT.get(), 4),
-                        item(MMMRegistry.IRIDIUM_INGOT.get(), 4),
-                        elementiumBulk.isEmpty() ? item(MMMRegistry.RHODIUM_INGOT.get(), 4) : elementiumBulk,
-                        item(MMMRegistry.NAQUADAH_ENRICHED_INGOT.get(), 4),
-                        GasStack.EMPTY, GasStack.EMPTY, moltenSuperAlloy(576),
+                        item(MMMRegistry.NAQUADAH_ALLOY_INGOT.get(), 16), item(MMMRegistry.PLATINUM_INGOT.get(), 16),
+                        item(MMMRegistry.IRIDIUM_INGOT.get(), 16),
+                        elementiumBulk.isEmpty() ? item(MMMRegistry.RHODIUM_INGOT.get(), 16) : elementiumBulk,
+                        item(MMMRegistry.NAQUADAH_ENRICHED_INGOT.get(), 16),
+                        GasStack.EMPTY, GasStack.EMPTY, moltenSuperAlloy(2_304),
                         scBulkOut, GasStack.EMPTY, FluidStack.EMPTY,
                         600, 50_000L, 0), MMMRegistry.RESEARCH_DATA_SUPERCONDUCTOR));
                 // fusion reactor controller (moved off the crafting grid)
@@ -1015,12 +1068,15 @@ public final class ChemRecipes {
                 // trans-dimensional circuit (moved from the circuit assembler)
                 ItemStack megaComponent = loaded("megacells") ? modItem("megacells", "cell_component_4m", 1) : ItemStack.EMPTY;
                 list.add(researchNote(new ChemRecipe(
-                        item(MMMRegistry.TRANSDIMENSIONAL_ALLOY.get(), 2), mekItem("ultimate_control_circuit", 2),
-                        item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 2), item(MMMRegistry.TRANSDIMENSIONAL_METAL.get(), 1),
-                        megaComponent.isEmpty() ? item(net.minecraft.world.item.Items.GOLD_INGOT, 2) : megaComponent,
-                        GasStack.EMPTY, GasStack.EMPTY, moltenStellarMatter(144),
+                        item(MMMRegistry.TRANSDIMENSIONAL_ALLOY.get(), 8), mekItem("ultimate_control_circuit", 8),
+                        item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 8), item(MMMRegistry.TRANSDIMENSIONAL_METAL.get(), 4),
+                        megaComponent.isEmpty() ? item(net.minecraft.world.item.Items.GOLD_INGOT, 8) : megaComponent,
+                        GasStack.EMPTY, GasStack.EMPTY, moltenStellarMatter(576),
                         item(MMMRegistry.TRANSDIMENSIONAL_CIRCUIT.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
                         600, 1_000_000_000L, 0), MMMRegistry.RESEARCH_DATA_TRANSDIMENSIONAL));
+
+                // (The infinity circuit is built in the CIRCUIT_ASSEMBLER — every other
+                // circuit tier is made there, and it takes infinity research data.)
 
                 // --- machine controllers ---
                 // Most multiblock controllers are built here rather than on a crafting
@@ -1086,6 +1142,15 @@ public final class ChemRecipes {
                         item(MMMRegistry.GRAVITON_ALLOY.get(), 4), item(MMMRegistry.NEUTRONIUM.get(), 8),
                         item(MMMRegistry.SUPERCONDUCTOR.get(), 16),
                         moltenGravitonAlloy(576), 3_600, 50_000_000L, MMMRegistry.RESEARCH_DATA_REPLICATION));
+
+                // The trans-dimensional fusion reactor itself. Its controller is cheap
+                // next to the ~370 trans-dimensional casings the shell needs.
+                list.add(controller(ChemMachineType.TRANSDIMENSIONAL_FUSION,
+                        item(MMMRegistry.TRANSDIMENSIONAL_CASING.get().asItem(), 8),
+                        item(MMMRegistry.TRANSDIMENSIONAL_CIRCUIT.get(), 4),
+                        item(MMMRegistry.GRAVITON_ALLOY.get(), 8), item(MMMRegistry.NEUTRONIUM.get(), 16),
+                        item(MMMRegistry.SUPERCONDUCTOR.get(), 32),
+                        moltenTransAlloy(1_152), 4_800, 100_000_000L, MMMRegistry.RESEARCH_DATA_INFINITY));
 
                 // Arcane engineering: the Botania / Ars parallel machines. Each also
                 // demands mana, drawn from the assembly line's own mana hatches.
@@ -1279,15 +1344,40 @@ public final class ChemRecipes {
                         12_000, 250_000_000L, 0));
             }
             case CIRCUIT_ASSEMBLER -> {
+                // --- Mekanism's own circuit tiers, in bulk ---
+                // This is what a circuit assembly line is FOR: each tier is built four
+                // at a time from the tier below plus one alloy, far cheaper per circuit
+                // and far faster than the metallurgic-infuser route it replaces.
+                record Tier(String output, ItemStack a, ItemStack b, int ticks, long energy) {
+                }
+                for (Tier t : new Tier[]{
+                        new Tier("basic_control_circuit", mekItem("ingot_osmium", 1),
+                                item(net.minecraft.world.item.Items.REDSTONE, 2), 40, 400L),
+                        new Tier("advanced_control_circuit", mekItem("basic_control_circuit", 4),
+                                mekItem("alloy_infused", 1), 60, 800L),
+                        new Tier("elite_control_circuit", mekItem("advanced_control_circuit", 4),
+                                mekItem("alloy_reinforced", 1), 80, 1_600L),
+                        new Tier("ultimate_control_circuit", mekItem("elite_control_circuit", 4),
+                                mekItem("alloy_atomic", 1), 100, 3_200L)}) {
+                    ItemStack out = mekItem(t.output(), 4);
+                    if (out.isEmpty() || t.a().isEmpty() || t.b().isEmpty()) {
+                        continue;
+                    }
+                    list.add(new ChemRecipe(
+                            t.a(), t.b(), GasStack.EMPTY, FluidStack.EMPTY,
+                            out, GasStack.EMPTY, FluidStack.EMPTY,
+                            t.ticks(), t.energy(), 0));
+                }
+
                 // supreme control circuit: 5 components + molten super alloy solder.
                 // With Botania installed the gold is replaced by mana-infused manasteel.
                 ItemStack manasteel = loaded("botania") ? modItem("botania", "manasteel_ingot", 2) : ItemStack.EMPTY;
                 list.add(new ChemRecipe(
-                        mekItem("ultimate_control_circuit", 2), item(MMMRegistry.SUPER_ALLOY_INGOT.get(), 1),
-                        mekItem("alloy_atomic", 2),
-                        manasteel.isEmpty() ? item(net.minecraft.world.item.Items.GOLD_INGOT, 2) : manasteel,
-                        item(net.minecraft.world.item.Items.REDSTONE, 4),
-                        GasStack.EMPTY, GasStack.EMPTY, moltenSuperAlloy(144),
+                        mekItem("ultimate_control_circuit", 8), item(MMMRegistry.SUPER_ALLOY_INGOT.get(), 4),
+                        mekItem("alloy_atomic", 8),
+                        manasteel.isEmpty() ? item(net.minecraft.world.item.Items.GOLD_INGOT, 8) : manasteel,
+                        item(net.minecraft.world.item.Items.REDSTONE, 16),
+                        GasStack.EMPTY, GasStack.EMPTY, moltenSuperAlloy(576),
                         item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
                         400, 10_000L, 0));
                 // superconductor (GregTech-style): exotic-metal windings assembled with molten
@@ -1299,13 +1389,26 @@ public final class ChemRecipes {
                         ? item(MMMRegistry.UNCHARGED_SUPERCONDUCTOR.get(), 2)
                         : item(MMMRegistry.SUPERCONDUCTOR.get(), 2);
                 list.add(new ChemRecipe(
-                        item(MMMRegistry.NAQUADAH_ALLOY_INGOT.get(), 1), item(MMMRegistry.PLATINUM_INGOT.get(), 1),
-                        item(MMMRegistry.IRIDIUM_INGOT.get(), 1),
-                        elementium.isEmpty() ? item(MMMRegistry.RHODIUM_INGOT.get(), 1) : elementium,
-                        item(MMMRegistry.NAQUADAH_ENRICHED_INGOT.get(), 1),
-                        GasStack.EMPTY, GasStack.EMPTY, moltenSuperAlloy(144),
+                        item(MMMRegistry.NAQUADAH_ALLOY_INGOT.get(), 4), item(MMMRegistry.PLATINUM_INGOT.get(), 4),
+                        item(MMMRegistry.IRIDIUM_INGOT.get(), 4),
+                        elementium.isEmpty() ? item(MMMRegistry.RHODIUM_INGOT.get(), 4) : elementium,
+                        item(MMMRegistry.NAQUADAH_ENRICHED_INGOT.get(), 4),
+                        GasStack.EMPTY, GasStack.EMPTY, moltenSuperAlloy(576),
                         scOutput, GasStack.EMPTY, FluidStack.EMPTY,
                         400, 25_000L, 0));
+                // infinity circuit: the top of the circuit ladder, and the control logic
+                // the creative-tier blocks need. Soldered with molten infinity alloy, so
+                // every circuit costs another run of the trans-dimensional fusion reactor
+                // on top of its components. Needs infinity research data — in the module
+                // slot or in a research hatch built into the line's wall.
+                list.add(researchNote(new ChemRecipe(
+                        item(MMMRegistry.INFINITY_ALLOY.get(), 4), item(MMMRegistry.TRANSDIMENSIONAL_CIRCUIT.get(), 8),
+                        item(MMMRegistry.SUPERCONDUCTOR.get(), 32), item(MMMRegistry.GRAVITON_ALLOY.get(), 4),
+                        item(MMMRegistry.NEUTRONIUM.get(), 8),
+                        GasStack.EMPTY, GasStack.EMPTY, moltenInfinityAlloy(576),
+                        item(MMMRegistry.INFINITY_CIRCUIT.get(), 1), GasStack.EMPTY, FluidStack.EMPTY,
+                        2_400, 2_000_000_000L, 0), MMMRegistry.RESEARCH_DATA_INFINITY));
+
                 // (the trans-dimensional circuit moved to the ASSEMBLY_LINE — it now
                 // needs trans-dimensional research data installed there)
             }
@@ -1418,6 +1521,17 @@ public final class ChemRecipes {
 
     private static boolean loaded(String modid) {
         return net.minecraftforge.fml.ModList.get().isLoaded(modid);
+    }
+
+    /**
+     * JEI note naming a module the recipe will not run without. Without it the polonium
+     * route in particular just looks broken — the reactor sits idle with every input
+     * present and nothing says why.
+     */
+    private static net.minecraft.network.chat.Component moduleNote(ItemStack module) {
+        return net.minecraft.network.chat.Component.translatable(
+                "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".module_req",
+                module.getHoverName());
     }
 
     /** JEI note naming the press module a large-inscriber recipe needs. */
@@ -1543,6 +1657,10 @@ public final class ChemRecipes {
 
     private static FluidStack moltenStellarMatter(int amount) {
         return new FluidStack(ChemRegistry.MOLTEN_STELLAR_MATTER.getStillFluid(), amount);
+    }
+
+    private static FluidStack moltenInfinityAlloy(int amount) {
+        return new FluidStack(ChemRegistry.MOLTEN_INFINITY_ALLOY.getStillFluid(), amount);
     }
 
     private static FluidStack moltenTransAlloy(int amount) {

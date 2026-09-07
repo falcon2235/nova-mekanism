@@ -155,11 +155,24 @@ public class PortBlockEntity extends BlockEntity implements MenuProvider {
         return getBlockState().getBlock() instanceof PortBlock port ? port.type : PortBlock.PortType.ENERGY;
     }
 
+    /**
+     * Binds this port to a controller. The first formed machine to claim it KEEPS it:
+     * two multiblocks sharing a wall would otherwise both claim the port on every
+     * revalidate, flipping its routing — and its skin — back and forth a few times a
+     * second. A new controller only takes over once the old one is gone or unformed.
+     */
     public void setController(BlockPos pos) {
-        if (!pos.equals(controllerPos)) {
-            controllerPos = pos.immutable();
-            setChanged();
+        if (pos.equals(controllerPos)) {
+            return;
         }
+        if (controllerPos != null && host() != null) {
+            return; // still owned by a live, formed machine
+        }
+        controllerPos = pos.immutable();
+        // Re-skin on the next tick rather than up to AUTO_INTERVAL ticks later, so a
+        // freshly formed machine's ports take its colour immediately.
+        styleCounter = AUTO_INTERVAL;
+        setChanged();
     }
 
     @Nullable

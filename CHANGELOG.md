@@ -3,6 +3,62 @@
 All notable changes to Nova Mekanism are documented here. This project targets
 Minecraft 1.20.1 (Forge) and follows loose semantic versioning.
 
+## [1.2.0] - 2026-09-07
+
+### Added — the infinity tier
+- **Trans-Dimensional Fusion Reactor** (9×9×9): a shell of roughly 370 **trans-
+  dimensional casings**, each forged from trans-dimensional alloy — by far the
+  mod's largest sink for that metal. Inside, absurd quantities of end-game
+  material fuse into **molten infinity alloy**, frozen into **infinity alloy**.
+- **Infinity circuit**, built on the Circuit Assembly Line behind **infinity
+  engineering** research, and the **creative-tier storage blocks**: creative
+  energy cube, chemical tank, fluid tank and bin. They are deliberately not
+  equal — the tanks cost twice the cube, and the bin four times.
+- **Research Data Hatch**: build it into any multiblock's wall (anywhere a port
+  may stand) and the machine reads the research data it holds, leaving the
+  controller's module slot free for presses and matter patterns. It takes **six
+  different research data at once**; right-click to install, empty-handed to
+  take one back, and hoppers or pipes can swap them automatically.
+
+### Changed
+- **The Large Chemical Reactor is now built to GregTech's own plan**: a SOLID
+  3×3×3 of chemically inert casing with a **PTFE pipe casing** at the dead
+  centre and five coil slots, at least one holding a real heating coil. Its
+  casing, pipe casing, controller face and all seven port skins were repainted
+  to GT's chemically-inert palette. **Nova's own twist: every coil tier above
+  copper DOUBLES the reactor's speed** (an antimatter coil runs it 16× faster).
+- **The Circuit Assembly Line builds Mekanism's circuits** four at a time from
+  the tier below plus one alloy — far cheaper per circuit and far faster than
+  the metallurgic-infuser route.
+- **Speed AND energy upgrades are now capped per machine.** Eight of either was
+  a flat 10×, which made one upgraded machine strictly better than any number of
+  plain ones and quietly erased the late-game power wall. The end-game rigs take
+  none, the parallel and coil-scaled lines take four, the plain processing
+  machines still take all eight.
+- **Machine GUIs now show only what that machine uses**, derived from its own
+  recipes rather than a hand-written table. An electrolyzer no longer displays
+  two gas inputs it will never accept, and the oil rig shows no item slots at
+  all. Unused slots cannot be clicked or filled.
+- **Mid and late-game recipes consume far more material** (GT-modpack scale),
+  graduated so the tiers do not compound: base alloys ×3, circuits and bulk
+  parts ×4, infinity alloy ×3.
+- The antimatter pellet is back to Mekanism's own **1,000 mB** (was 8,000).
+
+### Fixed
+- **The parallel machines duplicated items.** Mekanism's raw-ore recipes consume
+  three raw ore per craft; the controller ignored the recipe's input amount and
+  consumed one, minting 4 dust from 1 raw ore — a 3× duplication that only
+  showed on raw materials. Batches are now counted in crafts, not items.
+- **Ports shared between two multiblocks flip-flopped.** Both machines re-claimed
+  the port on every revalidation, so its routing — and its colour — swapped back
+  and forth several times a second. The first formed machine now keeps the port
+  until it is gone, and a newly claimed port takes its colour on the next tick
+  instead of up to a second later.
+- The polonium route silently did nothing without its module: required modules
+  now get their own catalyst slot in JEI and a warning-orange note.
+- Infinity alloy is drawn by the shared Mekanism-style ingot painter instead of
+  a one-off, so it matches every other ingot.
+
 ## [1.1.2] - 2026-08-22
 
 ### Added — rare-material replication

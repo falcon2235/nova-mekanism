@@ -94,7 +94,9 @@ public class ControllerBlockEntity extends BlockEntity implements MenuProvider, 
 
         @Override
         public int getSlotLimit(int slot) {
-            return 8;
+            // Speed is capped: these machines are meant to scale by their parallel
+            // tier (and by building more of them), not by stacking a flat 10x into one.
+            return slot == 0 ? MAX_SPEED_UPGRADES : MAX_ENERGY_UPGRADES;
         }
 
         @Override
@@ -118,6 +120,11 @@ public class ControllerBlockEntity extends BlockEntity implements MenuProvider, 
     private long energyPerTick = 50;
     private int revalidateIn;
     private boolean upgradesDirty = true;
+    /** Speed-upgrade cap: these scale by parallel tier, so a flat 10x would flatten that. */
+    public static final int MAX_SPEED_UPGRADES = 4;
+    /** Energy-upgrade cap: a flat 10x discount would erase the parallel tier's power cost. */
+    public static final int MAX_ENERGY_UPGRADES = 4;
+
     private boolean recipeSearched;
     private Component statusMessage = Component.translatable(LANG + "not_formed");
     @Nullable
@@ -289,8 +296,8 @@ public class ControllerBlockEntity extends BlockEntity implements MenuProvider, 
     }
 
     private void recomputeUpgrades() {
-        int speed = upgrades.getStackInSlot(0).getCount();
-        int energyUpgrades = upgrades.getStackInSlot(1).getCount();
+        int speed = Math.min(upgrades.getStackInSlot(0).getCount(), MAX_SPEED_UPGRADES);
+        int energyUpgrades = Math.min(upgrades.getStackInSlot(1).getCount(), MAX_ENERGY_UPGRADES);
         MachineType type = machineType();
         ticksRequired = Math.max(1, (int) Math.round(type.baseTicks * Math.pow(10, -speed / 8.0)));
         energyPerTick = Math.max(1L, (long) Math.ceil(type.baseUsage * Math.pow(10, (2.0 * speed - energyUpgrades) / 8.0)));
@@ -305,6 +312,13 @@ public class ControllerBlockEntity extends BlockEntity implements MenuProvider, 
         boolean matches(ItemStack input);
 
         ItemStack assemble(ItemStack input);
+
+        /**
+         * How many input items ONE craft consumes. Mekanism recipes may need more than
+         * one (raw ore enriching is 3 raw -> 4 dust); ignoring this turned the parallel
+         * machines into duplicators, so every batch calculation must go through it.
+         */
+        int inputCount(ItemStack input);
     }
 
     private record RecipeMatch(ProcessRecipe recipe, ItemStack stack) {
@@ -321,6 +335,11 @@ public class ControllerBlockEntity extends BlockEntity implements MenuProvider, 
             public ItemStack assemble(ItemStack input) {
                 return recipe.getOutput(input);
             }
+
+            @Override
+            public int inputCount(ItemStack input) {
+                return (int) Math.max(1L, recipe.getInput().getNeededAmount(input));
+            }
         };
     }
 
@@ -334,6 +353,11 @@ public class ControllerBlockEntity extends BlockEntity implements MenuProvider, 
             @Override
             public ItemStack assemble(ItemStack input) {
                 return recipe.assemble(new SimpleContainer(input), level.registryAccess());
+            }
+
+            @Override
+            public int inputCount(ItemStack input) {
+                return 1; // vanilla smelting is always one item in
             }
         };
     }
@@ -388,6 +412,7 @@ public class ControllerBlockEntity extends BlockEntity implements MenuProvider, 
         return null;
     }
 
+    /** How many complete crafts the current inputs and output space allow. */
     private int computeBatch(ProcessRecipe recipe, ItemStack template) {
         int available = 0;
         for (int i = 0; i < INPUT_SLOTS; i++) {
@@ -396,6 +421,10 @@ public class ControllerBlockEntity extends BlockEntity implements MenuProvider, 
                 available += stack.getCount();
             }
         }
+        // Crafts, not items: a recipe that eats three raw ore per craft must not run
+        // once per ore, or the machine mints free dust.
+        int perCraft = Math.max(1, recipe.inputCount(template));
+        available /= perCraft;
         ItemStack output = recipe.assemble(template);
         if (output.isEmpty()) {
             return 0;
@@ -415,7 +444,8 @@ public class ControllerBlockEntity extends BlockEntity implements MenuProvider, 
     private void complete(ProcessRecipe recipe, ItemStack template) {
         ItemStack matcher = template.copy();
         ItemStack output = recipe.assemble(matcher).copy();
-        int remaining = batch;
+        // batch counts CRAFTS; each one consumes the recipe's own input amount.
+        int remaining = batch * Math.max(1, recipe.inputCount(matcher));
         for (int i = 0; i < INPUT_SLOTS && remaining > 0; i++) {
             ItemStack stack = inputs.getStackInSlot(i);
             if (!stack.isEmpty() && ItemStack.isSameItemSameTags(stack, matcher)) {

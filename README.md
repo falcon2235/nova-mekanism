@@ -40,6 +40,8 @@ workbench recipes, so the whole progression stays completable in any pack.
 - **Alternative antimatter route** — the **Large Hadron Collider** collides hydrogen protons straight into antimatter as an end-game-adjacent alternative to a hardened SPS, and a Large Chemical Reactor polonium recipe (gated behind an antimatter-pellet upgrade) offers a second polonium path.
 - **GT-style petroleum power** — an **Oil Drilling Rig** pumps crude oil, the distillation tower and chemical reactor refine it (distill → desulfurize) into diesel, and a **Large Combustion Generator** burns it at 500,000 RF/t; the end-game **Annihilation Generator** converts hydrogen + antimatter under liquid-helium cooling into 800,000,000 RF/t.
 - **Void Ore Miner** — mines 10 of a random rarity-weighted RAW ore every second (22 ore types, naquadah as the jackpot) for 1,000,000 RF/t; Mekanism speed upgrades roll faster.
+- **The infinity tier** — a 9×9×9 **Trans-Dimensional Fusion Reactor**, built from ~370 casings of trans-dimensional alloy, fuses **infinity alloy**. With the **infinity circuit** it builds Mekanism's creative-tier energy cube, chemical tank, fluid tank and bin — priced apart, the bin costing four times the cube.
+- **Research Data Hatch** — build it into any multiblock's wall and it feeds the machine up to **six different research data** at once, freeing the controller's module slot for presses and matter patterns.
 - **Rare-material replication** — dissolve a nether star, dragon egg, chaos shard or Gaia spirit onto a reusable **matter pattern**, then let the **Matter Replicator** roll chance copies from primordial matter. Every run returns exotic residue that loops back into feedstock.
 - **GTNH-depth end-game chains** — neutronium takes four machines (fusion → centrifuge → alloy blast furnace → freezer), stellar cores need distilling, and trans-dimensional metal starts as singularity fragments. Byproducts (stellar ash, exotic residue) recycle through the chemical reactor.
 - **JEI bill of materials** — every structure preview lists exactly how many of each block the multiblock needs.
@@ -61,7 +63,7 @@ Parallel machines share a fixed **3×3×4** hollow casing box (GregTech-style bl
 | Enriching / Crushing / Smelting | 3×3×4 | Parallel Mekanism processing (up to 300×) |
 | Primitive Blast Furnace | 3×3×4 | Unpowered, coal-fired iron → steel |
 | Electric Blast Furnace | 3×3×4 | Coil-tiered smelting, magnesium melting |
-| Large Chemical Reactor | 5×3×5 | Two-gas chemistry |
+| Large Chemical Reactor | 3×3×3 solid | GregTech's own plan; each coil tier above copper **doubles** its speed |
 | Distillation Tower | 3×5×3 | Gas/fluid distillation |
 | Mixer | 3×3×3 | Dust alloying, acid mixing |
 | Large Electrolyzer | 3×3×3 | Splits raw metals into pure metals + gas |
@@ -84,8 +86,9 @@ Parallel machines share a fixed **3×3×4** hollow casing box (GregTech-style bl
 | **Fusion Reactor** | 15×3×15 ring | D-T fusion → helium plasma → molten stellar matter |
 | **Annihilation Generator** | 7×7×7 sphere | Hydrogen + antimatter + liquid helium → **800,000,000 RF/t** |
 | **Artificial Star Generator** | 9×9×9 sphere | Stellar core + hydrogen → black hole seed |
-| **Black Hole Stabilizer** | 16×16×16 cube | Black hole seed → singularity fragments + Creative Energy Cube |
+| **Black Hole Stabilizer** | 16×16×16 cube | Black hole seed → singularity fragments |
 | **Matter Replicator** | 5×5×5 sphere | Imprinted pattern + primordial matter → chance copies of rare artefacts |
+| **Trans-Dimensional Fusion Reactor** | 9×9×9 sphere | ~370 trans-dimensional casings → infinity alloy → creative-tier storage |
 
 ### Heating coils
 
@@ -103,7 +106,7 @@ The Electric and Alloy Blast Furnaces use tiered heating coils — **copper → 
 6. **Fusion** — deuterium + tritium → helium plasma → (+ antimatter) → **molten stellar matter** → distilled into **stellar plasma** → frozen into a **stellar core**. Naquadria fuses into **degenerate matter**, which is centrifuged, pressed and frozen across four machines into **neutronium**. Both chains shed byproducts (stellar ash, exotic residue) that loop back into feedstock.
 7. **Artificial star** — stellar core + a huge charge of hydrogen at **100,000,000 RF/t for 10 minutes** → **black hole seed**.
 8. **Black hole stabilizer** — black hole seed at **1,000,000,000 RF/t for 30 minutes** → **singularity fragments**, dissolved in primordial matter into **trans-dimensional metal**.
-9. **The pinnacle** — trans-dimensional metal → alloy → circuit (each requiring hundreds of millions of RF/t) → a fully-charged, craftable **Mekanism Creative Energy Cube**.
+9. **The pinnacle** — trans-dimensional metal → alloy → circuit → build the **Trans-Dimensional Fusion Reactor** out of ~370 casings, fuse **infinity alloy**, and assemble Mekanism's **creative-tier** energy cube, tanks and bin.
 
 ---
 
@@ -118,7 +121,7 @@ Building a 16×16×16 cube by hand is not fun. Craft a **Construction Terminal**
 Requires **JDK 17**. The project uses ForgeGradle 6.
 
 ```bash
-./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.1.2.jar
+./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.2.0.jar
 ./gradlew runClient      # launch a dev client
 ```
 

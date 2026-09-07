@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["SCS", "CDC", "SCS"],
+  "key": {
+    "S": {"item": "mekanism_more_multiblock:special_steel_ingot"},
+    "C": {"item": "mekanism:elite_control_circuit"},
+    "D": {"item": "mekanism_more_multiblock:data_orb"}
+  },
+  "result": {"item": "mekanism_more_multiblock:research_hatch", "count": 2}
+}

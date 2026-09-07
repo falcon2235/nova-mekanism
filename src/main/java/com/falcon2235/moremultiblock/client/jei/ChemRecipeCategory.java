@@ -119,6 +119,11 @@ public class ChemRecipeCategory implements IRecipeCategory<ChemRecipe> {
         if (!recipe.fluidInput.isEmpty()) {
             builder.addSlot(RecipeIngredientRole.INPUT, inX, 46).addIngredient(ForgeTypes.FLUID_STACK, recipe.fluidInput);
         }
+        // The required module gets a slot of its own (CATALYST, so JEI marks it as not
+        // consumed). Players kept missing that the polonium route needs its upgrade.
+        if (!recipe.requiredUpgrade.isEmpty()) {
+            builder.addSlot(RecipeIngredientRole.CATALYST, 112, 26).addItemStack(recipe.requiredUpgrade);
+        }
         // item outputs fill a 2x2 grid; gas/fluid outputs keep the right-hand column
         // (no recipe has 3+ item outputs AND a gas output, so the spots never clash)
         int[][] outPos = {{outX, 6}, {outX + 18, 6}, {outX, 26}, {outX + 18, 26}};
@@ -227,9 +232,16 @@ public class ChemRecipeCategory implements IRecipeCategory<ChemRecipe> {
             Component coil = Component.translatable("gui." + MekanismMoreMultiblock.MODID + ".coil_req",
                     MMMRegistry.COIL_TIERS.get(recipe.coilTier).get().getName());
             ny = drawWrapped(g, font, coil, ny);
+        } else if (type == ChemMachineType.REACTOR) {
+            // The LCR takes a coil too (GT's plan), and this mod lets its tier pay off:
+            // every tier above copper halves the time, so say so where players look.
+            ny = drawWrapped(g, font,
+                    Component.translatable("gui." + MekanismMoreMultiblock.MODID + ".coil_speed"), ny);
         }
         if (recipe.note != null) {
-            drawWrapped(g, font, recipe.note, ny);
+            // A required module is a hard gate, not a footnote — draw it in warning
+            // orange so it reads before anything else in the notes area.
+            drawWrapped(g, font, recipe.note, ny, recipe.requiredUpgrade.isEmpty() ? 0xFF606060 : 0xFFCC6600);
         }
     }
 
@@ -238,11 +250,16 @@ public class ChemRecipeCategory implements IRecipeCategory<ChemRecipe> {
      * long note can never spill out; returns the y below the last line drawn.
      */
     private static int drawWrapped(GuiGraphics g, net.minecraft.client.gui.Font font, Component text, int y) {
+        return drawWrapped(g, font, text, y, 0xFF606060);
+    }
+
+    private static int drawWrapped(GuiGraphics g, net.minecraft.client.gui.Font font, Component text,
+                                   int y, int colour) {
         for (var line : font.split(text, WIDTH - 12)) {
             if (y > NOTES_MAX_Y) {
                 break;
             }
-            g.drawString(font, line, 6, y, 0xFF606060, false);
+            g.drawString(font, line, 6, y, colour, false);
             y += font.lineHeight;
         }
         return y;

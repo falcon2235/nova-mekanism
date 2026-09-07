@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "loaded=false": {"model": "mekanism_more_multiblock:block/research_hatch"},
+    "loaded=true": {"model": "mekanism_more_multiblock:block/research_hatch_loaded"}
+  }
+}

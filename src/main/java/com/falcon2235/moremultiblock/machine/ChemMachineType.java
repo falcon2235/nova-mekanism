@@ -12,8 +12,13 @@ public enum ChemMachineType {
      * two coil rings between them with a hollow centre column.
      */
     BLAST_FURNACE("blast_furnace", 3, 4, 3, true),
-    /** Large chemical reactor: oxide+chlorine→TiCl4, purified TiCl4+liquid Mg→sponge, CO chemistry. */
-    REACTOR("reactor", 5, 3, 5, false),
+    /**
+     * Large chemical reactor: oxide+chlorine→TiCl4, purified TiCl4+liquid Mg→sponge,
+     * CO chemistry. Built to GregTech's own plan — a SOLID 3x3x3 of chemically inert
+     * casing with a PTFE pipe casing at the dead centre and five coil slots, at least
+     * one of which must hold a real heating coil.
+     */
+    REACTOR("reactor", 3, 3, 3, false),
     /** Distillation tower: TiCl4→purified TiCl4. */
     DISTILLATION("distillation", 3, 5, 3, false),
     /** Mixer: blends dusts into alloy dusts (copper + nickel → cupronickel). */
@@ -166,7 +171,63 @@ public enum ChemMachineType {
      * primordial matter, and it grows copies of that rare item — probabilistically,
      * always leaving exotic residue that the line recycles back into feedstock.
      */
-    MATTER_REPLICATOR("matter_replicator", 5, 5, 5, false);
+    MATTER_REPLICATOR("matter_replicator", 5, 5, 5, false),
+    /**
+     * Trans-dimensional fusion reactor: a 9x9x9 shell built almost entirely out of
+     * trans-dimensional casing — roughly 370 blocks of it, and every one is forged
+     * from trans-dimensional alloy, so the structure alone is the largest single
+     * sink for the mod's hardest metal. Inside, absurd quantities of end-game
+     * material fuse into molten infinity alloy, and the creative-tier storage
+     * blocks are assembled from what comes out.
+     */
+    TRANSDIMENSIONAL_FUSION("transdimensional_fusion", 9, 9, 9, false);
+
+    /**
+     * How many Mekanism speed upgrades this machine accepts (0 = none).
+     *
+     * <p>Eight upgrades is a flat 10x, which made one upgraded machine strictly better
+     * than any number of plain ones — so the machines whose scaling is supposed to come
+     * from elsewhere take fewer, or none at all. The end-game rigs are meant to be built
+     * again; the parallel lines already run sixteen jobs at once; the LCR now doubles its
+     * own speed with every coil tier. Only the plain processing machines still take all
+     * eight. See {@link #maxEnergyUpgrades()} for the matching draw cap.
+     */
+    public int maxSpeedUpgrades() {
+        return switch (this) {
+            // Build another one — that is the intended way to go faster.
+            case FUSION_REACTOR, STAR_GENERATOR, STABILIZER, HADRON_COLLIDER,
+                 COMBUSTION_GENERATOR, ANNIHILATION_GENERATOR, MATTER_REPLICATOR,
+                 TRANSDIMENSIONAL_FUSION -> 0;
+            // Already parallel, research-gated, or coil-scaled: a little headroom only.
+            case LARGE_INSCRIBER, LARGE_CHARGER, GRAND_MANA_POOL, GRAND_ELVEN_GATE,
+                 GRAND_TERRA_PLATE, GRAND_IMBUEMENT, ASSEMBLY_LINE, RESEARCH_STATION,
+                 CIRCUIT_ASSEMBLER, VOID_MINER, REACTOR -> 4;
+            default -> 8;
+        };
+    }
+
+    /**
+     * How many Mekanism energy upgrades this machine accepts (0 = none).
+     *
+     * <p>Eight energy upgrades divide the draw by ten. On an 800,000,000 RF/t rig that
+     * quietly erases the entire late-game power problem — the number the recipe
+     * advertises stops being the number you pay. So the machines whose cost IS the
+     * challenge take none, and what a player reads in JEI is what the machine draws.
+     */
+    public int maxEnergyUpgrades() {
+        return switch (this) {
+            // Their draw is the point of the tier; a 10x discount would undo it.
+            case FUSION_REACTOR, STAR_GENERATOR, STABILIZER, HADRON_COLLIDER,
+                 COMBUSTION_GENERATOR, ANNIHILATION_GENERATOR, MATTER_REPLICATOR,
+                 TRANSDIMENSIONAL_FUSION -> 0;
+            // Expensive but not the wall: a partial discount is fair.
+            case LARGE_INSCRIBER, LARGE_CHARGER, GRAND_MANA_POOL, GRAND_ELVEN_GATE,
+                 GRAND_TERRA_PLATE, GRAND_IMBUEMENT, ASSEMBLY_LINE, RESEARCH_STATION,
+                 CIRCUIT_ASSEMBLER, VOID_MINER, REACTOR, ALLOY_BLAST_FURNACE,
+                 VACUUM_FREEZER -> 4;
+            default -> 8;
+        };
+    }
 
     public final String id;
     public final int width;

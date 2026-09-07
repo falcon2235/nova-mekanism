@@ -54,7 +54,8 @@ public final class StructureBlueprint {
             case ALLOY_BLAST_FURNACE -> alloyBarrel(pos, facing);
             case CIRCUIT_ASSEMBLER -> assemblyLine(pos, facing);
             case FUSION_REACTOR -> fusionRing(pos, facing);
-            case STAR_GENERATOR, ANNIHILATION_GENERATOR, MATTER_REPLICATOR -> starSphere(pos, facing, type);
+            case STAR_GENERATOR, ANNIHILATION_GENERATOR, MATTER_REPLICATOR, TRANSDIMENSIONAL_FUSION ->
+                    starSphere(pos, facing, type);
             case STABILIZER -> stabilizerCage(pos, facing);
             case HADRON_COLLIDER -> colliderLoop(pos, facing);
             case VOID_MINER -> voidMinerRig(pos, facing);
@@ -62,8 +63,46 @@ public final class StructureBlueprint {
             case ASSEMBLY_LINE -> asslineLane(pos, facing);
             case COMBUSTION_GENERATOR -> coilBox(pos, facing, MMMRegistry.chemCasing(type),
                     MMMRegistry.chemCoil(type), type.width, type.height, type.depth);
+            case REACTOR -> largeChemicalReactor(pos, facing);
             default -> box(pos, facing, MMMRegistry.chemCasing(type), type.width, type.height, type.depth);
         };
+    }
+
+    /**
+     * GregTech's Large Chemical Reactor: a solid 3x3x3 of chemically inert casing with
+     * the PTFE pipe casing at the dead centre and five coil slots (the back-face centre
+     * and the middle slice's edge centres). See
+     * {@link MultiblockValidator#validateLcr}.
+     */
+    private static List<Cell> largeChemicalReactor(BlockPos pos, Direction facing) {
+        Direction back = facing.getOpposite();
+        Direction right = facing.getClockWise();
+        Block casing = MMMRegistry.chemCasing(ChemMachineType.REACTOR);
+        Block pipe = MMMRegistry.PTFE_PIPE_CASING.get();
+        Block coil = MMMRegistry.CUPRONICKEL_COIL.get();
+        List<Cell> cells = new ArrayList<>();
+        BlockPos.MutableBlockPos c = new BlockPos.MutableBlockPos();
+        for (int d = 0; d <= 2; d++) {
+            for (int u = -1; u <= 1; u++) {
+                for (int r = -1; r <= 1; r++) {
+                    if (d == 0 && u == 0 && r == 0) {
+                        continue; // the controller sits here
+                    }
+                    boolean centre = u == 0 && r == 0;
+                    Block block;
+                    if (d == 1 && centre) {
+                        block = pipe;
+                    } else if ((d == 2 && centre) || (d == 1 && Math.abs(u) + Math.abs(r) == 1)) {
+                        block = coil; // a coil slot: casing also passes, but suggest the coil
+                    } else {
+                        block = casing;
+                    }
+                    c.set(pos).move(back, d).move(Direction.UP, u).move(right, r);
+                    cells.add(new Cell(c.immutable(), block));
+                }
+            }
+        }
+        return cells;
     }
 
     // --- parallel processing box (3x3x4 casing shell) ---

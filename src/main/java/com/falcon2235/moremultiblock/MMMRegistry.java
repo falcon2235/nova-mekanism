@@ -178,6 +178,13 @@ public final class MMMRegistry {
     /** Matter replicator shell: holds a pattern's field while a copy condenses. */
     public static final RegistryObject<Block> REPLICATOR_CASING =
             registerBlock("replicator_casing", () -> new Block(props().lightLevel(state -> 6)));
+    /**
+     * Trans-dimensional casing: the shell of the trans-dimensional fusion reactor.
+     * Each one is forged from trans-dimensional alloy, and the reactor needs roughly
+     * 370 of them — deliberately the mod's largest sink for that metal.
+     */
+    public static final RegistryObject<Block> TRANSDIMENSIONAL_CASING =
+            registerBlock("transdimensional_casing", () -> new Block(props().lightLevel(state -> 7)));
 
     /** Mana hatch: buffers mana for the Botania machines; accepts a spark on top. */
     public static final RegistryObject<com.falcon2235.moremultiblock.block.ManaHatchBlock> MANA_HATCH =
@@ -187,6 +194,29 @@ public final class MMMRegistry {
             BLOCK_ENTITIES.register("mana_hatch", () -> BlockEntityType.Builder.of(
                     com.falcon2235.moremultiblock.blockentity.ManaHatchSupport::create,
                     MANA_HATCH.get()).build(null));
+    /**
+     * PTFE pipe casing: the block at the dead centre of the Large Chemical Reactor,
+     * exactly as GregTech lays it out — the reaction chamber's plumbing.
+     */
+    public static final RegistryObject<Block> PTFE_PIPE_CASING =
+            registerBlock("ptfe_pipe_casing", () -> new Block(props()));
+
+    /**
+     * Research data hatch: build it into any multiblock's wall and the machine reads
+     * the research data it holds, leaving the controller's module slot free for
+     * presses and matter patterns.
+     */
+    public static final RegistryObject<com.falcon2235.moremultiblock.block.ResearchHatchBlock> RESEARCH_HATCH =
+            registerBlock("research_hatch",
+                    () -> new com.falcon2235.moremultiblock.block.ResearchHatchBlock(props().lightLevel(
+                            state -> state.getValue(
+                                    com.falcon2235.moremultiblock.block.ResearchHatchBlock.LOADED) ? 8 : 0)));
+
+    public static final RegistryObject<BlockEntityType<?>> RESEARCH_HATCH_BE =
+            BLOCK_ENTITIES.register("research_hatch", () -> BlockEntityType.Builder.of(
+                    com.falcon2235.moremultiblock.blockentity.ResearchHatchBlockEntity::new,
+                    RESEARCH_HATCH.get()).build(null));
+
     public static final RegistryObject<Block> ELVEN_GATE_CASING =
             registerBlock("elven_gate_casing", () -> new Block(props().lightLevel(state -> 7)));
     public static final RegistryObject<Block> TERRA_PLATE_CASING =
@@ -411,6 +441,17 @@ public final class MMMRegistry {
     public static final RegistryObject<Item> RESEARCH_DATA_DIGITAL = registerItem("research_data_digital");
     /** Arcane engineering: the Botania / Ars Nouveau parallel machines. */
     public static final RegistryObject<Item> RESEARCH_DATA_ARCANE = registerItem("research_data_arcane");
+    /** Infinity engineering: the infinity circuit and the creative-tier storage blocks. */
+    public static final RegistryObject<Item> RESEARCH_DATA_INFINITY = registerItem("research_data_infinity");
+
+    // --- infinity tier (v1.2.0) ---
+    /**
+     * Infinity alloy: matter fused past every ordinary limit in the trans-dimensional
+     * fusion reactor. The only material the creative-tier storage blocks are built from.
+     */
+    public static final RegistryObject<Item> INFINITY_ALLOY = registerItem("infinity_alloy");
+    /** Infinity circuit: the control logic the creative-tier blocks need. */
+    public static final RegistryObject<Item> INFINITY_CIRCUIT = registerItem("infinity_circuit");
     /** Black hole seed: the artificial star generator's pinnacle product. */
     public static final RegistryObject<Item> BLACK_HOLE_SEED = registerItem("black_hole_seed");
     /** Reactor module (antimatter-forged) that unlocks the alternative polonium synthesis recipe. */
@@ -556,6 +597,7 @@ public final class MMMRegistry {
             case ASSEMBLY_LINE -> ASSLINE_CASING.get();
             case GRAND_IMBUEMENT -> SOURCESTONE_CASING.get();
             case MATTER_REPLICATOR -> REPLICATOR_CASING.get();
+            case TRANSDIMENSIONAL_FUSION -> TRANSDIMENSIONAL_CASING.get();
         };
     }
 

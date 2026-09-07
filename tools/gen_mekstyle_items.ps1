@@ -172,6 +172,7 @@ New-Ingot 'transdimensional_metal'  (C 176 110 210) (C 226 176 250) (C 108 58 14
 New-Ingot 'transdimensional_alloy'  (C 132 84 196)  (C 196 150 246) (C 78 42 126)
 New-Ingot 'neutronium'              (C 232 232 236) (C 255 255 255) (C 150 150 158)
 New-Ingot 'graviton_alloy_ingot'     (C 92 178 214)  (C 168 238 255) (C 46 110 148)
+New-Ingot 'infinity_alloy'            (C 236 234 246) (C 255 255 255) (C 170 164 196)
 
 # ---------------- dusts ----------------
 New-Dust 'alumina'                    (C 242 242 244) (C 255 255 255)

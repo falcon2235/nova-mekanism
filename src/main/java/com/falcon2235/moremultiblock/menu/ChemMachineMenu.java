@@ -33,28 +33,60 @@ public class ChemMachineMenu extends AbstractContainerMenu {
         super(MMMRegistry.CHEM_MACHINE_MENU.get(), id);
         this.be = be;
 
+        // Every slot is always registered so the indices quickMoveStack relies on stay
+        // fixed; the ones this machine never uses are simply inactive, which stops
+        // vanilla both drawing them and letting anything be put in them.
+        var io = com.falcon2235.moremultiblock.machine.MachineIo.of(be.machineType());
+
         // 5 input slots: three across the top row, two on the bottom row
-        addSlot(new SlotItemHandler(be.getInputs(), 0, 26, 20));
-        addSlot(new SlotItemHandler(be.getInputs(), 1, 44, 20));
-        addSlot(new SlotItemHandler(be.getInputs(), 2, 62, 20));
-        addSlot(new SlotItemHandler(be.getInputs(), 3, 26, 42));
-        addSlot(new SlotItemHandler(be.getInputs(), 4, 44, 42));
+        int[][] inPos = {{26, 20}, {44, 20}, {62, 20}, {26, 42}, {44, 42}};
+        for (int i = 0; i < ChemMachineBlockEntity.INPUT_SLOTS; i++) {
+            final int index = i;
+            addSlot(new SlotItemHandler(be.getInputs(), i, inPos[i][0], inPos[i][1]) {
+                @Override
+                public boolean isActive() {
+                    return io.usesInputSlot(index);
+                }
+            });
+        }
         // output 2x2 grid (centrifuge separations fill up to four different stacks)
         int[][] outPos = {{98, 25}, {116, 25}, {98, 47}, {116, 47}};
         for (int i = 0; i < ChemMachineBlockEntity.OUTPUT_SLOTS; i++) {
+            final int index = i;
             addSlot(new SlotItemHandler(be.getOutputs(), i, outPos[i][0], outPos[i][1]) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return false;
                 }
+
+                @Override
+                public boolean isActive() {
+                    return io.usesOutputSlot(index);
+                }
             });
         }
         // upgrade slots: speed, energy, and a special module slot below
         // Upgrade column: kept inside the machine area so the bottom slot never
-        // crosses into the inventory label / player inventory below.
-        addSlot(new SlotItemHandler(be.getUpgrades(), 0, 134, 17));
-        addSlot(new SlotItemHandler(be.getUpgrades(), 1, 134, 37));
-        addSlot(new SlotItemHandler(be.getUpgrades(), 2, 134, 57));
+        // crosses into the inventory label / player inventory below. A machine that
+        // takes no speed (or energy) upgrades hides that slot entirely.
+        addSlot(new SlotItemHandler(be.getUpgrades(), 0, 134, 17) {
+            @Override
+            public boolean isActive() {
+                return be.machineType().maxSpeedUpgrades() > 0;
+            }
+        });
+        addSlot(new SlotItemHandler(be.getUpgrades(), 1, 134, 37) {
+            @Override
+            public boolean isActive() {
+                return be.machineType().maxEnergyUpgrades() > 0;
+            }
+        });
+        addSlot(new SlotItemHandler(be.getUpgrades(), 2, 134, 57) {
+            @Override
+            public boolean isActive() {
+                return io.module();
+            }
+        });
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {

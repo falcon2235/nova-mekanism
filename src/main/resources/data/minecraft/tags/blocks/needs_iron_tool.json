@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "mekanism_more_multiblock:accelerator_casing",
     "mekanism_more_multiblock:alloy_blast_casing",
@@ -36,6 +37,7 @@
     "mekanism_more_multiblock:nickel_ore",
     "mekanism_more_multiblock:oil_rig_casing",
     "mekanism_more_multiblock:ptfe_casing",
+    "mekanism_more_multiblock:ptfe_pipe_casing",
     "mekanism_more_multiblock:replicator_casing",
     "mekanism_more_multiblock:research_casing",
     "mekanism_more_multiblock:saltpeter_ore",
@@ -44,8 +46,8 @@
     "mekanism_more_multiblock:star_casing",
     "mekanism_more_multiblock:terra_plate_casing",
     "mekanism_more_multiblock:titanium_ore",
+    "mekanism_more_multiblock:transdimensional_casing",
     "mekanism_more_multiblock:void_miner_casing",
     "mekanism_more_multiblock:zinc_ore"
-  ],
-  "replace": false
+  ]
 }

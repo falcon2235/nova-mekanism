@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "mekanism_more_multiblock:accelerator_casing",
     "mekanism_more_multiblock:alloy_blast_casing",
@@ -88,6 +89,7 @@
     "mekanism_more_multiblock:plutonium_coil",
     "mekanism_more_multiblock:primitive_blast_furnace_controller",
     "mekanism_more_multiblock:ptfe_casing",
+    "mekanism_more_multiblock:ptfe_pipe_casing",
     "mekanism_more_multiblock:quantum_cable",
     "mekanism_more_multiblock:quantum_fluid_pipe",
     "mekanism_more_multiblock:quantum_gas_tube",
@@ -95,6 +97,7 @@
     "mekanism_more_multiblock:reactor_controller",
     "mekanism_more_multiblock:replicator_casing",
     "mekanism_more_multiblock:research_casing",
+    "mekanism_more_multiblock:research_hatch",
     "mekanism_more_multiblock:research_station_controller",
     "mekanism_more_multiblock:saltpeter_ore",
     "mekanism_more_multiblock:smelting_controller",
@@ -106,11 +109,12 @@
     "mekanism_more_multiblock:terra_plate_casing",
     "mekanism_more_multiblock:titanium_coil",
     "mekanism_more_multiblock:titanium_ore",
+    "mekanism_more_multiblock:transdimensional_casing",
+    "mekanism_more_multiblock:transdimensional_fusion_controller",
     "mekanism_more_multiblock:vacuum_freezer_controller",
     "mekanism_more_multiblock:void_drill",
     "mekanism_more_multiblock:void_miner_casing",
     "mekanism_more_multiblock:void_ore_miner_controller",
     "mekanism_more_multiblock:zinc_ore"
-  ],
-  "replace": false
+  ]
 }
