@@ -158,6 +158,8 @@ public class MMMJeiPlugin implements IModPlugin {
                     block.getName(),
                     MultiblockValidator.WIDTH, MultiblockValidator.HEIGHT, MultiblockValidator.DEPTH,
                     parallelCasing.defaultBlockState(), new ItemStack(parallelCasing), null, null)
+                    .withUpgrades(com.falcon2235.moremultiblock.blockentity.ControllerBlockEntity.MAX_SPEED_UPGRADES,
+                            com.falcon2235.moremultiblock.blockentity.ControllerBlockEntity.MAX_ENERGY_UPGRADES)
                     .withMaterials(countMaterials(state)));
         }
         for (ChemMachineType type : ChemMachineType.values()) {
@@ -214,7 +216,8 @@ public class MMMJeiPlugin implements IModPlugin {
                     mode,
                     vent == null ? null : vent.defaultBlockState(),
                     vent == null ? null : new ItemStack(vent))
-                    .withMaterials(countMaterials(chemState)));
+                    .withMaterials(countMaterials(chemState))
+                    .withUpgrades(type.maxSpeedUpgrades(), type.maxEnergyUpgrades()));
         }
         // primitive blast furnace: same vertical shape as the EBF, all bricks
         Block pbf = MMMRegistry.PBF_CONTROLLER.get();

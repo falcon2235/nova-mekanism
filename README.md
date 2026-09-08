@@ -38,13 +38,13 @@ workbench recipes, so the whole progression stays completable in any pack.
 - **Construction Terminal** — right-click any controller to auto-build its whole structure from your inventory.
 - **JEI integration** — every machine has recipe categories with gas/fluid amounts and an isometric 3-D structure preview; controllers act as recipe catalysts.
 - **Alternative antimatter route** — the **Large Hadron Collider** collides hydrogen protons straight into antimatter as an end-game-adjacent alternative to a hardened SPS, and a Large Chemical Reactor polonium recipe (gated behind an antimatter-pellet upgrade) offers a second polonium path.
-- **GT-style petroleum power** — an **Oil Drilling Rig** pumps crude oil, the distillation tower and chemical reactor refine it (distill → desulfurize) into diesel, and a **Large Combustion Generator** burns it at 500,000 RF/t; the end-game **Annihilation Generator** converts hydrogen + antimatter under liquid-helium cooling into 800,000,000 RF/t.
+- **GT-style petroleum power** — an **Oil Drilling Rig** pumps crude oil, the distillation tower and chemical reactor refine it into diesel, and a **Large Combustion Generator** burns it at 500,000 RF/t. Push further and a **Catalytic Reformer** runs a five-stage refinery — hydrotreat, reform over a platinum catalyst, crack, alkylate, blend — into **high-octane gasoline** that burns at **2,000,000 RF/t**. The end-game **Annihilation Generator** converts hydrogen + antimatter under liquid-helium cooling into 800,000,000 RF/t.
 - **Void Ore Miner** — mines 10 of a random rarity-weighted RAW ore every second (22 ore types, naquadah as the jackpot) for 1,000,000 RF/t; Mekanism speed upgrades roll faster.
 - **The infinity tier** — a 9×9×9 **Trans-Dimensional Fusion Reactor**, built from ~370 casings of trans-dimensional alloy, fuses **infinity alloy**. With the **infinity circuit** it builds Mekanism's creative-tier energy cube, chemical tank, fluid tank and bin — priced apart, the bin costing four times the cube.
 - **Research Data Hatch** — build it into any multiblock's wall and it feeds the machine up to **six different research data** at once, freeing the controller's module slot for presses and matter patterns.
 - **Rare-material replication** — dissolve a nether star, dragon egg, chaos shard or Gaia spirit onto a reusable **matter pattern**, then let the **Matter Replicator** roll chance copies from primordial matter. Every run returns exotic residue that loops back into feedstock.
 - **GTNH-depth end-game chains** — neutronium takes four machines (fusion → centrifuge → alloy blast furnace → freezer), stellar cores need distilling, and trans-dimensional metal starts as singularity fragments. Byproducts (stellar ash, exotic residue) recycle through the chemical reactor.
-- **JEI bill of materials** — every structure preview lists exactly how many of each block the multiblock needs.
+- **JEI bill of materials** — every structure preview lists exactly how many of each block the multiblock needs, and how many speed/energy upgrades that machine accepts.
 - **Quantum conduits** — a transmitter tier above Mekanism's ultimate: quantum universal cable / mechanical pipe / pressurized tube / logistical pipe. Anything pushed in is routed instantly; right-click a face with an empty hand to toggle extraction from tanks/chests. Crafted from 8 ultimate transmitters + a superconductor.
 - **Fully configurable** — `config/mekanism_more_multiblock-common.toml` exposes every machine rate (miner, rigs, generators, LHC, conduits) plus global recipe energy/time multipliers for expert-pack tuning.
 - **Modpack ready** — integrations are optional with workbench fallbacks, ore generation can be switched off per ore, the Mekanism recipe hardening can be turned off entirely, and every material carries the standard `forge:ores/*`, `forge:raw_materials/*`, `forge:ingots/*` and `forge:dusts/*` tags for recipe unification.
@@ -80,7 +80,8 @@ Parallel machines share a fixed **3×3×4** hollow casing box (GregTech-style bl
 | Research Station | 3×3×3 | Scans a sample + data orb into research data |
 | **Assembly Line** | 3×4×8 | GT-style line; recipes need the matching research installed |
 | Oil Drilling Rig | 5×7×5 rig | Pumps crude oil from bedrock (10 mB/t) |
-| **Large Combustion Generator** | 3×3×4 engine | Burns diesel (20 mB/t) into **500,000 RF/t** |
+| **Catalytic Reformer** | 5×5×5 | Five-stage refinery line: naphtha → reformate → alkylate → high-octane gasoline |
+| **Large Combustion Generator** | 3×3×4 engine | Burns diesel into **500,000 RF/t**, or high-octane gasoline into **2,000,000 RF/t** |
 | **Void Ore Miner** | 7×9×7 rig | Mines 10 random rarity-weighted RAW ores per second from nothing (1M RF/t; speed upgrades roll faster) |
 | **Large Hadron Collider** | 33×3×33 ring | Collides hydrogen directly into antimatter (alt to the SPS); ~100M RF/t |
 | **Fusion Reactor** | 15×3×15 ring | D-T fusion → helium plasma → molten stellar matter |
@@ -121,7 +122,7 @@ Building a 16×16×16 cube by hand is not fun. Craft a **Construction Terminal**
 Requires **JDK 17**. The project uses ForgeGradle 6.
 
 ```bash
-./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.2.0.jar
+./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.2.1.jar
 ./gradlew runClient      # launch a dev client
 ```
 

@@ -3,7 +3,7 @@
   "category": "misc",
   "pattern": ["ACA", "CPC", "ACA"],
   "key": {
-    "A": {"item": "mekanism:alloy_reinforced"},
+    "A": {"item": "mekanism_more_multiblock:titanium_ingot"},
     "C": {"item": "mekanism:elite_control_circuit"},
     "P": {"item": "mekanism_more_multiblock:parallel_processor_25"}
   },

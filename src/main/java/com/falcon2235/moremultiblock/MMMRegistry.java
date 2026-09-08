@@ -194,6 +194,19 @@ public final class MMMRegistry {
             BLOCK_ENTITIES.register("mana_hatch", () -> BlockEntityType.Builder.of(
                     com.falcon2235.moremultiblock.blockentity.ManaHatchSupport::create,
                     MANA_HATCH.get()).build(null));
+    /** Reformer casing: the shell of the catalytic reformer's reactor column. */
+    public static final RegistryObject<Block> REFORMER_CASING =
+            registerBlock("reformer_casing", () -> new Block(props()));
+
+    /**
+     * Platinum reforming catalyst (Pt on alumina, as in a real refinery). Consumed by
+     * the reforming and alkylation steps, but handed back nine times out of ten — a
+     * running line only tops it up occasionally.
+     */
+    public static final RegistryObject<Item> REFORMING_CATALYST = registerItem("reforming_catalyst");
+    /** Octane booster: the aromatic additive crystallised out of toluene. */
+    public static final RegistryObject<Item> OCTANE_BOOSTER = registerItem("octane_booster");
+
     /**
      * PTFE pipe casing: the block at the dead centre of the Large Chemical Reactor,
      * exactly as GregTech lays it out — the reaction chamber's plumbing.
@@ -598,6 +611,7 @@ public final class MMMRegistry {
             case GRAND_IMBUEMENT -> SOURCESTONE_CASING.get();
             case MATTER_REPLICATOR -> REPLICATOR_CASING.get();
             case TRANSDIMENSIONAL_FUSION -> TRANSDIMENSIONAL_CASING.get();
+            case CATALYTIC_REFORMER -> REFORMER_CASING.get();
         };
     }
 

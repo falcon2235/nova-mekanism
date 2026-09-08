@@ -3,6 +3,45 @@
 All notable changes to Nova Mekanism are documented here. This project targets
 Minecraft 1.20.1 (Forge) and follows loose semantic versioning.
 
+## [1.2.1] - 2026-09-08
+
+### Added — the high-octane gasoline line
+- **Catalytic Reformer** (5×5×5) and a five-stage refinery line that follows the real
+  order of operations: hydrotreat sulfuric fuel into **naphtha**, rearrange naphtha
+  into **reformate** over a **platinum reforming catalyst** (Pt on alumina, handed
+  back 90% of the time), crack naphtha to **butene**, alkylate it back into
+  **alkylate**, and blend that with an **octane booster** distilled out of
+  **toluene** into **high-octane gasoline**.
+- The line has two real loops: reforming sheds the hydrogen hydrotreating needs, and
+  the hydrotreater's **hydrogen sulfide** burns back into sulfuric acid, feeding the
+  platinum and naquadah lines. Naphtha is contested by three different steps, so the
+  line is a routing problem rather than a straight pipe.
+- **The Large Combustion Generator now takes two fuels.** Diesel still burns at
+  500,000 RF/t; high-octane gasoline burns at **2,000,000 RF/t** — four times the
+  energy per mB, and 2.8× the total energy per unit of crude, which is what pays for
+  the five extra steps. Both rates are configurable.
+- **JEI shows how many upgrades each machine accepts**, on the structure panel, with
+  a hover explaining the dimensions and why some machines take none at all.
+
+### Fixed
+- **Every block, gas and item name displayed as a raw translation key.** A trailing
+  comma left in the language files made them invalid JSON, and Minecraft discards a
+  language file it cannot parse — so the whole mod lost its names. Both files are
+  fixed and all 936 resource JSONs are now checked with a strict parser (the one
+  used before accepted trailing commas and passed the broken file).
+- **1.2.0 announced itself as 1.1.2.** `mods.toml` carried a hardcoded version that
+  was not bumped, and that is the file Forge and launchers read. The version is now
+  substituted at build time from `gradle.properties`, so the two cannot drift again.
+- **Ports did not match the machines they were built into.** Eleven port skins were
+  shared across twenty-odd casings, leaving a charcoal oil rig wearing near-white
+  ports and a white terra plate wearing brown ones. Every machine now has a skin
+  whose palette is **derived from its own casing texture**, so a port can never drift
+  from its wall — 29 styles across all seven port types.
+- **Parallel processing units are built from the mod's own materials.** The top three
+  tiers were identical (atomic alloy + ultimate circuit); the ladder now runs
+  cupronickel → aluminium → titanium → special steel → super alloy → naquadah alloy,
+  with supreme circuits and superconductors at the top.
+
 ## [1.2.0] - 2026-09-07
 
 ### Added — the infinity tier

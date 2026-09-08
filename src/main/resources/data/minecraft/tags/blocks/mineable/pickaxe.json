@@ -1,5 +1,4 @@
 {
-  "replace": false,
   "values": [
     "mekanism_more_multiblock:accelerator_casing",
     "mekanism_more_multiblock:alloy_blast_casing",
@@ -17,6 +16,7 @@
     "mekanism_more_multiblock:bauxite_ore",
     "mekanism_more_multiblock:black_hole_stabilizer_controller",
     "mekanism_more_multiblock:blast_furnace_controller",
+    "mekanism_more_multiblock:catalytic_reformer_controller",
     "mekanism_more_multiblock:centrifuge_casing",
     "mekanism_more_multiblock:centrifuge_controller",
     "mekanism_more_multiblock:charger_casing",
@@ -95,6 +95,7 @@
     "mekanism_more_multiblock:quantum_gas_tube",
     "mekanism_more_multiblock:quantum_item_pipe",
     "mekanism_more_multiblock:reactor_controller",
+    "mekanism_more_multiblock:reformer_casing",
     "mekanism_more_multiblock:replicator_casing",
     "mekanism_more_multiblock:research_casing",
     "mekanism_more_multiblock:research_hatch",
@@ -116,5 +117,6 @@
     "mekanism_more_multiblock:void_miner_casing",
     "mekanism_more_multiblock:void_ore_miner_controller",
     "mekanism_more_multiblock:zinc_ore"
-  ]
+  ],
+  "replace": false
 }

@@ -59,6 +59,10 @@ public class StructureEntry {
      * (counted from the construction blueprint; the controller itself is excluded).
      */
     public java.util.List<ItemStack> materials = java.util.List.of();
+    /** Mekanism speed upgrades this machine accepts; 0 means it takes none. */
+    public int maxSpeedUpgrades;
+    /** Mekanism energy upgrades this machine accepts; 0 means it takes none. */
+    public int maxEnergyUpgrades;
 
     public StructureEntry(ResourceLocation id, ItemStack controllerStack, BlockState controllerState,
                           Component name, int width, int height, int depth,
@@ -100,6 +104,17 @@ public class StructureEntry {
     /** Fluent: attach the counted bill of materials. */
     public StructureEntry withMaterials(java.util.List<ItemStack> materials) {
         this.materials = materials;
+        return this;
+    }
+
+    /**
+     * How many Mekanism speed and energy upgrades this machine accepts. Shown in the
+     * structure panel because the caps differ per machine — an end-game rig takes
+     * none at all, and there was no way to find that out short of trying.
+     */
+    public StructureEntry withUpgrades(int speed, int energy) {
+        this.maxSpeedUpgrades = speed;
+        this.maxEnergyUpgrades = energy;
         return this;
     }
 }

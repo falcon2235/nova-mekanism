@@ -601,6 +601,21 @@ public final class ChemRecipes {
                         ItemStack.EMPTY, GasStack.EMPTY, primordialMatter(750),
                         400, 200_000_000L, 0));
 
+                // --- gasoline line: cracking and sour-gas recovery ---
+                // Steam-crack naphtha down to butene, which alkylation bolts back on.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, GasStack.EMPTY, naphtha(1_000),
+                        ItemStack.EMPTY, new GasStack(ChemRegistry.BUTENE, 1_200L), FluidStack.EMPTY,
+                        200, 3_000L));
+                // The hydrotreater's sour gas is not waste: burnt with oxygen it becomes
+                // sulfuric acid, which the platinum and naquadah lines already run on.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        new GasStack(ChemRegistry.HYDROGEN_SULFIDE, 1_000L), new GasStack(MekanismGases.OXYGEN, 1_500L),
+                        FluidStack.EMPTY,
+                        ItemStack.EMPTY, new GasStack(MekanismGases.SULFURIC_ACID, 1_000L), FluidStack.EMPTY,
+                        150, 2_000L, 0));
+
                 // GT desulfurization: hydrogen strips the sulfur out of the fuel fraction,
                 // yielding clean diesel + a sulfur dust byproduct.
                 list.add(new ChemRecipe(
@@ -627,6 +642,12 @@ public final class ChemRecipes {
                         400, 40_000_000L)
                         .withChance(item(MMMRegistry.STELLAR_ASH.get(), 1), 40)
                         .withNote(stepNote("stellar", 2, 3, "freezer")));
+                // Gasoline line, step 3: pull the aromatic cut out of reformate.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, GasStack.EMPTY, reformate(1_000),
+                        ItemStack.EMPTY, GasStack.EMPTY, toluene(600),
+                        180, 3_000L)
+                        .withNote(stepNote("gasoline", 3, 5, "centrifuge")));
                 // GT oil processing: distill crude oil into the sulfur-laden fuel fraction
                 list.add(new ChemRecipe(
                         ItemStack.EMPTY, GasStack.EMPTY, crudeOil(1_000),
@@ -978,6 +999,53 @@ public final class ChemRecipes {
                                     pattern.getHoverName(), j.chance() + "%", j.result().getHoverName())));
                 }
             }
+            case CATALYTIC_REFORMER -> {
+                // --- the high-octane gasoline line ---
+                // Real refinery order: hydrotreat, reform, alkylate, blend. Every step
+                // is a genuine competitor for the same naphtha, so the line is a routing
+                // problem rather than a straight pipe.
+
+                // 1. Hydrotreating: strip the sulfur out of the fuel cut with hydrogen.
+                // Competes with the diesel route for sulfuric fuel — that is the point.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, new GasStack(MekanismGases.HYDROGEN, 400L), sulfuricFuel(1_000),
+                        ItemStack.EMPTY, new GasStack(ChemRegistry.HYDROGEN_SULFIDE, 300L), naphtha(750),
+                        200, 4_000L)
+                        .withNote(stepNote("gasoline", 1, 5, "reactor")));
+
+                // 2. Catalytic reforming: rearrange naphtha over platinum into aromatics.
+                // The catalyst comes back 90% of the time, and the hydrogen it sheds is
+                // exactly what step 1 needs — a running line feeds its own hydrotreater.
+                list.add(new ChemRecipe(
+                        item(MMMRegistry.REFORMING_CATALYST.get(), 1), ItemStack.EMPTY, ItemStack.EMPTY,
+                        ItemStack.EMPTY, ItemStack.EMPTY,
+                        GasStack.EMPTY, GasStack.EMPTY, naphtha(1_000),
+                        ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        new GasStack(MekanismGases.HYDROGEN, 500L), reformate(700),
+                        300, 8_000L, 0)
+                        .withChance(item(MMMRegistry.REFORMING_CATALYST.get(), 1), 90)
+                        .withNote(stepNote("gasoline", 2, 5, "distillation")));
+
+                // 3. Alkylation: bolt the cracked butene back onto naphtha under acid.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        new GasStack(ChemRegistry.BUTENE, 1_000L), new GasStack(MekanismGases.SULFURIC_ACID, 200L),
+                        naphtha(500),
+                        ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        GasStack.EMPTY, alkylate(900),
+                        250, 6_000L, 0)
+                        .withNote(stepNote("gasoline", 4, 5, "reformer")));
+
+                // 4. Blending: alkylate plus the aromatic booster, air-blown to finish.
+                list.add(new ChemRecipe(
+                        item(MMMRegistry.OCTANE_BOOSTER.get(), 1), ItemStack.EMPTY, ItemStack.EMPTY,
+                        ItemStack.EMPTY, ItemStack.EMPTY,
+                        new GasStack(MekanismGases.OXYGEN, 200L), GasStack.EMPTY, alkylate(1_000),
+                        ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        GasStack.EMPTY, highOctaneGasoline(1_400),
+                        400, 12_000L, 0)
+                        .withNote(stepNote("gasoline", 5, 5, "done")));
+            }
             case TRANSDIMENSIONAL_FUSION -> {
                 // --- infinity alloy: the point of the whole reactor ---
                 // Absurd quantities of every end-game material, fused at 800,000,000
@@ -1093,6 +1161,12 @@ public final class ChemRecipes {
                         item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 2), item(MMMRegistry.DURALUMIN_INGOT.get(), 8),
                         item(MMMRegistry.SPECIAL_STEEL_INGOT.get(), 8),
                         moltenSuperAlloy(288), 600, 50_000L, MMMRegistry.RESEARCH_DATA_PETROCHEMISTRY));
+                list.add(controller(ChemMachineType.CATALYTIC_REFORMER,
+                        item(MMMRegistry.REFORMER_CASING.get().asItem(), 8),
+                        item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 2),
+                        item(MMMRegistry.PLATINUM_INGOT.get(), 8), item(MMMRegistry.SPECIAL_STEEL_INGOT.get(), 16),
+                        item(MMMRegistry.DURALUMIN_INGOT.get(), 8),
+                        moltenSuperAlloy(576), 800, 80_000L, MMMRegistry.RESEARCH_DATA_PETROCHEMISTRY));
                 list.add(controller(ChemMachineType.COMBUSTION_GENERATOR,
                         item(MMMRegistry.ENGINE_CASING.get().asItem(), 4), item(MMMRegistry.HEAT_VENT.get().asItem(), 4),
                         item(MMMRegistry.SUPREME_CONTROL_CIRCUIT.get(), 2), item(MMMRegistry.DURALUMIN_INGOT.get(), 8),
@@ -1296,6 +1370,17 @@ public final class ChemRecipes {
                                 "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".generates",
                                 String.format(java.util.Locale.ROOT, "%,d",
                                         com.falcon2235.moremultiblock.MMMConfig.combustionRfPerTick()))));
+                // The same engine on the reformer line's premium fuel — the payoff for
+                // five extra steps, shown as its own entry so the difference is visible.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, GasStack.EMPTY,
+                        highOctaneGasoline(com.falcon2235.moremultiblock.MMMConfig.combustionGasolineMbPerTick() * 20),
+                        ItemStack.EMPTY, GasStack.EMPTY, FluidStack.EMPTY,
+                        20, com.falcon2235.moremultiblock.MMMConfig.combustionGasolineJPerTick())
+                        .withNote(net.minecraft.network.chat.Component.translatable(
+                                "gui." + com.falcon2235.moremultiblock.MekanismMoreMultiblock.MODID + ".generates",
+                                String.format(java.util.Locale.ROOT, "%,d",
+                                        com.falcon2235.moremultiblock.MMMConfig.combustionGasolineRfPerTick()))));
             }
             case ANNIHILATION_GENERATOR -> {
                 // JEI display only — the generator's real logic annihilates every tick in
@@ -1434,6 +1519,13 @@ public final class ChemRecipes {
                         400, 40_000_000L)
                         .withChance(item(MMMRegistry.STELLAR_ASH.get(), 1), 35)
                         .withNote(stepNote("neutronium", 2, 4, "alloy_blast")));
+                // Gasoline line: crystallise toluene into the solid octane booster that
+                // the reformer blends in. An item, so blending can take it alongside a
+                // fluid — a machine has only one fluid input tank.
+                list.add(new ChemRecipe(
+                        ItemStack.EMPTY, GasStack.EMPTY, toluene(1_000),
+                        item(MMMRegistry.OCTANE_BOOSTER.get(), 8), GasStack.EMPTY, FluidStack.EMPTY,
+                        200, 2_500L));
                 // GTCEu: platinum group sludge + aqua regia -> the four raw metal fractions
                 list.add(new ChemRecipe(
                         item(MMMRegistry.PLATINUM_GROUP_SLUDGE.get(), 6), ItemStack.EMPTY, ItemStack.EMPTY,
@@ -1604,6 +1696,27 @@ public final class ChemRecipes {
     /** Public: the combustion generator's block entity checks its fuel tank against this. */
     public static FluidStack diesel(int amount) {
         return new FluidStack(ChemRegistry.DIESEL.getStillFluid(), amount);
+    }
+
+    private static FluidStack naphtha(int amount) {
+        return new FluidStack(ChemRegistry.NAPHTHA.getStillFluid(), amount);
+    }
+
+    private static FluidStack reformate(int amount) {
+        return new FluidStack(ChemRegistry.REFORMATE.getStillFluid(), amount);
+    }
+
+    private static FluidStack toluene(int amount) {
+        return new FluidStack(ChemRegistry.TOLUENE.getStillFluid(), amount);
+    }
+
+    private static FluidStack alkylate(int amount) {
+        return new FluidStack(ChemRegistry.ALKYLATE.getStillFluid(), amount);
+    }
+
+    /** Public: the combustion generator checks its fuel tank against this premium fuel. */
+    public static FluidStack highOctaneGasoline(int amount) {
+        return new FluidStack(ChemRegistry.HIGH_OCTANE_GASOLINE.getStillFluid(), amount);
     }
 
     /** Public: the annihilation generator's block entity checks its coolant tank against this. */

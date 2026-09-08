@@ -126,6 +126,28 @@ public class StructureCategory implements IRecipeCategory<StructureEntry> {
         }
     }
 
+    /**
+     * Hovering the header spells out what the compact line above means: the full
+     * machine name (it is trimmed to fit), which dimension is which, and how many
+     * upgrades the machine takes — or that it takes none, and why.
+     */
+    @Override
+    public java.util.List<Component> getTooltipStrings(StructureEntry entry, IRecipeSlotsView slotsView,
+                                                       double mouseX, double mouseY) {
+        if (mouseY < 4 || mouseY > 28 || mouseX < 28) {
+            return java.util.List.of();
+        }
+        String base = "gui." + MekanismMoreMultiblock.MODID + ".";
+        java.util.List<Component> lines = new java.util.ArrayList<>(3);
+        lines.add(entry.name);
+        lines.add(Component.translatable(base + "dims_legend", entry.width, entry.height, entry.depth)
+                .withStyle(net.minecraft.ChatFormatting.GRAY));
+        boolean noUpgrades = entry.maxSpeedUpgrades == 0 && entry.maxEnergyUpgrades == 0;
+        lines.add(Component.translatable(base + (noUpgrades ? "upgrades_tip_none" : "upgrades_tip"))
+                .withStyle(noUpgrades ? net.minecraft.ChatFormatting.GOLD : net.minecraft.ChatFormatting.GRAY));
+        return lines;
+    }
+
     @Override
     public void draw(StructureEntry entry, IRecipeSlotsView slotsView, GuiGraphics g, double mouseX, double mouseY) {
         var font = Minecraft.getInstance().font;
@@ -139,6 +161,18 @@ public class StructureCategory implements IRecipeCategory<StructureEntry> {
         Component dims = Component.translatable("gui." + MekanismMoreMultiblock.MODID + ".structure",
                 entry.width, entry.height, entry.depth);
         g.drawString(font, dims, 30, 20, 0xFF606060, false);
+        // Upgrade capacity shares the dimensions line: the caps differ per machine and
+        // there is no spare vertical space (the hint already runs to the preview box).
+        // Drawn in warning orange when the machine takes none at all.
+        boolean noUpgrades = entry.maxSpeedUpgrades == 0 && entry.maxEnergyUpgrades == 0;
+        Component upgrades = noUpgrades
+                ? Component.translatable("gui." + MekanismMoreMultiblock.MODID + ".upgrades_none")
+                : Component.translatable("gui." + MekanismMoreMultiblock.MODID + ".upgrades_cap",
+                        entry.maxSpeedUpgrades, entry.maxEnergyUpgrades);
+        // Right-aligned to the panel edge so it can never run past it, and never into
+        // the dimensions text on its left however wide the numbers get.
+        int upgX = Math.max(30 + font.width(dims) + 6, WIDTH - 4 - font.width(upgrades));
+        g.drawString(font, upgrades, upgX, 20, noUpgrades ? 0xFFCC6600 : 0xFF606060, false);
         // The hint sits below however many rows the bill of materials needed, and is
         // wrapped instead of running off the page.
         int rows = Math.max(1, (entry.materials.size() + SLOTS_PER_ROW - 1) / SLOTS_PER_ROW);

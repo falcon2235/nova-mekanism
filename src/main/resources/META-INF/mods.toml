@@ -5,7 +5,11 @@ issueTrackerURL="https://github.com/falcon2235/nova-mekanism/issues"
 
 [[mods]]
 modId="mekanism_more_multiblock"
-version="1.1.2"
+# Substituted at BUILD time by processResources from mod_version in gradle.properties
+# (not by Forge at runtime, so the shipped jar can be checked by unzipping it).
+# Hardcoding this drifted once already: 1.2.0 shipped declaring itself 1.1.2 because
+# only gradle.properties was bumped.
+version="@MOD_VERSION@"
 displayName="Nova Mekanism"
 displayURL="https://github.com/falcon2235/nova-mekanism"
 authors="falcon2235"

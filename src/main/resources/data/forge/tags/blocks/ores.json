@@ -1,5 +1,4 @@
 {
-  "replace": false,
   "values": [
     "mekanism_more_multiblock:antimony_ore",
     "mekanism_more_multiblock:bauxite_ore",
@@ -21,5 +20,6 @@
     "mekanism_more_multiblock:saltpeter_ore",
     "mekanism_more_multiblock:titanium_ore",
     "mekanism_more_multiblock:zinc_ore"
-  ]
+  ],
+  "replace": false
 }

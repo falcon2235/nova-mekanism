@@ -48,7 +48,31 @@ public class PortBlock extends Block implements EntityBlock {
         ASSEMBLY("assembly"),
         ELECTROLYZER("electrolyzer"),
         CENTRIFUGE("centrifuge"),
-        FUSION("fusion");
+        FUSION("fusion"),
+        // Added so every machine's ports carry its own hull's colour instead of
+        // borrowing the nearest of eleven skins — the oil rig used to wear near-white
+        // stainless ports on a charcoal hull. The eleven names above are unchanged
+        // because saved worlds store this value in the block state.
+        // Each one's palette is derived from the matching casing texture by
+        // tools/gen_all_ports.ps1, so ports can never drift from their wall again.
+        OIL_RIG("oil_rig"),
+        ENGINE("engine"),
+        HAZARD("hazard"),
+        INSCRIBER("inscriber"),
+        CHARGER("charger"),
+        LIVINGROCK("livingrock"),
+        ELVEN("elven"),
+        TERRA("terra"),
+        RESEARCH("research"),
+        ASSLINE("assline"),
+        SOURCESTONE("sourcestone"),
+        REPLICATOR("replicator"),
+        TRANSDIM("transdim"),
+        REFORMER("reformer"),
+        STAR("star"),
+        NEUTRONIUM("neutronium"),
+        ACCELERATOR("accelerator"),
+        ANNIHILATION("annihilation");
 
         private final String name;
 

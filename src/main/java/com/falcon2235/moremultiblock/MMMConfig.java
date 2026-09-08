@@ -28,6 +28,8 @@ public final class MMMConfig {
     // --- large combustion generator ---
     private static final ForgeConfigSpec.LongValue COMBUSTION_RF_PER_TICK;
     private static final ForgeConfigSpec.IntValue COMBUSTION_DIESEL_MB_PER_TICK;
+    private static final ForgeConfigSpec.LongValue COMBUSTION_GASOLINE_RF_PER_TICK;
+    private static final ForgeConfigSpec.IntValue COMBUSTION_GASOLINE_MB_PER_TICK;
 
     // --- annihilation generator ---
     private static final ForgeConfigSpec.LongValue ANNIHILATION_RF_PER_TICK;
@@ -92,6 +94,14 @@ public final class MMMConfig {
         COMBUSTION_DIESEL_MB_PER_TICK = b
                 .comment("Diesel burned per tick (mB).")
                 .defineInRange("dieselMbPerTick", 20, 1, 64_000);
+        COMBUSTION_GASOLINE_RF_PER_TICK = b
+                .comment("Energy generated per tick while burning HIGH-OCTANE GASOLINE, in RF/t.",
+                        "The reformer line that produces it is far longer than the diesel route,",
+                        "so this is deliberately several times the diesel figure.")
+                .defineInRange("gasolineOutputRfPerTick", 2_000_000L, 1L, 1_000_000_000_000L);
+        COMBUSTION_GASOLINE_MB_PER_TICK = b
+                .comment("High-octane gasoline burned per tick (mB).")
+                .defineInRange("gasolineMbPerTick", 20, 1, 64_000);
         b.pop();
 
         b.comment("Annihilation Generator (7x7x7 containment sphere)").push("annihilation_generator");
@@ -227,6 +237,18 @@ public final class MMMConfig {
 
     public static int combustionDieselMbPerTick() {
         return get(COMBUSTION_DIESEL_MB_PER_TICK, 20);
+    }
+
+    public static int combustionGasolineMbPerTick() {
+        return get(COMBUSTION_GASOLINE_MB_PER_TICK, 20);
+    }
+
+    public static long combustionGasolineRfPerTick() {
+        return get(COMBUSTION_GASOLINE_RF_PER_TICK, 2_000_000L);
+    }
+
+    public static long combustionGasolineJPerTick() {
+        return rfToJoules(combustionGasolineRfPerTick());
     }
 
     public static int annihilationHydrogenMbPerTick() {

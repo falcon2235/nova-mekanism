@@ -180,7 +180,15 @@ public enum ChemMachineType {
      * material fuse into molten infinity alloy, and the creative-tier storage
      * blocks are assembled from what comes out.
      */
-    TRANSDIMENSIONAL_FUSION("transdimensional_fusion", 9, 9, 9, false);
+    TRANSDIMENSIONAL_FUSION("transdimensional_fusion", 9, 9, 9, false),
+    /**
+     * Catalytic reformer: a 5x5x5 reactor column that runs the whole high-octane
+     * gasoline line — hydrotreating sulfuric fuel into naphtha, rearranging naphtha
+     * into reformate over a platinum catalyst, alkylating it back with butene, and
+     * blending the result into the combustion generator's premium fuel. The catalyst
+     * is consumed and handed back nine times out of ten.
+     */
+    CATALYTIC_REFORMER("catalytic_reformer", 5, 5, 5, false);
 
     /**
      * How many Mekanism speed upgrades this machine accepts (0 = none).

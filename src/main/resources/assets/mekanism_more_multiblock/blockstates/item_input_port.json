@@ -10,6 +10,24 @@
     "style=assembly": {"model": "mekanism_more_multiblock:block/item_input_port_assembly"},
     "style=electrolyzer": {"model": "mekanism_more_multiblock:block/item_input_port_electrolyzer"},
     "style=centrifuge": {"model": "mekanism_more_multiblock:block/item_input_port_centrifuge"},
-    "style=fusion": {"model": "mekanism_more_multiblock:block/item_input_port_fusion"}
+    "style=fusion": {"model": "mekanism_more_multiblock:block/item_input_port_fusion"},
+    "style=oil_rig": {"model": "mekanism_more_multiblock:block/item_input_port_oil_rig"},
+    "style=engine": {"model": "mekanism_more_multiblock:block/item_input_port_engine"},
+    "style=hazard": {"model": "mekanism_more_multiblock:block/item_input_port_hazard"},
+    "style=inscriber": {"model": "mekanism_more_multiblock:block/item_input_port_inscriber"},
+    "style=charger": {"model": "mekanism_more_multiblock:block/item_input_port_charger"},
+    "style=livingrock": {"model": "mekanism_more_multiblock:block/item_input_port_livingrock"},
+    "style=elven": {"model": "mekanism_more_multiblock:block/item_input_port_elven"},
+    "style=terra": {"model": "mekanism_more_multiblock:block/item_input_port_terra"},
+    "style=research": {"model": "mekanism_more_multiblock:block/item_input_port_research"},
+    "style=assline": {"model": "mekanism_more_multiblock:block/item_input_port_assline"},
+    "style=sourcestone": {"model": "mekanism_more_multiblock:block/item_input_port_sourcestone"},
+    "style=replicator": {"model": "mekanism_more_multiblock:block/item_input_port_replicator"},
+    "style=transdim": {"model": "mekanism_more_multiblock:block/item_input_port_transdim"},
+    "style=reformer": {"model": "mekanism_more_multiblock:block/item_input_port_reformer"},
+    "style=star": {"model": "mekanism_more_multiblock:block/item_input_port_star"},
+    "style=neutronium": {"model": "mekanism_more_multiblock:block/item_input_port_neutronium"},
+    "style=accelerator": {"model": "mekanism_more_multiblock:block/item_input_port_accelerator"},
+    "style=annihilation": {"model": "mekanism_more_multiblock:block/item_input_port_annihilation"}
   }
 }

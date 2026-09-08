@@ -138,6 +138,30 @@ public final class ChemRegistry {
     public static final FluidRegistryObject<?, ?, ?, ?, ?> MOLTEN_NEUTRONIUM =
             FLUIDS.register("molten_neutronium", props -> props.tint(0xFFDCDCE4));
 
+    // --- the high-octane gasoline line (v1.2.1) ---
+    /** Naphtha: the hydrotreated light cut, feedstock for reforming, cracking and alkylation. */
+    public static final FluidRegistryObject<?, ?, ?, ?, ?> NAPHTHA =
+            FLUIDS.register("naphtha", props -> props.tint(0xFFE8D89A));
+    /** Reformate: naphtha rearranged over a platinum catalyst; rich in aromatics. */
+    public static final FluidRegistryObject<?, ?, ?, ?, ?> REFORMATE =
+            FLUIDS.register("reformate", props -> props.tint(0xFFC98A3A));
+    /** Toluene: the aromatic cut distilled out of reformate. */
+    public static final FluidRegistryObject<?, ?, ?, ?, ?> TOLUENE =
+            FLUIDS.register("toluene", props -> props.tint(0xFFB0603A));
+    /** Alkylate: branched, high-octane blendstock from naphtha and butene. */
+    public static final FluidRegistryObject<?, ?, ?, ?, ?> ALKYLATE =
+            FLUIDS.register("alkylate", props -> props.tint(0xFFF0C860));
+    /** High-octane gasoline: the combustion generator's premium fuel. */
+    public static final FluidRegistryObject<?, ?, ?, ?, ?> HIGH_OCTANE_GASOLINE =
+            FLUIDS.register("high_octane_gasoline", props -> props.tint(0xFFFF9020));
+
+    /** Hydrogen sulfide: hydrotreating's sour byproduct; burns back into sulfuric acid. */
+    public static final GasRegistryObject<Gas> HYDROGEN_SULFIDE =
+            GASES.register("hydrogen_sulfide", 0xFFB8C070);
+    /** Butene: cracked from naphtha, alkylated back into a high-octane blendstock. */
+    public static final GasRegistryObject<Gas> BUTENE =
+            GASES.register("butene", 0xFFD8E0B0);
+
     /** Molten infinity alloy: the fusion reactor's product, frozen into the solid alloy. */
     public static final FluidRegistryObject<?, ?, ?, ?, ?> MOLTEN_INFINITY_ALLOY =
             FLUIDS.register("molten_infinity_alloy", props -> props.tint(0xFFFFFFFF));

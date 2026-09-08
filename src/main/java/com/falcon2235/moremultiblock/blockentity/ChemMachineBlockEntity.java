@@ -270,18 +270,28 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
             case CIRCUIT_ASSEMBLER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ASSEMBLY;
             case ELECTROLYZER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ELECTROLYZER;
             case CENTRIFUGE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.CENTRIFUGE;
-            case FUSION_REACTOR, STAR_GENERATOR, STABILIZER, HADRON_COLLIDER, ANNIHILATION_GENERATOR -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.FUSION;
-            case VOID_MINER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ALLOY;
-            case OIL_RIG -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.STAINLESS;
-            case COMBUSTION_GENERATOR -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.HEAT_PROOF;
-            case LARGE_INSCRIBER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ASSEMBLY;
-            case LARGE_CHARGER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ELECTROLYZER;
-            case GRAND_MANA_POOL -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.STAINLESS;
-            case GRAND_ELVEN_GATE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ASSEMBLY;
-            case GRAND_TERRA_PLATE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ALLOY;
-            case RESEARCH_STATION, ASSEMBLY_LINE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ASSEMBLY;
-            case GRAND_IMBUEMENT -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.STAINLESS;
-            case MATTER_REPLICATOR, TRANSDIMENSIONAL_FUSION -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.FUSION;
+            case FUSION_REACTOR -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.FUSION;
+            // Below: each machine now wears the skin derived from ITS OWN casing.
+            // These used to share a handful of styles, which is why a charcoal oil rig
+            // had white ports and a white terra plate had brown ones.
+            case STAR_GENERATOR -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.STAR;
+            case STABILIZER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.NEUTRONIUM;
+            case HADRON_COLLIDER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ACCELERATOR;
+            case ANNIHILATION_GENERATOR -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ANNIHILATION;
+            case VOID_MINER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.HAZARD;
+            case OIL_RIG -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.OIL_RIG;
+            case CATALYTIC_REFORMER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.REFORMER;
+            case COMBUSTION_GENERATOR -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ENGINE;
+            case LARGE_INSCRIBER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.INSCRIBER;
+            case LARGE_CHARGER -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.CHARGER;
+            case GRAND_MANA_POOL -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.LIVINGROCK;
+            case GRAND_ELVEN_GATE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ELVEN;
+            case GRAND_TERRA_PLATE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.TERRA;
+            case RESEARCH_STATION -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.RESEARCH;
+            case ASSEMBLY_LINE -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.ASSLINE;
+            case GRAND_IMBUEMENT -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.SOURCESTONE;
+            case MATTER_REPLICATOR -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.REPLICATOR;
+            case TRANSDIMENSIONAL_FUSION -> com.falcon2235.moremultiblock.block.PortBlock.PortStyle.TRANSDIM;
         };
     }
 
@@ -460,12 +470,22 @@ public class ChemMachineBlockEntity extends BlockEntity implements MenuProvider,
     private void combustionTick() {
         ticksRequired = 1;
         boolean processed = false;
+        // Two fuels, one engine: high-octane gasoline burns for several times what
+        // diesel yields, which is what the whole reformer line exists to earn. The
+        // tank's own contents decide which rate applies.
         int burn = com.falcon2235.moremultiblock.MMMConfig.combustionDieselMbPerTick();
         long generated = com.falcon2235.moremultiblock.MMMConfig.combustionJPerTick();
-        FluidStack diesel = ChemRecipes.diesel(burn);
-        if (!diesel.isEmpty()
+        FluidStack fuel = ChemRecipes.diesel(burn);
+        FluidStack gasoline = ChemRecipes.highOctaneGasoline(
+                com.falcon2235.moremultiblock.MMMConfig.combustionGasolineMbPerTick());
+        if (!gasoline.isEmpty() && !fluidIn.isEmpty() && fluidIn.getFluid().isFluidEqual(gasoline)) {
+            burn = com.falcon2235.moremultiblock.MMMConfig.combustionGasolineMbPerTick();
+            generated = com.falcon2235.moremultiblock.MMMConfig.combustionGasolineJPerTick();
+            fuel = gasoline;
+        }
+        if (!fuel.isEmpty()
                 && fluidIn.getFluidAmount() >= burn
-                && fluidIn.getFluid().isFluidEqual(diesel)
+                && fluidIn.getFluid().isFluidEqual(fuel)
                 && energy + generated <= CAPACITY) {
             fluidIn.drain(burn, IFluidHandler.FluidAction.EXECUTE);
             energy += generated;

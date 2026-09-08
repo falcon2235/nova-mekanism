@@ -3,8 +3,8 @@
   "category": "misc",
   "pattern": ["ACA", "CPC", "ACA"],
   "key": {
-    "A": {"item": "mekanism:alloy_atomic"},
-    "C": {"item": "mekanism:ultimate_control_circuit"},
+    "A": {"item": "mekanism_more_multiblock:super_alloy_ingot"},
+    "C": {"item": "mekanism_more_multiblock:supreme_control_circuit"},
     "P": {"item": "mekanism_more_multiblock:parallel_processor_100"}
   },
   "result": {"item": "mekanism_more_multiblock:parallel_processor_200", "count": 1}
