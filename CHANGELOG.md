@@ -3,6 +3,34 @@
 All notable changes to Nova Mekanism are documented here. This project targets
 Minecraft 1.20.1 (Forge) and follows loose semantic versioning.
 
+## [1.2.2] - 2026-09-16
+
+### Fixed
+- **Two pairs of casings shared an identical crafting recipe**, so one of each pair
+  could never be made — vanilla returns the first recipe that matches a grid, and
+  which one loses is arbitrary. The **engine casing** clashed with the **assembly
+  line casing** (reported by a playtester), and the **accelerator casing** clashed
+  with the **alloy blast casing** (found while checking for others, before anyone hit
+  it). The engine casing now takes pistons and the accelerator casing takes titanium;
+  both keep their original tier and cost.
+- **The Large Inscriber and Large Charger could not be built without AE2.** Their
+  controllers were craftable with an AE2-free fallback, but their casings were gated
+  on AE2 with no fallback, so the machines were impossible to complete — the Large
+  Charger has a non-AE2 use (charging this mod's superconductors), so this bit.
+  Both casings gained workbench fallbacks, matching the mod's promise that every
+  integration is optional.
+- **The hadron collider's blueprint placed a block on its own controller.** The
+  validator skips that cell, so the bill of materials over-counted one glass and the
+  structure could not be laid down from its own plan.
+
+### Added — release safeguards
+- **Obtainability audit** at startup: reports any multiblock whose controller or
+  structure blocks have no recipe at all. This is what caught the AE2 casings.
+- **`tools/check_recipe_collisions.ps1`**: normalises every crafting recipe to a
+  shape-and-ingredients signature and reports indistinguishable pairs, correctly
+  ignoring recipes whose mod conditions are mutually exclusive. This is what caught
+  the second casing clash.
+
 ## [1.2.1] - 2026-09-08
 
 ### Added — the high-octane gasoline line

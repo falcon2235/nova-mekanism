@@ -367,6 +367,12 @@ public final class StructureBlueprint {
                     if (kind == 0) {
                         continue;
                     }
+                    if (d == 0 && r == 0 && layer == 1) {
+                        // The controller's own cell. validateCollider skips it, so listing
+                        // it here over-counted the bill of materials by one glass and made
+                        // the structure impossible to lay down from its own blueprint.
+                        continue;
+                    }
                     Block block = kind == 2 ? magnet : kind == 3 ? glass : casing;
                     c.set(pos).move(back, d).move(Direction.UP, layer - 1).move(right, r);
                     cells.add(new Cell(c.immutable(), block));

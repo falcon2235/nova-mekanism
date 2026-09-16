@@ -122,7 +122,7 @@ Building a 16×16×16 cube by hand is not fun. Craft a **Construction Terminal**
 Requires **JDK 17**. The project uses ForgeGradle 6.
 
 ```bash
-./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.2.1.jar
+./gradlew build          # -> build/libs/Nova-Mekanism-1.20.1-1.2.2.jar
 ./gradlew runClient      # launch a dev client
 ```
 

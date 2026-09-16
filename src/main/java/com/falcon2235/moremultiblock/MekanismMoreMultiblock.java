@@ -78,6 +78,66 @@ public class MekanismMoreMultiblock {
         }
     }
 
+    /**
+     * Reports any part a multiblock needs that nothing can make: every block in each
+     * structure's bill of materials, plus every controller, checked against the recipe
+     * manager and the mod's own machine recipes. An unobtainable part makes a machine
+     * simply impossible to build, which is invisible until a player tries.
+     */
+    private static void obtainabilityAudit(ServerStartedEvent event) {
+        var server = event.getServer();
+        var recipes = server.getRecipeManager();
+        java.util.Set<net.minecraft.world.item.Item> makeable = new java.util.HashSet<>();
+        for (var r : recipes.getRecipes()) {
+            try {
+                ItemStack out = r.getResultItem(server.registryAccess());
+                if (!out.isEmpty()) {
+                    makeable.add(out.getItem());
+                }
+            } catch (Exception ignored) {
+                // a recipe type that cannot resolve a result without a real inventory
+            }
+        }
+        // the mod's own machine recipes produce parts too
+        for (var type : com.falcon2235.moremultiblock.machine.ChemMachineType.values()) {
+            for (var r : com.falcon2235.moremultiblock.machine.ChemRecipes.get(type)) {
+                for (ItemStack out : r.allPossibleOutputs()) {
+                    makeable.add(out.getItem());
+                }
+            }
+        }
+
+        java.util.List<String> problems = new java.util.ArrayList<>();
+        for (var type : com.falcon2235.moremultiblock.machine.ChemMachineType.values()) {
+            var controllerBlock = MMMRegistry.CHEM_CONTROLLERS.get(type).get();
+            if (!makeable.contains(controllerBlock.asItem())) {
+                problems.add(type.id + ": CONTROLLER has no recipe");
+            }
+            var state = controllerBlock.defaultBlockState()
+                    .setValue(com.falcon2235.moremultiblock.block.ChemMachineBlock.FACING,
+                            net.minecraft.core.Direction.NORTH);
+            var cells = com.falcon2235.moremultiblock.multiblock.StructureBlueprint
+                    .forController(net.minecraft.core.BlockPos.ZERO, state);
+            if (cells == null) {
+                continue;
+            }
+            java.util.Set<net.minecraft.world.level.block.Block> needed = new java.util.LinkedHashSet<>();
+            cells.forEach(c -> needed.add(c.block()));
+            for (var block : needed) {
+                var item = block.asItem();
+                if (item != net.minecraft.world.item.Items.AIR && !makeable.contains(item)) {
+                    problems.add(type.id + ": needs " + block.getName().getString() + " which has no recipe");
+                }
+            }
+        }
+        if (problems.isEmpty()) {
+            LOGGER.info("Obtainability audit — every multiblock part can be made");
+        } else {
+            LOGGER.warn("Obtainability audit — {} unobtainable part(s):", problems.size());
+            problems.forEach(p -> LOGGER.warn("  {}", p));
+        }
+    }
+
     /** Sanity log so override problems are visible in the log instead of silently reverting recipes. */
     private static void onServerStarted(ServerStartedEvent event) {
         // Recipe reachability: a machine picks the first recipe it can satisfy, so a
@@ -89,6 +149,7 @@ public class MekanismMoreMultiblock {
             LOGGER.warn("Recipe audit — {} unreachable recipe(s):", shadowed.size());
             shadowed.forEach(line -> LOGGER.warn("  {}", line));
         }
+        obtainabilityAudit(event);
         // Integration debug: which optional mods and key items resolved. If a mod shows
         // loaded=true but an item false, the item id is wrong for that mod version.
         for (String[] probe : new String[][]{
